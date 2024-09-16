@@ -5,10 +5,13 @@
   "version": "0.0.1",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@9.9.0",
+  "packageManager": "pnpm@8.7.1",
   "scripts": {
     "dev": "pnpm --stream --parallel --recursive dev",
     "build": "pnpm --recursive build",
-    "release": "pnpm --stream --parallel --recursive release"
+    "release": "pnpm changeset version && pnpm publish --recursive --access public"
+  },
+  "devDependencies": {
+    "@changesets/cli": "2.27.8"
   }
 }
