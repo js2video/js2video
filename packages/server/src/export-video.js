@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import { fileURLToPath } from "url";
 import path from "path";
-import fs from "fs/promises";
+import { promises as fs } from "fs";
 import { v4 as uuidv4 } from "uuid";
 import os from "os";
 
@@ -58,16 +58,10 @@ const exportVideo = async ({
   const fileHandle = await fs.open(outputFile, "w");
 
   // page can now call writeChunk() from its exportVideo()
-  await page.exposeFunction(
-    "writeChunk",
-    async (
-      /** @type {WithImplicitCoercion<ArrayBuffer | SharedArrayBuffer>} */ chunk,
-      /** @type {number} */ position
-    ) => {
-      const buffer = Buffer.from(chunk);
-      await fileHandle.write(buffer, 0, buffer.length, position);
-    }
-  );
+  await page.exposeFunction("writeChunk", async (chunk, position) => {
+    const buffer = Buffer.from(chunk);
+    await fileHandle.write(buffer, 0, buffer.length, position);
+  });
 
   const options = { templateUrl, params, size, fps, bitrate };
   await page.evaluate(async (options) => {
