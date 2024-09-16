@@ -2,7 +2,7 @@
   "name": "@js2video/cli",
   "author": "Tight Ship AB",
   "license": "MIT",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "type": "module",
   "bin": "./src/bin.js",
   "files": [
