@@ -1,5 +1,13 @@
 # @js2video/cli
 
+## 0.0.5
+
+### Patch Changes
+
+- a7f05b3: Testing
+- Updated dependencies [a7f05b3]
+  - @js2video/server@0.0.5
+
 ## 0.0.4
 
 ### Patch Changes

@@ -1,5 +1,11 @@
 # @js2video/client
 
+## 0.0.5
+
+### Patch Changes
+
+- a7f05b3: Testing
+
 ## 0.0.4
 
 ### Patch Changes
