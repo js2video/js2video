@@ -8,8 +8,7 @@
   "packageManager": "pnpm@8.7.1",
   "scripts": {
     "dev": "pnpm --stream --parallel --recursive dev",
-    "build": "pnpm --recursive build",
-    "release": "pnpm changeset version && pnpm publish --recursive --access public"
+    "build": "pnpm --recursive build"
   },
   "devDependencies": {
     "@changesets/cli": "2.27.8"
