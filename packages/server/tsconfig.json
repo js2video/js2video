@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-      "lib" : ["ES2015", "DOM"],
+      "lib" : ["ESNext", "DOM"],
       "module": "NodeNext",
       "moduleResolution": "NodeNext",
       "checkJs": true,  
@@ -13,5 +13,3 @@
     "include": ["src/**/*.js"],
     "exclude": ["node_modules", "dist"]
   }
-
-  

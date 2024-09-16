@@ -1,7 +1,7 @@
 import puppeteer from "puppeteer";
 import { fileURLToPath } from "url";
 import path from "path";
-import { promises as fs } from "fs";
+import * as fs from "node:fs/promises";
 import { v4 as uuidv4 } from "uuid";
 import os from "os";
 

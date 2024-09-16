@@ -1,6 +1,6 @@
 {
     "compilerOptions": {
-      "lib": ["ES2015", "DOM"],
+      "lib": ["ESNext", "DOM"],
       "checkJs": true,  
       "allowJs": true,
       "declaration": true, 

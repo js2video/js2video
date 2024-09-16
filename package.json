@@ -5,7 +5,10 @@
   "version": "0.0.1",
   "type": "module",
   "private": true,
-  "packageManager": "pnpm@8.7.1",
+  "packageManager": "pnpm@9.9.0",
+  "engines": {
+    "node": ">=20.17.0"
+  },
   "scripts": {
     "dev": "pnpm --stream --parallel --r dev",
     "build": "pnpm -r build",
