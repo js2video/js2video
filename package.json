@@ -9,8 +9,5 @@
   "scripts": {
     "dev": "pnpm --stream --parallel --recursive dev",
     "build": "pnpm --recursive build"
-  },
-  "devDependencies": {
-    "@changesets/cli": "2.27.8"
   }
 }
