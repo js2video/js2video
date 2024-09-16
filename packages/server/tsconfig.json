@@ -1,0 +1,17 @@
+{
+    "compilerOptions": {
+      "lib" : ["ES2015", "DOM"],
+      "module": "NodeNext",
+      "moduleResolution": "NodeNext",
+      "checkJs": true,  
+      "allowJs": true,
+      "declaration": true, 
+      "emitDeclarationOnly": true,
+      "outDir": "types",
+      "skipLibCheck": true
+    },
+    "include": ["src/**/*.js"],
+    "exclude": ["node_modules", "dist"]
+  }
+
+  

@@ -1,0 +1,14 @@
+{
+  "name": "js2video",
+  "author": "Tight Ship AB",
+  "license": "MIT",
+  "version": "0.0.1",
+  "type": "module",
+  "private": true,
+  "packageManager": "pnpm@9.9.0",
+  "scripts": {
+    "dev": "pnpm --stream --parallel --recursive dev",
+    "build": "pnpm --recursive build",
+    "release": "pnpm --stream --parallel --recursive release"
+  }
+}
