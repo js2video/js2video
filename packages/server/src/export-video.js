@@ -1,9 +1,9 @@
-import puppeteer from "puppeteer";
-import { fileURLToPath } from "url";
-import path from "path";
+import { fileURLToPath } from "node:url";
+import path from "node:path";
 import * as fs from "node:fs/promises";
+import os from "node:os";
+import puppeteer from "puppeteer";
 import { v4 as uuidv4 } from "uuid";
-import os from "os";
 
 // resolves the path to your project root
 const __filename = fileURLToPath(import.meta.url);
