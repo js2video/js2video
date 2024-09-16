@@ -14,5 +14,8 @@
     "release:publish": "pnpm -r publish",
     "release:commit": "git add . && git commit -m 'Release $npm_config_version' && git tag v$npm_config_version",
     "release:tags": "git push && git push --tags"
+  },
+  "devDependencies": {
+    "npm-run-all": "4.1.5"
   }
 }
