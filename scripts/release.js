@@ -34,20 +34,15 @@ const args = parseArgs(argv.slice(2));
 console.log(args);
 
 const version = args["v"];
-const changelog = args["c"];
 
-if (!version || !changelog) {
-  console.error("Version and changelog are required.");
+if (!version) {
   process.exit(1);
 }
 
 console.log(`Version: ${version}`);
-console.log(`Changelog: ${changelog}`);
 
 // update versions in all workspaces
-await runCommand(
-  `pnpm -r exec npm version ${version} --allow-same-version --no-git-tag-version`
-);
+await runCommand(`pnpm -r exec npm version ${version} --no-git-tag-version`);
 
 // build all workspaces
 await runCommand(`pnpm -r build`);
