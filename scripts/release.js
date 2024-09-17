@@ -56,6 +56,10 @@ await runCommand(`pnpm -r build`);
 // publish to npm registry
 // await runCommand(`pnpm -r publish --access public --dry-run`);
 
-// runPnpm(`exec npm echo hello`);
+await runCommand("git add .");
+await runCommand(`git commit -m "release ${version}"`);
+await runCommand(`git tag v${version}`);
+await runCommand(`git push`);
+await runCommand(`git push --tags`);
 
 // Add your release logic here
