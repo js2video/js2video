@@ -10,10 +10,10 @@ async function runCommand(command, options = {}) {
     console.log(`Executing command: ${command}`);
     const { stdout, stderr } = await execPromise(command, options);
     if (stdout) {
-      console.log(`Standard Output:\n${stdout}`);
+      console.log(`${stdout}`);
     }
     if (stderr) {
-      console.error(`Standard Error:\n${stderr}`);
+      console.warn(`${stderr}`);
     }
   } catch (error) {
     console.error(`Error executing command: ${error.message}`);
@@ -54,7 +54,7 @@ await runCommand(
 await runCommand(`pnpm -r build`);
 
 // publish to npm registry
-// await runCommand(`pnpm -r publish --access public --dry-run`);
+await runCommand(`pnpm -r publish --access public`);
 
 await runCommand("git add .");
 await runCommand(`git commit -m "release ${version}"`);
