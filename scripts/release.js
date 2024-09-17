@@ -1,4 +1,3 @@
-// release.js
 import { argv } from "process";
 import { exec } from "child_process";
 import { promisify } from "util";
@@ -61,5 +60,3 @@ await runCommand(`git commit -m "release ${version}"`);
 await runCommand(`git tag v${version}`);
 await runCommand(`git push`);
 await runCommand(`git push --tags`);
-
-// Add your release logic here
