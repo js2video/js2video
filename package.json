@@ -2,7 +2,7 @@
   "name": "js2video",
   "author": "Tight Ship AB",
   "license": "MIT",
-  "version": "0.0.10",
+  "version": "0.0.11",
   "type": "module",
   "private": true,
   "packageManager": "pnpm@9.9.0",
