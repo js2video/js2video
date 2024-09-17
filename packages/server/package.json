@@ -5,8 +5,13 @@
   "version": "0.0.10",
   "type": "module",
   "main": "./src/index.js",
-  "exports": "./src/index.js",
   "types": "./types/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./types/index.d.ts",
+      "import": "./src/index.js"
+    }
+  },
   "files": [
     "src",
     "dist",
