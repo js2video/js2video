@@ -12,7 +12,7 @@
   "scripts": {
     "dev": "pnpm --stream --parallel --r dev",
     "build": "pnpm -r build",
-    "release": "run-s release:*",
+    "release": "node ./scripts/release.js",
     "release:version": "pnpm -r version $npm_config_version",
     "release:publish": "pnpm -r publish",
     "release:commit": "git add . && git commit -m 'Release $npm_config_version' && git tag v$npm_config_version",
