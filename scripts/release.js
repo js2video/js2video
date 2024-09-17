@@ -1,6 +1,6 @@
-import { argv } from "process";
 import { exec } from "child_process";
 import { promisify } from "util";
+import packageJson from "../package.json" assert { type: "json" };
 
 const execPromise = promisify(exec);
 
@@ -19,25 +19,7 @@ async function runCommand(command, options = {}) {
   }
 }
 
-function parseArgs(args) {
-  const options = {};
-  for (let i = 0; i < args.length; i += 2) {
-    const key = args[i].replace("-", "");
-    const value = args[i + 1];
-    options[key] = value;
-  }
-  return options;
-}
-
-const args = parseArgs(argv.slice(2));
-
-console.log(args);
-
-const version = args["v"];
-
-if (!version) {
-  process.exit(1);
-}
+const version = packageJson.version;
 
 console.log(`Version: ${version}`);
 
