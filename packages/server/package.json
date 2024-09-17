@@ -13,8 +13,7 @@
   ],
   "scripts": {
     "dev": "rimraf types && chokidar 'src/**/*' 'node_modules/@js2video/client/src/**/*' -c 'vite build'",
-    "build": "vite build && rimraf types && tsc",
-    "prepublishOnly": "pnpm build"
+    "build": "vite build && rimraf types && tsc"
   },
   "dependencies": {
     "@js2video/client": "workspace:*",

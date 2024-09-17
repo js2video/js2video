@@ -29,11 +29,12 @@ await runCommand(`pnpm -r exec npm version ${version} --no-git-tag-version`);
 // build all workspaces
 await runCommand(`pnpm -r build`);
 
-// publish to npm registry
-await runCommand(`pnpm -r publish --access public`);
-
+// add to git
 await runCommand("git add .");
 await runCommand(`git commit -m "release ${version}"`);
 await runCommand(`git tag v${version}`);
 await runCommand(`git push`);
 await runCommand(`git push --tags`);
+
+// publish to npm registry
+await runCommand(`pnpm -r publish --access public`);
