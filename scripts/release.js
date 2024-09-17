@@ -23,11 +23,11 @@ const version = packageJson.version;
 
 console.log(`Version: ${version}`);
 
-// update versions in all workspaces
-await runCommand(`pnpm -r exec npm version ${version} --no-git-tag-version`);
-
 // build all workspaces
 await runCommand(`pnpm -r build`);
+
+// update versions in all workspaces
+await runCommand(`pnpm -r exec npm version ${version} --no-git-tag-version`);
 
 // add to git
 await runCommand("git add .");
