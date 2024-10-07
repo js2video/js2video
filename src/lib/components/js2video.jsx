@@ -4,21 +4,6 @@ import { VideoTemplate } from "../video-template";
 import { Preview } from "./preview";
 
 /**
- * Generates a random string of specified length.
- * @param {number} length - The length of the random string.
- * @returns {string} - The generated random string.
- */
-function generateRandomString(length) {
-  const characters =
-    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-  let result = "";
-  for (let i = 0; i < length; i++) {
-    result += characters.charAt(Math.floor(Math.random() * characters.length));
-  }
-  return result;
-}
-
-/**
  * The context for JS2Video to provide video template information.
  * @type {React.Context<{ videoTemplate: VideoTemplate | null }>}
  */
@@ -65,12 +50,12 @@ const JS2Video = ({
   autoPlay = false,
   loop = false,
   yolo = false,
+  children,
 }) => {
   const [videoTemplate, setVideoTemplate] = useState(null);
-  const [parentId, setParentId] = useState(
-    `js2video-preview-${generateRandomString(10)}`
-  );
+
   const vtRef = useRef(null);
+  const previewRef = useRef(null);
 
   useEffect(() => {
     vtRef.current = videoTemplate;
@@ -82,7 +67,7 @@ const JS2Video = ({
       await vt.load({
         templateUrl,
         yolo,
-        parentId,
+        parentElement: previewRef.current,
         autoPlay,
         loop,
         params,
@@ -92,7 +77,9 @@ const JS2Video = ({
       });
       setVideoTemplate(vt);
     }
+
     load();
+
     return () => {
       async function dispose() {
         if (!vtRef.current) {
@@ -105,8 +92,8 @@ const JS2Video = ({
   }, [templateUrl, params, size, fps, bitrate]);
 
   return (
-    <Context.Provider value={{ videoTemplate }}>
-      <Preview parentId={parentId} />
+    <Context.Provider value={{ videoTemplate, previewRef }}>
+      {children}
     </Context.Provider>
   );
 };

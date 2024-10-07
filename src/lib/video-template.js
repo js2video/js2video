@@ -19,13 +19,13 @@ class VideoTemplate {
    * Loads and displays a video template with params + all other options.
    * @param {Object} options
    * @param {string} options.templateUrl - URL to the video template.
+   * @param {HTMLDivElement} options.parentElement - ID of the div element to put the loaded template canvas in.
    * @param {Object} [options.params] - Video template params. Default; {}.
    * @param {Object} [options.size] - Video dimensions.
    * @param {number} [options.size.width] - Video width. Default: 1920.
    * @param {number} [options.size.height] - Video height. Default: 1080.
    * @param {number} [options.fps] - Video fps. Default: 30.
    * @param {number} [options.bitrate] - Video bitrate when exporting. Default: 5_000_000.
-   * @param {string} [options.parentId] - ID of the element to put the loaded template canvas in.
    * @param {boolean} [options.autoPlay] - Play video immediately after loading? Default: false.
    * @param {boolean} [options.loop] - Loop the video? Default: false.
    * @param {boolean} [options.yolo] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
@@ -36,7 +36,7 @@ class VideoTemplate {
     size = { width: 1920, height: 1080 },
     fps = 30,
     bitrate = 5_000_000,
-    parentId,
+    parentElement,
     autoPlay = false,
     loop = false,
     yolo = false,
@@ -46,7 +46,7 @@ class VideoTemplate {
     this.size = size;
     this.fps = fps;
     this.bitrate = bitrate;
-    this.parentId = parentId;
+    this.parentElement = parentElement;
     this.canvasElement = document.createElement("canvas");
 
     console.log("Loading video template", templateUrl);
@@ -114,12 +114,9 @@ class VideoTemplate {
 
     this.wrapper = document.createElement("div");
     this.wrapper.style.cssText =
-      "position: absolute; inset: 0; overflow: hidden; display: flex; justify-content: center; align-items: center;";
+      "position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center; justify-content: center";
     this.wrapper.appendChild(this.canvasElement);
-
-    if (this.parentId) {
-      document.getElementById(this.parentId).appendChild(this.wrapper);
-    }
+    this.parentElement.appendChild(this.wrapper);
 
     this.wrapper.addEventListener("click", async () => {
       this.togglePlay();
@@ -130,7 +127,7 @@ class VideoTemplate {
     });
 
     this.resizeHandler = () => {
-      if (!this.parentId) {
+      if (!this.parentElement) {
         return;
       }
       const rect = this.wrapper.getBoundingClientRect();
