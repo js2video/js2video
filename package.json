@@ -1,13 +1,12 @@
 {
   "name": "js2video",
-  "version": "0.0.13",
+  "version": "0.0.14",
   "license": "MIT",
   "author": {
     "name": "@pkl",
     "url": "https://github.com/pkl"
   },
   "type": "module",
-  "main": "./dist/index.client.js",
   "exports": {
     ".": {
       "types": "./dist/index.client.d.ts",
