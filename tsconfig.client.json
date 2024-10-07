@@ -1,0 +1,7 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "declarationDir": "types/client",
+  },
+  "include": ["src/index.client.js"] 
+}

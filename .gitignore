@@ -1,3 +1,5 @@
 node_modules
 dist
-*.local.*
+types
+.DS_Store
+*.local

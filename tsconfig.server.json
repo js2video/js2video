@@ -1,0 +1,8 @@
+
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "declarationDir": "types/server",
+  },
+  "include": ["src/index.server.js"] 
+}

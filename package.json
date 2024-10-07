@@ -1,20 +1,78 @@
 {
   "name": "js2video",
-  "author": "Tight Ship AB",
+  "version": "0.0.1",
   "license": "MIT",
-  "version": "0.0.12",
+  "author": {
+    "name": "@pkl",
+    "url": "https://github.com/pkl"
+  },
   "type": "module",
-  "private": true,
-  "packageManager": "pnpm@9.9.0",
+  "exports": {
+    ".": {
+      "types": "./dist/index.client.d.ts",
+      "import": "./dist/index.client.js"
+    },
+    "./react": {
+      "types": "./dist/index.react.d.ts",
+      "import": "./dist/index.react.js"
+    },
+    "./server": {
+      "types": "./dist/index.server.d.ts",
+      "import": "./dist/index.server.js"
+    }
+  },
+  "files": [
+    "dist",
+    "assets"
+  ],
   "engines": {
     "node": ">=20.17.0"
   },
   "scripts": {
-    "dev": "pnpm --stream --parallel --r dev",
-    "build": "pnpm -r build",
-    "release": "node ./scripts/release.js"
+    "dev": "vite",
+    "build": "npm run clean && run-s build:*",
+    "clean": "rimraf dist types",
+    "build:client": "esbuild src/index.client.js src/index.react.js --minify --splitting --bundle --format=esm --target=es2020 --platform=browser --external:react --external:react-dom --jsx=automatic --outdir=dist",
+    "build:server": "esbuild src/index.server.js --minify --bundle --format=esm --target=es2020 --platform=node --external:puppeteer --outfile=dist/index.server.js",
+    "build:types-server": "tsc --project tsconfig.server.json && rollup -c rollup.server.js",
+    "build:types-client": "tsc --project tsconfig.client.json && rollup -c rollup.client.js",
+    "build:types-react": "tsc --project tsconfig.react.json && rollup -c rollup.react.js",
+    "test-cli": "node cli.js export -t=../assets/template.js -x=1920 -y=1080 -f=30 -b=6000000 -p '{\"text\" : \"Hello World\"}'"
   },
   "devDependencies": {
-    "npm-run-all": "4.1.5"
+    "esbuild": "0.24.0",
+    "npm-run-all": "4.1.5",
+    "rimraf": "6.0.1",
+    "rollup": "4.24.0",
+    "rollup-plugin-dts": "6.1.1",
+    "typescript": "5.6.2",
+    "vite": "^5.4.8",
+    "vite-plugin-dts": "^4.2.3"
+  },
+  "peerDependencies": {
+    "puppeteer": "23.5.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "peerDependenciesMeta": {
+    "puppeteer": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "react-dom": {
+      "optional": true
+    }
+  },
+  "dependencies": {
+    "fabric": "6.4.3",
+    "gsap": "3.12.5",
+    "media-codecs": "2.0.1",
+    "mp4-muxer": "5.1.3",
+    "nanoid": "5.0.7",
+    "pixi-filters": "6.0.5",
+    "pixi.js": "8.4.1",
+    "yargs": "17.7.2"
   }
 }
