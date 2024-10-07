@@ -29,7 +29,7 @@ await runCommand(`npm run build`);
 await runCommand("git add .");
 await runCommand(`git commit -m "release ${version}"`);
 await runCommand(`git tag v${version}`);
-await runCommand(`git push --follow-tags `);
+await runCommand(`git push --follow-tags`);
 
 // publish to npm registry
 await runCommand(`npm publish`);
