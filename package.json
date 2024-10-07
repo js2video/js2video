@@ -37,7 +37,8 @@
     "build:types-server": "tsc --project tsconfig.server.json && rollup -c rollup.server.js",
     "build:types-client": "tsc --project tsconfig.client.json && rollup -c rollup.client.js",
     "build:types-react": "tsc --project tsconfig.react.json && rollup -c rollup.react.js",
-    "test-cli": "node cli.js export -t=../assets/template.js -x=1920 -y=1080 -f=30 -b=6000000 -p '{\"text\" : \"Hello World\"}'"
+    "test-cli": "node cli.js export -t=../assets/template.js -x=1920 -y=1080 -f=30 -b=6000000 -p '{\"text\" : \"Hello World\"}'",
+    "release": "node scripts/release.js"
   },
   "devDependencies": {
     "esbuild": "0.24.0",
