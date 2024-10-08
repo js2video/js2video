@@ -1,7 +1,6 @@
 import React from "react";
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { VideoTemplate } from "../video-template";
-import { Preview } from "./preview";
 
 /**
  * The context for JS2Video to provide video template information.
