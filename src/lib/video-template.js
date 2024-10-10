@@ -28,7 +28,7 @@ class VideoTemplate {
    * @param {number} [options.bitrate] - Video bitrate when exporting. Default: 5_000_000.
    * @param {boolean} [options.autoPlay] - Play video immediately after loading? Default: false.
    * @param {boolean} [options.loop] - Loop the video? Default: false.
-   * @param {boolean} [options.yolo] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
+   * @param {boolean} [options.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
    */
   async load({
     templateUrl,
@@ -39,7 +39,7 @@ class VideoTemplate {
     parentElement,
     autoPlay = false,
     loop = false,
-    yolo = false,
+    enableUnsecureMode = false,
   }) {
     this.templateUrl = templateUrl;
     this.params = params;
@@ -51,10 +51,10 @@ class VideoTemplate {
 
     console.log("Loading video template", templateUrl);
 
-    // Throw if !yolo and template is loaded outside iframe
-    if (!yolo && window.self === window.top) {
+    // Throw if !enableUnsecureMode and template is loaded outside iframe
+    if (!enableUnsecureMode && window.self === window.top) {
       console.error(
-        "Error: The video template must be loaded from inside an iframe to avoid code execution on this page from the template. If you trust the content of this template or want it to execute anyway, set the option 'yolo' to true in the 'load' function."
+        "Error: The video template must be loaded from inside an iframe to avoid code execution on this page from the template. If you trust the content of this template or want it to execute anyway, set the option 'enableUnsecureMode' to true in the 'load' function."
       );
       return;
     }
@@ -66,9 +66,11 @@ class VideoTemplate {
     this.timeline = GSAP.timeline({ paused: true });
 
     this.sendEvent = function () {
-      if (typeof eventHandler !== "undefined") {
-        eventHandler({ timeline: this.timeline });
-      }
+      const message = { timeline: this.timeline };
+      const timelineEvent = new CustomEvent("js2video", {
+        detail: message,
+      });
+      window.dispatchEvent(timelineEvent);
     };
 
     this.timeline.eventCallback("onUpdate", () => {
@@ -84,66 +86,75 @@ class VideoTemplate {
       this.sendEvent();
     });
 
-    // import video template from url/path
-    const { template, defaultParams } = await import(
-      /* @vite-ignore */ this.templateUrl
-    );
-
-    this.params = { ...defaultParams, ...params };
+    // resize canvas
+    this.canvas.setDimensions(this.size);
 
     // set gsap fps
     GSAP.ticker.fps(this.fps);
 
-    // resize canvas
-    this.canvas.setDimensions(this.size);
-
-    // execute template function
-    await template({
-      timeline: this.timeline,
-      canvas: this.canvas,
-      canvasElement: this.canvasElement,
-      params: this.params,
-      size: this.size,
-      fps: this.fps,
-      Fabric,
-      Pixi,
-      PixiFilters,
-      utils,
-      fabricUtils,
-    });
-
-    this.wrapper = document.createElement("div");
-    this.wrapper.style.cssText =
-      "position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center; justify-content: center";
-    this.wrapper.appendChild(this.canvasElement);
-    this.parentElement.appendChild(this.wrapper);
-
-    this.wrapper.addEventListener("click", async () => {
-      this.togglePlay();
-    });
-
-    this.wrapper.addEventListener("dblclick", async () => {
-      await this.rewind();
-    });
-
-    this.resizeHandler = () => {
-      if (!this.parentElement) {
-        return;
-      }
-      const rect = this.wrapper.getBoundingClientRect();
-      const scale = utils.scaleToFit(
-        this.size.width,
-        this.size.height,
-        rect.width,
-        rect.height,
-        0,
-        1
+    try {
+      // import video template from url/path
+      const { template, defaultParams } = await import(
+        /* @vite-ignore */ this.templateUrl
       );
-      this.canvasElement.style.width = this.size.width * scale + "px";
-      this.canvasElement.style.height = this.size.height * scale + "px";
-    };
-    this.resizeHandler();
-    addEventListener("resize", this.resizeHandler);
+
+      this.params = { ...defaultParams, ...params };
+
+      // execute template function
+      await template({
+        timeline: this.timeline,
+        canvas: this.canvas,
+        canvasElement: this.canvasElement,
+        params: this.params,
+        size: this.size,
+        fps: this.fps,
+        Fabric,
+        Pixi,
+        PixiFilters,
+        utils,
+        fabricUtils,
+      });
+    } catch (e) {
+      console.error(e);
+      // display error message in the canvas itself.
+      const errorText = new Fabric.FabricText(
+        "Template error. See error logs in console",
+        {
+          fontSize: this.size.height * 0.045,
+          fill: "white",
+          left: 20,
+          top: 20,
+          fontFamily: "monospace",
+        }
+      );
+      this.canvas.set({ backgroundColor: "#cc0000" });
+      this.canvas.add(errorText);
+    }
+
+    // puppeteer doesn't use a parent element
+    if (this.parentElement) {
+      this.wrapper = document.createElement("div");
+      this.wrapper.style.cssText =
+        "position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center; justify-content: center";
+      this.wrapper.appendChild(this.canvasElement);
+      this.parentElement.appendChild(this.wrapper);
+
+      this.resizeHandler = () => {
+        const rect = this.wrapper.getBoundingClientRect();
+        const scale = utils.scaleToFit(
+          this.size.width,
+          this.size.height,
+          rect.width,
+          rect.height,
+          0,
+          1
+        );
+        this.canvasElement.style.width = this.size.width * scale + "px";
+        this.canvasElement.style.height = this.size.height * scale + "px";
+      };
+      this.resizeHandler();
+      addEventListener("resize", this.resizeHandler);
+    }
 
     this.canvas.renderAll();
     this.sendEvent();

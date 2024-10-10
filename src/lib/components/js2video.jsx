@@ -1,26 +1,8 @@
 import React from "react";
-import { createContext, useContext, useEffect, useState, useRef } from "react";
-import { VideoTemplate } from "../video-template";
-
-/**
- * The context for JS2Video to provide video template information.
- * @type {React.Context<{ videoTemplate: VideoTemplate | null }>}
- */
-const Context = createContext();
-
-/**
- * Custom hook to use the JS2Video context.
- * @returns {{ videoTemplate: VideoTemplate | null }} - The video template context.
- * @throws {Error} Throws an error if used outside of a Context.Provider.
- */
-const useJS2Video = () => {
-  const context = useContext(Context);
-  // Check if context is undefined and throw an error if it is
-  if (!context) {
-    throw new Error("useJS2Video must be used within a Context.Provider");
-  }
-  return context;
-};
+import { JS2VideoProvider } from "./js2video-provider";
+import { JS2VideoPreview } from "./js2video-preview";
+import { JS2VideoControls } from "./js2video-controls";
+import { JS2VideoLayout } from "./js2video-layout";
 
 /**
  *
@@ -37,7 +19,7 @@ const useJS2Video = () => {
  * @param {number} [props.bitrate] - Video bitrate when exporting. Default: 5_000_000.
  * @param {boolean} [props.autoPlay] - Play video immediately after loading? Default: false.
  * @param {boolean} [props.loop] - Loop the video? Default: false.
- * @param {boolean} [props.yolo] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
+ * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2Video = ({
@@ -48,53 +30,25 @@ const JS2Video = ({
   bitrate = 5_000_000,
   autoPlay = false,
   loop = false,
-  yolo = false,
-  children,
+  enableUnsecureMode = false,
 }) => {
-  const [videoTemplate, setVideoTemplate] = useState(null);
-
-  const vtRef = useRef(null);
-  const previewRef = useRef(null);
-
-  useEffect(() => {
-    vtRef.current = videoTemplate;
-  }, [videoTemplate]);
-
-  useEffect(() => {
-    async function load() {
-      const vt = new VideoTemplate();
-      await vt.load({
-        templateUrl,
-        yolo,
-        parentElement: previewRef.current,
-        autoPlay,
-        loop,
-        params,
-        size,
-        fps,
-        bitrate,
-      });
-      setVideoTemplate(vt);
-    }
-
-    load();
-
-    return () => {
-      async function dispose() {
-        if (!vtRef.current) {
-          return;
-        }
-        await vtRef.current.dispose();
-      }
-      dispose();
-    };
-  }, [templateUrl, params, size, fps, bitrate]);
-
   return (
-    <Context.Provider value={{ videoTemplate, previewRef }}>
-      {children}
-    </Context.Provider>
+    <JS2VideoProvider
+      templateUrl={templateUrl}
+      params={params}
+      size={size}
+      autoPlay={autoPlay}
+      loop={loop}
+      enableUnsecureMode={enableUnsecureMode}
+      fps={fps}
+      bitrate={bitrate}
+    >
+      <JS2VideoLayout>
+        <JS2VideoPreview />
+        <JS2VideoControls />
+      </JS2VideoLayout>
+    </JS2VideoProvider>
   );
 };
 
-export { useJS2Video, JS2Video };
+export { JS2Video };

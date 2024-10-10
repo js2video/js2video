@@ -6,18 +6,18 @@ import { nanoid } from "nanoid";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const pageUrl = "file://" + path.resolve(__dirname, "../assets/puppeteer.html");
+const pageUrl = "file://" + path.resolve(__dirname, "../public/puppeteer.html");
 
 /**
  * Exports a video template to MP4
  * @param {Object} options
  * @param {string} options.templateUrl - URL to the video template.
- * @param {Object} [options.params={}] - Video template params. Default; {}.
- * @param {Object} [options.size={ width: 1920, height: 1080 }] - Video dimensions.
- * @param {number} [options.size.width=1920] - Video width. Default: 1920.
- * @param {number} [options.size.height=1080] - Video height. Default: 1080.
- * @param {number} [options.fps=30] - Video fps. Default: 30.
- * @param {number} [options.bitrate=10000000] - Video bitrate when exporting. Default: 5_000_000.
+ * @param {Object} [options.params] - Video template params. Default; {}.
+ * @param {Object} [options.size] - Video dimensions.
+ * @param {number} [options.size.width] - Video width. Default: 1920.
+ * @param {number} [options.size.height] - Video height. Default: 1080.
+ * @param {number} [options.fps] - Video fps. Default: 30.
+ * @param {number} [options.bitrate] - Video bitrate when exporting. Default: 5_000_000.
  */
 export const exportVideo = async ({
   templateUrl = "",

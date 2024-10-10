@@ -10,7 +10,7 @@ addEventListener("DOMContentLoaded", async () => {
       params,
       size,
       fps,
-      yolo: true,
+      enableUnsecureMode: true,
       parentId: null,
       autoPlay: false,
       loop: false,

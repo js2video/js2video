@@ -10,7 +10,7 @@ class JS2VideoImage extends FabricImage {
   }
 }
 
-async function loadImage({ url, options }) {
+async function loadImage({ url, options = {} }) {
   const image = await new Promise((resolve, reject) => {
     const image = new Image();
     image.addEventListener("load", () => resolve(image));
