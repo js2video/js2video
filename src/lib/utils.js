@@ -1,5 +1,19 @@
-// lerp(20, 80, 0.5) -> 40
+/**
+ * @module utilas
+ * @namespace utilbs
+ * @category utilcs
+ */
+
+/**
+ * Linearly interpolates between two values, `x` and `y`, based on the interpolation factor `a`.
+ *
+ * @param {number} x - The start value.
+ * @param {number} y - The end value.
+ * @param {number} a - The interpolation factor (should be between 0 and 1).
+ * @returns {number} The interpolated value.
+ */
 const lerp = (x, y, a) => x * (1 - a) + y * a;
+// lerp(20, 80, 0.5) -> 40
 
 // clamp(32, 20, 30) -> 30
 const clamp = (a, min = 0, max = 1) => Math.min(max, Math.max(min, a));

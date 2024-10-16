@@ -1,5 +1,5 @@
 import http from "http";
-import { exportVideo } from "./dist/index.server.js";
+import { exportVideo } from "./src/lib/export-video.js";
 
 const parseJsonBody = (req) => {
   return new Promise((resolve, reject) => {

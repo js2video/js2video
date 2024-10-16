@@ -3,3 +3,5 @@ dist
 types
 .DS_Store
 *.local
+typedocs
+server-client.js

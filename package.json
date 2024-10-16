@@ -9,19 +9,14 @@
   "type": "module",
   "exports": {
     ".": {
-      "types": "./dist/index.client.d.ts",
-      "import": "./dist/index.client.js"
-    },
-    "./react": {
-      "types": "./dist/index.react.d.ts",
-      "import": "./dist/index.react.js"
+      "import": "./dist/index.js"
     },
     "./server": {
-      "types": "./dist/index.server.d.ts",
-      "import": "./dist/index.server.js"
+      "import": "./src/lib/export-video.js"
     }
   },
   "files": [
+    "src/lib/export-video.js",
     "dist",
     "public"
   ],
@@ -32,23 +27,14 @@
     "dev": "run-p dev:*",
     "dev:vite": "vite",
     "dev:server": "node --watch server.js",
-    "build": "npm run clean && run-s build:*",
-    "clean": "rimraf dist types",
-    "build:client": "esbuild src/index.client.js src/index.react.js --splitting --minify --bundle --format=esm --target=es2020 --platform=browser --external:react --external:react-dom --jsx=automatic --outdir=dist",
-    "build:server": "esbuild src/index.server.js --minify --bundle --format=esm --target=es2020 --platform=node --external:puppeteer --outfile=dist/index.server.js",
-    "build:types-server": "tsc --project tsconfig.server.json && rollup -c rollup.server.js",
-    "build:types-client": "tsc --project tsconfig.client.json && rollup -c rollup.client.js",
-    "build:types-react": "tsc --project tsconfig.react.json && rollup -c rollup.react.js",
+    "build": "vite build",
+    "build-server-client": "esbuild src/index.js --format=esm --bundle --minify --outfile=server-client.js",
     "release": "node scripts/release.js"
   },
   "devDependencies": {
-    "esbuild": "0.24.0",
-    "npm-run-all": "4.1.5",
-    "rimraf": "6.0.1",
-    "rollup": "4.24.0",
-    "rollup-plugin-dts": "6.1.1",
-    "typescript": "5.6.2",
-    "vite": "^5.4.8"
+    "npm-run-all": "^4.1.5",
+    "vite": "^5.4.8",
+    "vite-plugin-externalize-deps": "^0.8.0"
   },
   "peerDependencies": {
     "puppeteer": "23.5.0",
@@ -67,6 +53,7 @@
     }
   },
   "dependencies": {
+    "esbuild": "^0.24.0",
     "fabric": "6.4.3",
     "gsap": "3.12.5",
     "media-codecs": "2.0.1",

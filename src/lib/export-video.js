@@ -6,7 +6,8 @@ import { nanoid } from "nanoid";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const pageUrl = "file://" + path.resolve(__dirname, "../public/puppeteer.html");
+const pageUrl =
+  "file://" + path.resolve(__dirname, "../../public/puppeteer.html");
 
 /**
  * Exports a video template to MP4

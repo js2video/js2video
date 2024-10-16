@@ -1,12 +1,9 @@
 import { scaleToCover, scaleToFit } from "../utils.js";
 
-/** @typedef {import('fabric').FabricObject} FabricObject */
-/** @typedef {import('fabric').StaticCanvas} FabricStaticCanvas */
-
 /**
  * Scale object to fit into canvas
- * @param {FabricObject} obj
- * @param {FabricStaticCanvas} canvas
+ * @param {import('fabric').FabricObject} obj
+ * @param {import('fabric').StaticCanvas} canvas
  */
 function scaleToFitCanvas(obj, canvas) {
   const scale = scaleToFit(obj.width, obj.height, canvas.width, canvas.height);
@@ -15,8 +12,8 @@ function scaleToFitCanvas(obj, canvas) {
 
 /**
  * Scale object to cover canvas
- * @param {FabricObject} obj
- * @param {FabricStaticCanvas} canvas
+ * @param {import('fabric').FabricObject} obj
+ * @param {import('fabric').StaticCanvas} canvas
  */
 function scaleToCoverCanvas(obj, canvas) {
   const scale = scaleToCover(

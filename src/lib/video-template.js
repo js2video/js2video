@@ -1,4 +1,4 @@
-import { gsap as GSAP } from "gsap";
+import { gsap } from "gsap";
 import * as Pixi from "pixi.js";
 import * as PixiFilters from "pixi-filters";
 import * as Fabric from "fabric";
@@ -7,7 +7,7 @@ import * as fabricUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 
 /**
- * Class representing a video template.
+ * Class representing a video template
  */
 class VideoTemplate {
   /**
@@ -63,7 +63,7 @@ class VideoTemplate {
       enableRetinaScaling: true,
     });
 
-    this.timeline = GSAP.timeline({ paused: true });
+    this.timeline = gsap.timeline({ paused: true });
 
     this.sendEvent = function () {
       const message = { timeline: this.timeline };
@@ -90,7 +90,7 @@ class VideoTemplate {
     this.canvas.setDimensions(this.size);
 
     // set gsap fps
-    GSAP.ticker.fps(this.fps);
+    gsap.ticker.fps(this.fps);
 
     try {
       // import video template from url/path

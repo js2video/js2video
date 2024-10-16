@@ -1,4 +1,4 @@
-import { VideoTemplate } from "../dist/index.client.js";
+import { VideoTemplate } from "../server-client.js";
 
 addEventListener("DOMContentLoaded", async () => {
   let vt;

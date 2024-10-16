@@ -25,6 +25,10 @@ class PixiObject extends FabricObject {
   }
 }
 
+/**
+ * load pixi
+ * @export
+ */
 async function loadPixi({
   backgroundAlpha = 0,
   width = 1920,
