@@ -2,6 +2,12 @@ import React from "react";
 import { JS2VideoPreview } from "./js2video-preview";
 import { JS2VideoControls } from "./js2video-controls";
 
+/**
+ * A component that wraps the JS2VideoPreview and JS2VideoControls components.
+ * @param {Object} props
+ * @param {React.ReactNode} props.children
+ * @returns {JSX.Element}
+ */
 const JS2VideoLayout = ({ children }) => {
   let preview = null;
   let controls = null;

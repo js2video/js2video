@@ -46,6 +46,7 @@ function scaleToCover(sourceWidth, sourceHeight, destWidth, destHeight) {
 async function loadGoogleFont(fontName) {
   try {
     await new Promise((resolve, reject) => {
+      // @ts-ignore
       WebFont.load({
         google: {
           families: [fontName],

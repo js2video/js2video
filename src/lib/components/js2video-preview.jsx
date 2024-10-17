@@ -4,8 +4,7 @@ import { useJS2Video } from "./js2video-provider";
 /**
  * A preview component that renders a preview of the video.
  *
- * @param {Object} props - The props object.
- * @returns {JSX.Element} The preview component.
+ * @returns {JSX.Element}
  */
 const JS2VideoPreview = () => {
   const { previewRef } = useJS2Video();

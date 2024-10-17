@@ -93,6 +93,7 @@ export const exportVideo = async ({
   };
 
   await page.evaluate(async (options) => {
+    // @ts-ignore
     return await window.exportVideo(options);
   }, options);
 

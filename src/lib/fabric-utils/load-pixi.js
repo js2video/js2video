@@ -2,6 +2,7 @@ import { Application } from "pixi.js";
 import { FabricObject } from "fabric";
 
 class PixiObject extends FabricObject {
+  __pixi;
   static type = "js2video_pixi";
   constructor({ pixi, ...options }) {
     super(options);
@@ -35,7 +36,7 @@ async function loadPixi({
   height = 1080,
 } = {}) {
   const canvasElement = document.createElement("canvas");
-  canvasElement.style = "background: none";
+  canvasElement.style.background = "none";
   const app = new Application();
   /**
    * @see https://pixijs.download/release/docs/app.Application.html#init
@@ -51,7 +52,7 @@ async function loadPixi({
     width,
     height,
     hello: true,
-    antiAlias: true,
+    antialias: true,
   });
   const obj = new PixiObject({ pixi: app });
   return { obj, app };

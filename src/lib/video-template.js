@@ -201,7 +201,7 @@ class VideoTemplate {
       width: this.size.width,
       height: this.size.height,
       canvasElement: this.canvasElement,
-      seek: async (time) => await this.seek(time),
+      seek: async (/** @type {number} */ time) => await this.seek(time),
       fps: this.fps,
       timeline: this.timeline,
       isPuppeteer,
@@ -212,9 +212,11 @@ class VideoTemplate {
     console.log("dispose video template");
     this.timeline.clear();
     await Promise.all(
-      this.canvas
-        .getObjects()
-        .map((obj) => (obj._dispose ? obj._dispose() : null))
+      this.canvas.getObjects().map((obj) => {
+        if (typeof obj._dispose === undefined) {
+          obj._dispose();
+        }
+      })
     );
     this.canvas.clear();
     await this.canvas.dispose();

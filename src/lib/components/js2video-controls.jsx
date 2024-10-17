@@ -68,6 +68,10 @@ const TogglePlayButton = () => {
   }
 };
 
+/**
+ * Simple playback controls
+ * @returns {JSX.Element}
+ */
 const JS2VideoControls = () => {
   const { videoTemplate } = useJS2Video();
   return (

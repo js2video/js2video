@@ -2,22 +2,22 @@ import React from "react";
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { VideoTemplate } from "../video-template";
 
-/**
- * The context for JS2Video to provide video template information.
- * @type {React.Context<{ videoTemplate: VideoTemplate | null }>}
- */
-const Context = createContext();
+const Context = createContext({
+  videoTemplate: null,
+  previewRef: null,
+});
 
 /**
- * Custom hook to use the JS2Video context.
- * @returns {{ videoTemplate: VideoTemplate | null }} - The video template context.
- * @throws {Error} Throws an error if used outside of a Context.Provider.
+ * Custom hook for accessing the JS2Video context.
+ * @returns {{ videoTemplate: VideoTemplate | null, previewRef: React.MutableRefObject<HTMLDivElement | null> | null }} - The video template and preview element ref.
+ * @throws {Error} If used outside of a JS2VideoProvider.
  */
 const useJS2Video = () => {
   const context = useContext(Context);
-  // Check if context is undefined and throw an error if it is
   if (!context) {
-    throw new Error("useJS2Video must be used within a Context.Provider");
+    throw new Error(
+      "useJS2Video must be used in a component within the JS2VideoProvider"
+    );
   }
   return context;
 };
@@ -25,8 +25,6 @@ const useJS2Video = () => {
 /**
  *
  * JS2Video Provider Component
- *
- * @component
  * @param {Object} props - Component props
  * @param {string} props.templateUrl - URL to the video template.
  * @param {React.ReactNode} props.children
