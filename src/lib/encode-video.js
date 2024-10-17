@@ -32,6 +32,7 @@ async function encodeVideo({
     target = new StreamTarget({
       onData: async (chunk, position) => {
         // see puppeteer
+        // @ts-ignore
         await window.writeChunk(Array.from(chunk), position);
       },
     });
@@ -63,6 +64,7 @@ async function encodeVideo({
     firstTimestampBehavior: "offset",
   };
 
+  // @ts-ignore
   const muxer = new Muxer(muxerOptions);
 
   const videoEncoder = new VideoEncoder({

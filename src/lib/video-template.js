@@ -7,6 +7,20 @@ import * as fabricUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 
 /**
+ * @typedef {Object} IDisposableObject
+ * @property {Function} _dispose - A method to dispose of the object.
+ */
+
+/**
+ * Checks if the given object is an IDisposableObject.
+ * @param {Object} obj - The object to check.
+ * @returns {obj is IDisposableObject} - Returns true if the object is an IDisposableObject.
+ */
+function isDisposableObject(obj) {
+  return typeof obj._dispose === "function";
+}
+
+/**
  * Class representing a video template
  */
 class VideoTemplate {
@@ -208,12 +222,16 @@ class VideoTemplate {
     });
   }
 
+  /**
+   * Dispose of all objects on the canvas.
+   * @returns {Promise<void>} - A promise that resolves when all objects have been disposed of.
+   */
   async dispose() {
     console.log("dispose video template");
     this.timeline.clear();
     await Promise.all(
       this.canvas.getObjects().map((obj) => {
-        if (typeof obj._dispose === undefined) {
+        if (isDisposableObject(obj)) {
           obj._dispose();
         }
       })
