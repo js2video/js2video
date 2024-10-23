@@ -7,8 +7,8 @@ const App = () => {
     location.origin + "/template.js"
   );
   const [params, setParams] = useState({
-    text: "Hello From React!",
-    fontFamily: "Oswald",
+    text: "Fuckings MP4 Algorithm",
+    fontFamily: "Impact",
   });
   const [size, setSize] = useState({ width: 1920, height: 1080 });
 
@@ -48,8 +48,4 @@ const App = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById("app")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+ReactDOM.createRoot(document.getElementById("app")).render(<App />);
