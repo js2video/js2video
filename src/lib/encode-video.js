@@ -23,6 +23,8 @@ async function encodeVideo({
   canvasElement,
   isPuppeteer,
 }) {
+  console.log("fps", fps);
+
   const videoCodec = AVC.getCodec({ profile: "Main", level: "5.2" });
   const audioCodec = "mp4a.40.2";
 
@@ -78,7 +80,7 @@ async function encodeVideo({
     codec: videoCodec,
     width: width,
     height: height,
-    bitrate: bitrate,
+    bitrate: 10_000_000,
     latencyMode: "quality",
   });
 
@@ -88,13 +90,8 @@ async function encodeVideo({
   // loop through and encode all frames
   while (frame < frames) {
     const time = frame / fps;
-    console.log(
-      `export frame ${frame + 1}/${frames} - ${parseFloat(time + "").toFixed(
-        2
-      )}/${timeline.duration()}s.`
-    );
     // update timeline
-    await seek(Math.min(time, timeline.duration()));
+    await seek(Math.min(time, timeline.duration()), true);
     // grab the canvas into a frame
     const videoFrame = new VideoFrame(canvasElement, {
       timestamp: time * 1000 * 1000,
