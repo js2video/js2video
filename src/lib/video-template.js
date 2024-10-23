@@ -7,17 +7,20 @@ import * as fabricUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 
 /**
- * @typedef {Object} IDisposableObject
- * @property {Function} _dispose - A method to dispose of the object.
+ * @typedef {Object} IJS2VideoObject
+ * @property {Function} __dispose
+ * @property {Function} __seek
+ * @property {Function} __play
+ * @property {Function} __pause
  */
 
 /**
- * Checks if the given object is an IDisposableObject.
+ * Checks if the given object is an IJS2VideoObject.
  * @param {Object} obj - The object to check.
- * @returns {obj is IDisposableObject} - Returns true if the object is an IDisposableObject.
+ * @returns {obj is IJS2VideoObject} - Returns true if the object is an IJS2VideoObject.
  */
-function isDisposableObject(obj) {
-  return typeof obj._dispose === "function";
+function isJS2VideoObject(obj) {
+  return obj?.constructor?.isJS2Video === true;
 }
 
 /**
@@ -62,8 +65,6 @@ class VideoTemplate {
     this.bitrate = bitrate;
     this.parentElement = parentElement;
     this.canvasElement = document.createElement("canvas");
-
-    console.log("Loading video template", templateUrl);
 
     // Throw if !enableUnsecureMode and template is loaded outside iframe
     if (!enableUnsecureMode && window.self === window.top) {
@@ -180,11 +181,21 @@ class VideoTemplate {
 
   play() {
     this.timeline.play();
+    this.canvas.getObjects().map((obj) => {
+      if (isJS2VideoObject(obj)) {
+        return obj.__play();
+      }
+    });
     this.sendEvent();
   }
 
   pause() {
     this.timeline.pause();
+    this.canvas.getObjects().map((obj) => {
+      if (isJS2VideoObject(obj)) {
+        return obj.__pause();
+      }
+    });
     this.sendEvent();
   }
 
@@ -195,8 +206,17 @@ class VideoTemplate {
   /**
    * Seek to a specific time in the video
    * @param {number} time - Time to seek to
+   * @param {boolean} isExporting - Are we exporting?
    */
-  async seek(time) {
+  async seek(time, isExporting = false) {
+    // seek in all objects
+    await Promise.all(
+      this.canvas.getObjects().map((obj) => {
+        if (isJS2VideoObject(obj)) {
+          return obj.__seek(time, isExporting);
+        }
+      })
+    );
     this.timeline.time(time);
   }
 
@@ -215,7 +235,7 @@ class VideoTemplate {
       width: this.size.width,
       height: this.size.height,
       canvasElement: this.canvasElement,
-      seek: async (/** @type {number} */ time) => await this.seek(time),
+      seek: async (/** @type {number} */ time) => await this.seek(time, true),
       fps: this.fps,
       timeline: this.timeline,
       isPuppeteer,
@@ -231,8 +251,8 @@ class VideoTemplate {
     this.timeline.clear();
     await Promise.all(
       this.canvas.getObjects().map((obj) => {
-        if (isDisposableObject(obj)) {
-          obj._dispose();
+        if (isJS2VideoObject(obj)) {
+          obj.__dispose();
         }
       })
     );

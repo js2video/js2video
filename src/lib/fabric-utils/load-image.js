@@ -1,11 +1,23 @@
 import { FabricImage } from "fabric";
 
 class JS2VideoImage extends FabricImage {
+  static isJS2Video = true;
   static type = "js2video_image";
+
+  /**
+   * Create an instance of the JS2VideoImage class
+   * @param {HTMLImageElement} image
+   * @param {Object} options
+   */
   constructor(image, options) {
     super(image, options);
   }
-  async _dispose() {
+
+  async __seek() {}
+  async __play() {}
+  async __pause() {}
+
+  async __dispose() {
     console.log("disposed js2video_image obj");
   }
 }
