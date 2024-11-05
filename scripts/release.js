@@ -25,8 +25,6 @@ console.log(`Version: ${version}`);
 
 await runCommand(`npm run build`);
 
-await runCommand(`rm dist/Big_Buck_Bunny_1080_10s_1MB.mp4`);
-
 // add to git
 await runCommand("git add .");
 await runCommand(`git commit -m "release ${version}"`);

@@ -17,8 +17,10 @@
   },
   "files": [
     "src",
-    "dist",
-    "public"
+    "dist/index.js",
+    "public/puppeteer.html",
+    "public/puppeteer.js",
+    "public/webfont.js"
   ],
   "engines": {
     "node": ">=20.17.0"
