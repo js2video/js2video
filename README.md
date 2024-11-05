@@ -1,3 +1,3 @@
 # JS2Video
 
-Under development, breaking changes will happen.
+**This library is under development, breaking changes will happen**

@@ -7,7 +7,7 @@ const App = () => {
     location.origin + "/template.js"
   );
   const [params, setParams] = useState({
-    text: "Hello From React!",
+    text: "Welcome to JS2Video",
     fontFamily: "Oswald",
   });
   const [size, setSize] = useState({ width: 1920, height: 1080 });
@@ -48,8 +48,4 @@ const App = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById("app")).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
+ReactDOM.createRoot(document.getElementById("app")).render(<App />);

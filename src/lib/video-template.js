@@ -12,6 +12,7 @@ import { encodeVideo } from "./encode-video";
  * @property {Function} __seek
  * @property {Function} __play
  * @property {Function} __pause
+ * @property {boolean} __isExporting
  */
 
 /**
@@ -46,6 +47,7 @@ class VideoTemplate {
    * @param {boolean} [options.autoPlay] - Play video immediately after loading? Default: false.
    * @param {boolean} [options.loop] - Loop the video? Default: false.
    * @param {boolean} [options.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
+   * @param {boolean} [options.isExporting] - Are we exporting this video? Default: false.
    */
   async load({
     templateUrl,
@@ -57,6 +59,7 @@ class VideoTemplate {
     autoPlay = false,
     loop = false,
     enableUnsecureMode = false,
+    isExporting = false,
   }) {
     this.templateUrl = templateUrl;
     this.params = params;
@@ -65,6 +68,7 @@ class VideoTemplate {
     this.bitrate = bitrate;
     this.parentElement = parentElement;
     this.canvasElement = document.createElement("canvas");
+    this.isExporting = isExporting;
 
     // Throw if !enableUnsecureMode and template is loaded outside iframe
     if (!enableUnsecureMode && window.self === window.top) {
@@ -171,6 +175,16 @@ class VideoTemplate {
       addEventListener("resize", this.resizeHandler);
     }
 
+    // set the isExporting flag on all js2video objects
+    this.canvas.getObjects().map((obj) => {
+      if (isJS2VideoObject(obj)) {
+        return (obj.__isExporting = this.isExporting);
+      }
+    });
+
+    // forces rendering first video frame on all video objects
+    await this.seek(0);
+
     this.canvas.renderAll();
     this.sendEvent();
 
@@ -179,22 +193,26 @@ class VideoTemplate {
     }
   }
 
+  getJS2VideoObjects() {
+    return this.canvas.getObjects().filter((obj) => isJS2VideoObject(obj));
+  }
+
+  renderAll() {
+    this.canvas.renderAll();
+  }
+
   play() {
     this.timeline.play();
-    this.canvas.getObjects().map((obj) => {
-      if (isJS2VideoObject(obj)) {
-        return obj.__play();
-      }
+    this.getJS2VideoObjects().map((obj) => {
+      obj.__play();
     });
     this.sendEvent();
   }
 
   pause() {
     this.timeline.pause();
-    this.canvas.getObjects().map((obj) => {
-      if (isJS2VideoObject(obj)) {
-        return obj.__pause();
-      }
+    this.getJS2VideoObjects().map((obj) => {
+      obj.__pause();
     });
     this.sendEvent();
   }
@@ -206,15 +224,12 @@ class VideoTemplate {
   /**
    * Seek to a specific time in the video
    * @param {number} time - Time to seek to
-   * @param {boolean} isExporting - Are we exporting?
    */
-  async seek(time, isExporting = false) {
+  async seek(time) {
     // seek in all objects
     await Promise.all(
-      this.canvas.getObjects().map((obj) => {
-        if (isJS2VideoObject(obj)) {
-          return obj.__seek(time, isExporting);
-        }
+      this.getJS2VideoObjects().map((obj) => {
+        return obj.__seek(time);
       })
     );
     this.timeline.time(time);
@@ -235,11 +250,12 @@ class VideoTemplate {
       width: this.size.width,
       height: this.size.height,
       canvasElement: this.canvasElement,
-      seek: async (/** @type {number} */ time) => await this.seek(time, true),
+      seek: async (/** @type {number} */ time) => await this.seek(time),
       fps: this.fps,
       timeline: this.timeline,
       isPuppeteer,
     });
+    await this.dispose();
   }
 
   /**
@@ -248,18 +264,25 @@ class VideoTemplate {
    */
   async dispose() {
     console.log("dispose video template");
-    this.timeline.clear();
-    await Promise.all(
-      this.canvas.getObjects().map((obj) => {
-        if (isJS2VideoObject(obj)) {
-          obj.__dispose();
-        }
-      })
-    );
-    this.canvas.clear();
-    await this.canvas.dispose();
-    this.wrapper.remove();
-    window.removeEventListener("resize", this.resizeHandler);
+    try {
+      this.timeline.clear();
+      await Promise.all(
+        this.getJS2VideoObjects().map((obj) => {
+          return obj.__dispose();
+        })
+      );
+      this.canvas.clear();
+      await this.canvas.dispose();
+      if (this.wrapper) {
+        this.wrapper.remove();
+      }
+      if (this.resizeHandler) {
+        window.removeEventListener("resize", this.resizeHandler);
+      }
+      console.log("disposed video template");
+    } catch (e) {
+      console.error("error disposing", e.message);
+    }
   }
 }
 

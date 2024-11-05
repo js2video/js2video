@@ -14,6 +14,7 @@ addEventListener("DOMContentLoaded", async () => {
       parentId: null,
       autoPlay: false,
       loop: false,
+      isExporting: true,
     });
     await vt.export({ bitrate, isPuppeteer: true });
   }

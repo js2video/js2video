@@ -4,8 +4,9 @@ async function demux({ url }) {
   let file;
   let track;
   let _info;
-  let _samples = [];
+  let chunks = [];
   let codecConfig;
+  let offset = 0;
 
   await new Promise((resolve) => {
     file = createFile();
@@ -15,15 +16,26 @@ async function demux({ url }) {
       track = info.tracks.find((item) => item.type === "video");
       codecConfig = getCodecConfig(track, file);
       file.setExtractionOptions(track.id, null, {
-        nbSamples: 1000,
+        nbSamples: Infinity,
       });
       file.start();
       file.flush();
     };
 
     file.onSamples = (id, user, samples) => {
-      _samples.push(...samples);
-      if (_samples.length >= track.nb_samples) {
+      if (chunks.length === 0) {
+        offset = samples[0].cts;
+      }
+      samples.map((sample) => {
+        const chunk = new EncodedVideoChunk({
+          type: sample.is_sync ? "key" : "delta",
+          timestamp: (1e6 * (sample.cts - offset)) / sample.timescale,
+          duration: (1e6 * sample.duration) / sample.timescale,
+          data: sample.data,
+        });
+        chunks.push(chunk);
+      });
+      if (chunks.length >= track.nb_samples) {
         resolve();
       }
     };
@@ -34,7 +46,7 @@ async function demux({ url }) {
     );
   });
 
-  return { file, info: _info, track, samples: _samples, codecConfig };
+  return { file, info: _info, track, chunks, codecConfig };
 }
 
 function getCodecConfig(track, file) {
@@ -44,6 +56,7 @@ function getCodecConfig(track, file) {
     displayHeight: track.video.height,
     description: description(track, file),
     optimizeForLatency: true,
+    hardwareAcceleration: "prefer-hardware",
   };
 }
 

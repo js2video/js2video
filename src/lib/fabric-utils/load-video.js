@@ -1,11 +1,11 @@
 import { FabricObject } from "fabric";
-import { VideoRenderer } from "../video-renderer";
+import { FrameDecoder } from "../frame-decoder";
 
 class JS2VideoVideo extends FabricObject {
   static isJS2Video = true;
   __isExporting = false;
-  /** @type {VideoRenderer} */
-  __videoRenderer;
+  /** @type {FrameDecoder} */
+  __frameDecoder;
   /** @type {HTMLVideoElement} */
   __video;
   static type = "js2video_video";
@@ -24,35 +24,24 @@ class JS2VideoVideo extends FabricObject {
       width: video.videoWidth,
       height: video.videoHeight,
     });
-    this.__videoRenderer = new VideoRenderer(video.src);
+    this.__frameDecoder = new FrameDecoder(video.src);
   }
 
   _render(ctx) {
-    if (this.__isExporting) {
-      ctx.drawImage(
-        this.__videoRenderer.canvas,
-        (this.width / 2) * -1,
-        (this.height / 2) * -1
-      );
-    } else {
-      ctx.drawImage(
-        this.__video,
-        (this.width / 2) * -1,
-        (this.height / 2) * -1
-      );
-    }
+    ctx.drawImage(
+      this.__isExporting ? this.__frameDecoder.canvas : this.__video,
+      (this.width / 2) * -1,
+      (this.height / 2) * -1
+    );
   }
 
   /**
    * @param {number} time - time to seek to in video
-   * @param {boolean} isExporting - are we exporting?
    * @return {Promise<void>}
    */
-  async __seek(time, isExporting) {
-    console.log("seek video", time, isExporting);
-    this.__isExporting = isExporting;
-    if (isExporting) {
-      await this.__videoRenderer.render(time);
+  async __seek(time) {
+    if (this.__isExporting) {
+      await this.__frameDecoder.decode(time);
     } else {
       await new Promise((resolve) => {
         this.__video.requestVideoFrameCallback((now, metadata) => {
@@ -72,6 +61,7 @@ class JS2VideoVideo extends FabricObject {
   }
 
   async __dispose() {
+    await this.__frameDecoder.destroy();
     console.log("disposed js2video_video obj");
   }
 }

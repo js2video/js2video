@@ -14,12 +14,22 @@ const template = async ({
   utils,
   fabricUtils,
 }) => {
-  canvas.set({ backgroundColor: "#ff0000" });
+  canvas.set({ backgroundColor: "#e9e9e9" });
+
+  const video = await fabricUtils.loadVideo({
+    url: "http://localhost:5173/Big_Buck_Bunny_1080_10s_1MB.mp4",
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+  canvas.add(video);
+  canvas.centerObject(video);
 
   await utils.loadGoogleFont(params.fontFamily);
 
   const text = new Fabric.FabricText(params.text, {
-    fontSize: 222,
+    fontSize: 150,
     fontFamily: params.fontFamily,
     fill: "yellow",
     originX: "center",
@@ -29,15 +39,17 @@ const template = async ({
   canvas.add(text);
   canvas.centerObject(text);
 
-  timeline.from(text, {
-    opacity: 0,
+  timeline.from(video, {
+    angle: 360,
+    scaleX: 5,
+    scaleY: 5,
     duration: 1,
     ease: "expo.inOut",
   });
 
   timeline.to(text, {
     opacity: 0,
-    duration: 1,
+    duration: 5,
     delay: 1,
     ease: "expo.out",
   });
