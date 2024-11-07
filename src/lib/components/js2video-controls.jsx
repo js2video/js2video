@@ -77,7 +77,7 @@ const JS2VideoControls = () => {
   return (
     <div
       style={{ flex: "1 1 0%", display: "flex", flexDirection: "column" }}
-      onClick={(e) => videoTemplate.togglePlay()}
+      onClick={(e) => videoTemplate?.togglePlay()}
     >
       <div
         style={{
