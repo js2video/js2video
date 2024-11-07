@@ -5,11 +5,12 @@ import { VideoTemplate } from "../video-template";
 const Context = createContext({
   videoTemplate: null,
   previewRef: null,
+  templateError: null,
 });
 
 /**
  * Custom hook for accessing the JS2Video context.
- * @returns {{ videoTemplate: VideoTemplate | null, previewRef: React.MutableRefObject<HTMLDivElement | null> | null }} - The video template and preview element ref.
+ * @returns {{ videoTemplate: VideoTemplate | null, templateError: Error | null, previewRef: React.MutableRefObject<HTMLDivElement | null> | null }} - The video template and preview element ref.
  * @throws {Error} If used outside of a JS2VideoProvider.
  */
 const useJS2Video = () => {
@@ -43,6 +44,7 @@ const JS2VideoProvider = ({
   children,
 }) => {
   const [videoTemplate, setVideoTemplate] = useState(null);
+  const [templateError, setTemplateError] = useState(null);
 
   const vtRef = useRef(null);
   const previewRef = useRef(null);
@@ -53,17 +55,21 @@ const JS2VideoProvider = ({
 
   useEffect(() => {
     async function load() {
+      setTemplateError(null);
       const vt = new VideoTemplate();
-      await vt.load({
-        templateUrl,
-        enableUnsecureMode,
-        parentElement: previewRef.current,
-        autoPlay,
-        loop,
-        params,
-      });
-
-      setVideoTemplate(vt);
+      try {
+        await vt.load({
+          templateUrl,
+          enableUnsecureMode,
+          parentElement: previewRef.current,
+          autoPlay,
+          loop,
+          params,
+        });
+        setVideoTemplate(vt);
+      } catch (err) {
+        setTemplateError(err);
+      }
     }
 
     load();
@@ -80,7 +86,7 @@ const JS2VideoProvider = ({
   }, [templateUrl, params]);
 
   return (
-    <Context.Provider value={{ videoTemplate, previewRef }}>
+    <Context.Provider value={{ videoTemplate, previewRef, templateError }}>
       {children}
     </Context.Provider>
   );

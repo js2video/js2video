@@ -43,7 +43,7 @@ function validateParams(params) {
     mainSchema.parse(params);
   } catch (err) {
     if (err instanceof ZodError) {
-      throw err.errors.map((e) => e.message);
+      throw err.errors.map((e) => e.message).join(". ");
     } else {
       throw err;
     }
