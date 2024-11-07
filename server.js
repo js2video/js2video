@@ -29,11 +29,16 @@ const server = http.createServer(async (req, res) => {
   console.log(req.method, req.url);
 
   if (req.method === "POST") {
-    const options = await parseJsonBody(req);
-    console.log(options);
-    const result = await exportVideo(options);
-    res.writeHead(200, { "Content-Type": "application/json" });
-    res.end(JSON.stringify(result));
+    try {
+      const options = await parseJsonBody(req);
+      const result = await exportVideo(options);
+      console.log(result);
+      res.writeHead(200, { "Content-Type": "application/json" });
+      res.end(JSON.stringify(result));
+    } catch (err) {
+      res.writeHead(500);
+      res.end(JSON.stringify({ error: err }));
+    }
   } else {
     res.writeHead(204);
     res.end();

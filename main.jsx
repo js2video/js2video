@@ -29,7 +29,7 @@ const App = () => {
               method: "POST",
               body: JSON.stringify({ templateUrl, params, size }),
             }).then((res) => res.json());
-            console.log(result);
+            console.log(JSON.stringify(result));
             alert("Exported!");
           }}
         >

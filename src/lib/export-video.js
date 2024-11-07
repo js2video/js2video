@@ -13,20 +13,19 @@ const pageUrl =
  * Exports a video template to MP4
  * @param {Object} options
  * @param {string} options.templateUrl - URL to the video template.
- * @param {Object} [options.params] - Video template params. Default; {}.
- * @param {Object} [options.size] - Video dimensions.
- * @param {number} [options.size.width] - Video width. Default: 1920.
- * @param {number} [options.size.height] - Video height. Default: 1080.
- * @param {number} [options.fps] - Video fps. Default: 30.
- * @param {number} [options.bitrate] - Video bitrate when exporting. Default: 5_000_000.
+ * @param {Object} [options.params] - Video template params. Default: {}.
+ * @returns {Promise<{
+ *   videoBitrate: number,
+ *   videoSize: { width: number, height: number },
+ *   videoDuration: number,
+ *   exportDuration: number,
+ *   file: string
+ * }>} A promise that resolves with the video metadata.
+ *
+ * @throws {Error} If an error occurs during video processing or retrieval.
  */
-export const exportVideo = async ({
-  templateUrl = "",
-  params = {},
-  size = { width: 1920, height: 1080 },
-  fps = 30,
-  bitrate = 5_000_000,
-}) => {
+export const exportVideo = async ({ templateUrl = "", params = {} }) => {
+  const start = performance.now();
   let puppeteer;
 
   try {
@@ -41,9 +40,6 @@ export const exportVideo = async ({
   console.log("start export", {
     templateUrl,
     params,
-    size,
-    fps,
-    bitrate,
   });
 
   const puppeteerArgs = [
@@ -87,28 +83,39 @@ export const exportVideo = async ({
   const options = {
     templateUrl,
     params,
-    size,
-    fps,
-    bitrate,
   };
 
-  await page.evaluate(async (options) => {
-    // @ts-ignore
-    return await window.exportVideo(options);
-  }, options);
-
-  try {
-    await fileHandle.close();
-  } catch (err) {
-    console.warn(err);
+  async function destroy() {
+    console.log("cleanup exporter");
+    try {
+      await fileHandle.close();
+      await page.close();
+      await browser.close();
+    } catch (err) {
+      console.warn(err);
+    }
   }
 
-  await page.close();
-  await browser.close();
+  let exportResult;
 
-  console.warn("Exported file:", outputFile);
+  try {
+    exportResult = await page.evaluate(async (options) => {
+      // @ts-ignore
+      return await window.exportVideo(options);
+    }, options);
+  } catch (err) {
+    // cleanup + rethrow
+    await destroy();
+    throw err;
+  }
+
+  await destroy();
+
+  const exportDuration = Math.round(performance.now() - start);
 
   return {
+    ...exportResult,
+    exportDuration,
     file: outputFile,
   };
 };

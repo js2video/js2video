@@ -12,11 +12,6 @@ import { JS2VideoLayout } from "./js2video-layout";
  * @param {Object} props - Component props
  * @param {string} props.templateUrl - URL to the video template.
  * @param {Object} [props.params] - Video template params. Default; {}.
- * @param {Object} [props.size] - Video dimensions.
- * @param {number} [props.size.width] - Video width. Default: 1920.
- * @param {number} [props.size.height] - Video height. Default: 1080.
- * @param {number} [props.fps] - Video fps. Default: 30.
- * @param {number} [props.bitrate] - Video bitrate when exporting. Default: 5_000_000.
  * @param {boolean} [props.autoPlay] - Play video immediately after loading? Default: false.
  * @param {boolean} [props.loop] - Loop the video? Default: false.
  * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
@@ -25,9 +20,6 @@ import { JS2VideoLayout } from "./js2video-layout";
 const JS2Video = ({
   templateUrl,
   params = {},
-  size = { width: 1920, height: 1080 },
-  fps = 30,
-  bitrate = 5_000_000,
   autoPlay = false,
   loop = false,
   enableUnsecureMode = false,
@@ -36,12 +28,9 @@ const JS2Video = ({
     <JS2VideoProvider
       templateUrl={templateUrl}
       params={params}
-      size={size}
       autoPlay={autoPlay}
       loop={loop}
       enableUnsecureMode={enableUnsecureMode}
-      fps={fps}
-      bitrate={bitrate}
     >
       <JS2VideoLayout>
         <JS2VideoPreview />

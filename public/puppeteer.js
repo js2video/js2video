@@ -1,10 +1,8 @@
 import { VideoTemplate } from "../server-client.js";
 
 addEventListener("DOMContentLoaded", async () => {
-  let vt;
-
   async function exportVideo({ templateUrl, params, size, fps, bitrate }) {
-    vt = new VideoTemplate();
+    const vt = new VideoTemplate();
     await vt.load({
       templateUrl,
       params,
@@ -16,7 +14,7 @@ addEventListener("DOMContentLoaded", async () => {
       loop: false,
       isExporting: true,
     });
-    await vt.export({ bitrate, isPuppeteer: true });
+    return await vt.export({ bitrate, isPuppeteer: true });
   }
 
   // called by puppeteer!

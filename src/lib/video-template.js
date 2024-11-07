@@ -5,6 +5,16 @@ import * as Fabric from "fabric";
 import * as utils from "./utils";
 import * as fabricUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
+import { validateParams } from "./validate-params";
+
+const globalParams = {
+  bitrate: 5_000_000,
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
 
 /**
  * @typedef {Object} IJS2VideoObject
@@ -39,11 +49,6 @@ class VideoTemplate {
    * @param {string} options.templateUrl - URL to the video template.
    * @param {HTMLDivElement} options.parentElement - ID of the div element to put the loaded template canvas in.
    * @param {Object} [options.params] - Video template params. Default; {}.
-   * @param {Object} [options.size] - Video dimensions.
-   * @param {number} [options.size.width] - Video width. Default: 1920.
-   * @param {number} [options.size.height] - Video height. Default: 1080.
-   * @param {number} [options.fps] - Video fps. Default: 30.
-   * @param {number} [options.bitrate] - Video bitrate when exporting. Default: 5_000_000.
    * @param {boolean} [options.autoPlay] - Play video immediately after loading? Default: false.
    * @param {boolean} [options.loop] - Loop the video? Default: false.
    * @param {boolean} [options.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
@@ -52,9 +57,6 @@ class VideoTemplate {
   async load({
     templateUrl,
     params = {},
-    size = { width: 1920, height: 1080 },
-    fps = 30,
-    bitrate = 5_000_000,
     parentElement,
     autoPlay = false,
     loop = false,
@@ -63,9 +65,6 @@ class VideoTemplate {
   }) {
     this.templateUrl = templateUrl;
     this.params = params;
-    this.size = size;
-    this.fps = fps;
-    this.bitrate = bitrate;
     this.parentElement = parentElement;
     this.canvasElement = document.createElement("canvas");
     this.isExporting = isExporting;
@@ -105,19 +104,21 @@ class VideoTemplate {
       this.sendEvent();
     });
 
-    // resize canvas
-    this.canvas.setDimensions(this.size);
-
-    // set gsap fps
-    gsap.ticker.fps(this.fps);
-
     try {
       // import video template from url/path
       const { template, defaultParams } = await import(
         /* @vite-ignore */ this.templateUrl
       );
 
-      this.params = { ...defaultParams, ...params };
+      this.params = { ...globalParams, ...defaultParams, ...params };
+
+      validateParams(this.params);
+
+      // set gsap fps
+      gsap.ticker.fps(this.params.fps);
+
+      // resize canvas
+      this.canvas.setDimensions(this.params.size);
 
       // execute template function
       await template({
@@ -125,29 +126,16 @@ class VideoTemplate {
         canvas: this.canvas,
         canvasElement: this.canvasElement,
         params: this.params,
-        size: this.size,
-        fps: this.fps,
         Fabric,
         Pixi,
         PixiFilters,
         utils,
         fabricUtils,
       });
-    } catch (e) {
-      console.error(e);
-      // display error message in the canvas itself.
-      const errorText = new Fabric.FabricText(
-        "Template error. See error logs in console",
-        {
-          fontSize: this.size.height * 0.045,
-          fill: "white",
-          left: 20,
-          top: 20,
-          fontFamily: "monospace",
-        }
-      );
-      this.canvas.set({ backgroundColor: "#cc0000" });
-      this.canvas.add(errorText);
+    } catch (err) {
+      // cleanup + rethrow
+      await this.dispose();
+      throw err;
     }
 
     // puppeteer doesn't use a parent element
@@ -161,15 +149,16 @@ class VideoTemplate {
       this.resizeHandler = () => {
         const rect = this.wrapper.getBoundingClientRect();
         const scale = utils.scaleToFit(
-          this.size.width,
-          this.size.height,
+          this.params.size.width,
+          this.params.size.height,
           rect.width,
           rect.height,
           0,
           1
         );
-        this.canvasElement.style.width = this.size.width * scale + "px";
-        this.canvasElement.style.height = this.size.height * scale + "px";
+        this.canvasElement.style.width = this.params.size.width * scale + "px";
+        this.canvasElement.style.height =
+          this.params.size.height * scale + "px";
       };
       this.resizeHandler();
       addEventListener("resize", this.resizeHandler);
@@ -191,6 +180,8 @@ class VideoTemplate {
     if (autoPlay) {
       this.play();
     }
+
+    return;
   }
 
   getJS2VideoObjects() {
@@ -245,17 +236,29 @@ class VideoTemplate {
    * @param {boolean} [options.isPuppeteer] - Is video exported from server/puppeteer? Default is false.
    */
   async export({ isPuppeteer = false }) {
-    await encodeVideo({
-      bitrate: this.bitrate,
-      width: this.size.width,
-      height: this.size.height,
-      canvasElement: this.canvasElement,
-      seek: async (/** @type {number} */ time) => await this.seek(time),
-      fps: this.fps,
-      timeline: this.timeline,
-      isPuppeteer,
-    });
-    await this.dispose();
+    try {
+      await encodeVideo({
+        bitrate: this.params.bitrate,
+        width: this.params.size.width,
+        height: this.params.size.height,
+        canvasElement: this.canvasElement,
+        seek: async (/** @type {number} */ time) => await this.seek(time),
+        fps: this.params.fps,
+        timeline: this.timeline,
+        isPuppeteer,
+      });
+      const result = {
+        videoBitrate: this.params.bitrate,
+        videoSize: this.params.size,
+        videoDuration: this.timeline.duration() * 1000,
+      };
+      await this.dispose();
+      return result;
+    } catch (err) {
+      // cleanup + rethrow
+      await this.dispose();
+      throw err;
+    }
   }
 
   /**

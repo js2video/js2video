@@ -1,13 +1,17 @@
 const defaultParams = {
   text: "No Text",
   fontFamily: "Oswald",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
 };
 
 const template = async ({
   canvas,
   timeline,
   params,
-  size,
   Fabric,
   Pixi,
   PixiFilters,
