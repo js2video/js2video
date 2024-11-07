@@ -213,7 +213,6 @@ const JS2VideoControls = () => {
           padding: "4px",
           alignItems: "center",
           backgroundColor: "rgba(0, 0, 0, 0.7)",
-          height: "20px",
         }}
       >
         <SmallRewindButton />
