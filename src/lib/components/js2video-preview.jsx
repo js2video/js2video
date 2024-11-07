@@ -9,7 +9,6 @@ import { useJS2Video } from "./js2video-provider";
 const JS2VideoPreview = () => {
   const { previewRef, templateError } = useJS2Video();
   if (templateError) {
-    console.log(templateError);
     return (
       <div
         style={{
