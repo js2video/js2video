@@ -9,7 +9,7 @@ const config = [
     input: ["./types/index.d.ts", "./types/lib/export-video.d.ts"],
     output: [
       {
-        dir: resolve(__dirname, "rollup"),
+        dir: resolve(__dirname, "dist"),
         format: "es",
       },
     ],
