@@ -104,39 +104,33 @@ class VideoTemplate {
       this.sendEvent();
     });
 
-    try {
-      // import video template from url/path
-      const { template, defaultParams } = await import(
-        /* @vite-ignore */ this.templateUrl
-      );
+    // import video template from url/path
+    const { template, defaultParams } = await import(
+      /* @vite-ignore */ this.templateUrl
+    );
 
-      this.params = { ...globalParams, ...defaultParams, ...params };
+    this.params = { ...globalParams, ...defaultParams, ...params };
 
-      validateParams(this.params);
+    validateParams(this.params);
 
-      // set gsap fps
-      gsap.ticker.fps(this.params.fps);
+    // set gsap fps
+    gsap.ticker.fps(this.params.fps);
 
-      // resize canvas
-      this.canvas.setDimensions(this.params.size);
+    // resize canvas
+    this.canvas.setDimensions(this.params.size);
 
-      // execute template function
-      await template({
-        timeline: this.timeline,
-        canvas: this.canvas,
-        canvasElement: this.canvasElement,
-        params: this.params,
-        Fabric,
-        Pixi,
-        PixiFilters,
-        utils,
-        fabricUtils,
-      });
-    } catch (err) {
-      // cleanup + rethrow
-      await this.dispose();
-      throw err;
-    }
+    // execute template function
+    await template({
+      timeline: this.timeline,
+      canvas: this.canvas,
+      canvasElement: this.canvasElement,
+      params: this.params,
+      Fabric,
+      Pixi,
+      PixiFilters,
+      utils,
+      fabricUtils,
+    });
 
     // puppeteer doesn't use a parent element
     if (this.parentElement) {
@@ -236,29 +230,22 @@ class VideoTemplate {
    * @param {boolean} [options.isPuppeteer] - Is video exported from server/puppeteer? Default is false.
    */
   async export({ isPuppeteer = false }) {
-    try {
-      await encodeVideo({
-        bitrate: this.params.bitrate,
-        width: this.params.size.width,
-        height: this.params.size.height,
-        canvasElement: this.canvasElement,
-        seek: async (/** @type {number} */ time) => await this.seek(time),
-        fps: this.params.fps,
-        timeline: this.timeline,
-        isPuppeteer,
-      });
-      const result = {
-        videoBitrate: this.params.bitrate,
-        videoSize: this.params.size,
-        videoDuration: this.timeline.duration() * 1000,
-      };
-      await this.dispose();
-      return result;
-    } catch (err) {
-      // cleanup + rethrow
-      await this.dispose();
-      throw err;
-    }
+    await encodeVideo({
+      bitrate: this.params.bitrate,
+      width: this.params.size.width,
+      height: this.params.size.height,
+      canvasElement: this.canvasElement,
+      seek: async (/** @type {number} */ time) => await this.seek(time),
+      fps: this.params.fps,
+      timeline: this.timeline,
+      isPuppeteer,
+    });
+    const result = {
+      videoBitrate: this.params.bitrate,
+      videoSize: this.params.size,
+      videoDuration: this.timeline.duration() * 1000,
+    };
+    return result;
   }
 
   /**

@@ -68,6 +68,7 @@ const JS2VideoProvider = ({
         });
         setVideoTemplate(vt);
       } catch (err) {
+        await vt.dispose();
         setTemplateError(err);
       }
     }
