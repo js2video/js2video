@@ -1,6 +1,7 @@
 node_modules
 dist
 types
+rollup
 .DS_Store
 *.local
 typedocs

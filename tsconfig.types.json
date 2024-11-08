@@ -1,0 +1,11 @@
+{
+  "include": ["src/index.js", "src/lib/export-video.js"],
+  "compilerOptions": {
+    "jsx": "react-jsx",
+    "allowJs": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "types",
+    "skipLibCheck": true
+  }
+}
