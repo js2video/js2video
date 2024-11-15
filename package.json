@@ -43,7 +43,8 @@
     "build-server-client": "esbuild ./src/index.js --format=esm --bundle --minify --outfile=./server-client.js",
     "build-app": "vite build --config vite.config.app.js",
     "release": "node ./scripts/release.js",
-    "preview": "vite preview --config vite.config.app.js"
+    "preview": "vite preview --config vite.config.app.js",
+    "postinstall": "npm run build-server-client"
   },
   "devDependencies": {
     "@types/react": "18.3.11",
