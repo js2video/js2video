@@ -6,11 +6,11 @@ const App = () => {
   const [templateUrl, setTemplateUrl] = useState(
     location.origin + "/template.js"
   );
+
   const [params, setParams] = useState({
     text: "Welcome to JS2Video",
     fontFamily: "Oswald",
   });
-  const [size, setSize] = useState({ width: 1920, height: 1080 });
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
@@ -39,7 +39,6 @@ const App = () => {
       <JS2Video
         templateUrl={templateUrl}
         params={params}
-        size={size}
         autoPlay={true}
         loop={true}
         enableUnsecureMode={true}
