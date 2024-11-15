@@ -14,8 +14,8 @@ const App = () => {
   });
 
   return (
-    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
-      <div style={{ padding: "10px" }}>JS2Video</div>
+    <div className="h-screen flex flex-col">
+      <div className="p-2">JS2Video</div>
       <div>
         <button
           onClick={(e) => {

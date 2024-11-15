@@ -2,20 +2,22 @@ import React from "react";
 import { useJS2VideoEvent } from "./hooks/use-js2video-event";
 import { useJS2Video } from "./js2video-provider";
 import { formatTime } from "../utils";
+import { PlayIcon, PauseIcon, RewindIcon } from "lucide-react";
+
+const ControlButton = ({ children, ...rest }) => {
+  return (
+    <button {...rest} className="text-white p-2">
+      {children}
+    </button>
+  );
+};
 
 const CurrentTime = () => {
   const { message } = useJS2VideoEvent();
   const currentTime = message?.timeline ? message.timeline.time() : 0;
   const duration = message?.timeline ? message.timeline.duration() : 0;
   return (
-    <div
-      style={{
-        color: "rgba(255, 255, 255, 0.6)",
-        paddingLeft: "4px",
-        fontSize: "12px",
-        fontFamily: "monospace",
-      }}
-    >
+    <div className="tabular-nums px-2 text-white text-xs opacity-60">
       {formatTime(currentTime)} / {formatTime(duration)}
     </div>
   );
@@ -25,16 +27,10 @@ const Scrubber = () => {
   const { message } = useJS2VideoEvent();
   const progress = message?.timeline ? message.timeline.progress() : 0;
   return (
-    <div
-      style={{
-        backgroundColor: "rgba(123, 123, 123, 0.5)",
-        flex: "1 1 0%",
-      }}
-    >
+    <div className="flex-1 bg-white bg-opacity-10 mx-2">
       <div
+        className="bg-white bg-opacity-80 h-[1px]"
         style={{
-          backgroundColor: "rgba(255, 255, 255, 0.8)",
-          height: "2px",
           width: progress * 100 + "%",
         }}
       ></div>
@@ -46,98 +42,36 @@ const SmallTogglePlayButton = () => {
   const { videoTemplate } = useJS2Video();
   const { message } = useJS2VideoEvent();
   return (
-    <button
+    <ControlButton
       onClick={(e) => {
         e.stopPropagation();
         if (videoTemplate) {
           videoTemplate.togglePlay();
         }
       }}
-      style={{
-        all: "unset",
-        cursor: "pointer",
-        padding: "2px 8px 2px 8px",
-        backgroundColor: "black",
-        color: "white",
-        border: "1px #555 solid",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: "3px",
-      }}
     >
       {message?.timeline.isActive() ? (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <rect x="14" y="4" width="4" height="16" rx="1" />
-          <rect x="6" y="4" width="4" height="16" rx="1" />
-        </svg>
+        <PauseIcon size={22} />
       ) : (
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="16"
-          height="16"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <polygon points="6 3 20 12 6 21 6 3" />
-        </svg>
+        <PlayIcon size={22} />
       )}
-    </button>
+    </ControlButton>
   );
 };
 
 const SmallRewindButton = () => {
   const { videoTemplate } = useJS2Video();
   return (
-    <button
+    <ControlButton
       onClick={async (e) => {
         e.stopPropagation();
         if (videoTemplate) {
           await videoTemplate.rewind();
         }
       }}
-      style={{
-        all: "unset",
-        cursor: "pointer",
-        padding: "2px 8px 2px 6px",
-        backgroundColor: "black",
-        color: "white",
-        border: "1px #555 solid",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        borderRadius: "3px",
-      }}
     >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="16"
-        height="16"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      >
-        <polygon points="11 19 2 12 11 5 11 19" />
-        <polygon points="22 19 13 12 22 5 22 19" />
-      </svg>
-    </button>
+      <RewindIcon size={22} />
+    </ControlButton>
   );
 };
 
@@ -149,31 +83,16 @@ const TogglePlayButton = () => {
   } else {
     return (
       <button
+        className="bg-black size-[66px] rounded-full flex items-center justify-center"
         onClick={(e) => {
           e.stopPropagation();
           if (videoTemplate) {
             videoTemplate.togglePlay();
           }
         }}
-        style={{
-          position: "relative",
-          width: "60px",
-          height: "60px",
-          backgroundColor: "black",
-          border: "none",
-          borderRadius: "50%",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-          cursor: "pointer",
-          boxShadow:
-            "0 0 5px rgba(255, 255, 255, 0.5), 0 0 10px rgba(255, 255, 255, 0.3)",
-        }}
       >
         <div
           style={{
-            width: 0,
-            height: 0,
             borderLeft: "24px solid white",
             borderTop: "15px solid transparent",
             borderBottom: "15px solid transparent",
@@ -193,28 +112,13 @@ const JS2VideoControls = () => {
   const { videoTemplate } = useJS2Video();
   return (
     <div
-      style={{ flex: "1 1 0%", display: "flex", flexDirection: "column" }}
+      className="flex flex-1 flex-col"
       onClick={(e) => videoTemplate?.togglePlay()}
     >
-      <div
-        style={{
-          flex: "1 1 0%",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-        }}
-      >
+      <div className="flex flex-1 flex-col items-center justify-center">
         <TogglePlayButton />
       </div>
-      <div
-        style={{
-          display: "flex",
-          gap: "6px",
-          padding: "4px",
-          alignItems: "center",
-          backgroundColor: "rgba(0, 0, 0, 0.7)",
-        }}
-      >
+      <div className="flex  items-center bg-black bg-opacity-50 px-2">
         <SmallRewindButton />
         <SmallTogglePlayButton />
         <Scrubber />

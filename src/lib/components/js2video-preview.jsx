@@ -10,15 +10,7 @@ const JS2VideoPreview = () => {
   const { previewRef, templateError } = useJS2Video();
   if (templateError) {
     return (
-      <div
-        style={{
-          backgroundColor: "#aa0000",
-          padding: "10px",
-          color: "#ffffff",
-          fontFamily: "sans-serif",
-          textAlign: "center",
-        }}
-      >
+      <div className="bg-red-500 text-white p-4">
         {`Template Error: ${templateError}`}
       </div>
     );

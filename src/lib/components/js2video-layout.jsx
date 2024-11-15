@@ -24,17 +24,9 @@ const JS2VideoLayout = ({ children }) => {
   });
 
   return (
-    <div
-      style={{
-        flex: "1 1 0%",
-        backgroundColor: "black",
-        position: "relative",
-      }}
-    >
+    <div className="flex-1 bg-black relative">
       <div>{!!preview && preview}</div>
-      <div style={{ position: "absolute", inset: 0, display: "flex" }}>
-        {!!controls && controls}
-      </div>
+      <div className="absolute inset-0 flex">{!!controls && controls}</div>
     </div>
   );
 };
