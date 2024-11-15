@@ -27,7 +27,7 @@ const App = () => {
           onClick={async (e) => {
             const result = await fetch("http://localhost:3001", {
               method: "POST",
-              body: JSON.stringify({ templateUrl, params, size }),
+              body: JSON.stringify({ templateUrl, params }),
             }).then((res) => res.json());
             console.log(JSON.stringify(result));
             alert("Exported!");
