@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import ReactDOM from "react-dom/client";
 import { JS2Video } from "./src";
+import "./index.css";
 
 const App = () => {
   const [templateUrl, setTemplateUrl] = useState(
