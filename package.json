@@ -21,6 +21,7 @@
     "src",
     "dist/types",
     "dist/index.js",
+    "dist/index.css",
     "public/puppeteer.html",
     "public/puppeteer.js",
     "public/webfont.js"
@@ -38,6 +39,7 @@
     "build:lib": "vite build --config vite.config.lib.js",
     "build:types": "tsc --project tsconfig.types.json",
     "build:rollup": "rollup -c rollup.config.js",
+    "build:css": "tailwindcss -i ./index.css -o ./dist/index.css",
     "build-server-client": "esbuild ./src/index.js --format=esm --bundle --minify --outfile=./server-client.js",
     "build-app": "vite build --config vite.config.app.js",
     "release": "node ./scripts/release.js",
