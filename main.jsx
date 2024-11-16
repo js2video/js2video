@@ -15,28 +15,32 @@ const App = () => {
 
   return (
     <div className="h-screen flex flex-col">
-      <div className="p-2">JS2Video</div>
-      <div>
-        <button
-          onClick={(e) => {
-            setParams({ text: "New Params!", fontFamily: "Impact" });
-          }}
-        >
-          Update params
-        </button>
-        <button
-          onClick={async (e) => {
-            const result = await fetch("http://localhost:3001", {
-              method: "POST",
-              body: JSON.stringify({ templateUrl, params }),
-            }).then((res) => res.json());
-            console.log(JSON.stringify(result));
-            alert("Exported!");
-          }}
-        >
-          Export
-        </button>
-      </div>
+      <header className="p-3 bg-black border-b border-gray-600 text-white flex justify-between items-center">
+        <div>
+          JS2Video <span className="font-extrabold text-pink-500">PLAY</span>
+        </div>
+        <div className="flex gap-4">
+          <button
+            onClick={(e) => {
+              setParams({ text: "New Params!", fontFamily: "Impact" });
+            }}
+          >
+            Update params
+          </button>
+          <button
+            onClick={async (e) => {
+              const result = await fetch("http://localhost:3001", {
+                method: "POST",
+                body: JSON.stringify({ templateUrl, params }),
+              }).then((res) => res.json());
+              console.log(JSON.stringify(result));
+              alert("Exported!");
+            }}
+          >
+            Export
+          </button>
+        </div>
+      </header>
       <JS2Video
         templateUrl={templateUrl}
         params={params}
