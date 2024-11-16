@@ -1,4 +1,4 @@
-import { scaleToCover, scaleToFit } from "../utils.js";
+import { scaleToFit, scaleToCover } from "../utils";
 
 /**
  * Scale object to fit into canvas

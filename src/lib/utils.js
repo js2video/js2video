@@ -1,8 +1,5 @@
-/**
- * @module utilas
- * @namespace utilbs
- * @category utilcs
- */
+import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
 /**
  * Linearly interpolates between two values, `x` and `y`, based on the interpolation factor `a`.
@@ -80,8 +77,11 @@ function formatTime(seconds) {
   return `${paddedHours}:${paddedMinutes}:${paddedSeconds}.${paddedFractionalSeconds}`;
 }
 
+function cn(...inputs) {
+  return twMerge(clsx(inputs));
+}
+
 export {
-  loadGoogleFont,
   lerp,
   clamp,
   invlerp,
@@ -89,4 +89,6 @@ export {
   scaleToFit,
   scaleToCover,
   formatTime,
+  loadGoogleFont,
+  cn,
 };
