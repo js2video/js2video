@@ -15,7 +15,12 @@ const JS2VideoPreview = () => {
       </div>
     );
   }
-  return <div ref={previewRef}></div>;
+  return (
+    <div
+      className="absolute inset-0 overflow-hidden flex items-center justify-center"
+      ref={previewRef}
+    ></div>
+  );
 };
 
 export { JS2VideoPreview };

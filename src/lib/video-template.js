@@ -134,14 +134,9 @@ class VideoTemplate {
 
     // puppeteer doesn't use a parent element
     if (this.parentElement) {
-      this.wrapper = document.createElement("div");
-      this.wrapper.style.cssText =
-        "position: absolute; inset: 0; overflow: hidden; display: flex; align-items: center; justify-content: center";
-      this.wrapper.appendChild(this.canvasElement);
-      this.parentElement.appendChild(this.wrapper);
-
+      this.parentElement.appendChild(this.canvasElement);
       this.resizeHandler = () => {
-        const rect = this.wrapper.getBoundingClientRect();
+        const rect = this.parentElement.getBoundingClientRect();
         const scale = utils.scaleToFit(
           this.params.size.width,
           this.params.size.height,
@@ -255,16 +250,17 @@ class VideoTemplate {
   async dispose() {
     console.log("dispose video template");
     try {
-      this.timeline.clear();
-      await Promise.all(
-        this.getJS2VideoObjects().map((obj) => {
-          return obj.__dispose();
-        })
-      );
-      this.canvas.clear();
-      await this.canvas.dispose();
-      if (this.wrapper) {
-        this.wrapper.remove();
+      if (this.timeline) {
+        this.timeline.clear();
+      }
+      if (this.canvas) {
+        await Promise.all(
+          this.getJS2VideoObjects().map((obj) => {
+            return obj.__dispose();
+          })
+        );
+        this.canvas.clear();
+        await this.canvas.dispose();
       }
       if (this.resizeHandler) {
         window.removeEventListener("resize", this.resizeHandler);
@@ -272,6 +268,11 @@ class VideoTemplate {
       console.log("disposed video template");
     } catch (e) {
       console.error("error disposing", e.message);
+    } finally {
+      // remove canvas from parent
+      if (this.parentElement) {
+        this.parentElement.innerHTML = "";
+      }
     }
   }
 }

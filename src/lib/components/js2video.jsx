@@ -2,6 +2,7 @@ import React from "react";
 import { JS2VideoProvider } from "./js2video-provider";
 import { JS2VideoPreview } from "./js2video-preview";
 import { JS2VideoControls } from "./js2video-controls";
+import { JS2VideoEditor } from "./js2video-editor";
 import { JS2VideoLayout } from "./js2video-layout";
 
 /**
@@ -33,6 +34,7 @@ const JS2Video = ({
       enableUnsecureMode={enableUnsecureMode}
     >
       <JS2VideoLayout>
+        <JS2VideoEditor />
         <JS2VideoPreview />
         <JS2VideoControls />
       </JS2VideoLayout>

@@ -17,7 +17,7 @@ const CurrentTime = () => {
   const currentTime = message?.timeline ? message.timeline.time() : 0;
   const duration = message?.timeline ? message.timeline.duration() : 0;
   return (
-    <div className="tabular-nums px-2 text-white text-xs opacity-60">
+    <div className="tabular-nums px-2 text-white text-sm opacity-60">
       {formatTime(currentTime)} / {formatTime(duration)}
     </div>
   );
@@ -112,7 +112,7 @@ const JS2VideoControls = () => {
   const { videoTemplate } = useJS2Video();
   return (
     <div
-      className="flex flex-1 flex-col"
+      className="absolute inset-0 flex flex-col"
       onClick={(e) => videoTemplate?.togglePlay()}
     >
       <div className="flex flex-1 flex-col items-center justify-center">

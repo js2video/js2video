@@ -1,6 +1,7 @@
 import React from "react";
 import { JS2VideoPreview } from "./js2video-preview";
 import { JS2VideoControls } from "./js2video-controls";
+import { JS2VideoEditor } from "./js2video-editor";
 
 /**
  * A component that wraps the JS2VideoPreview and JS2VideoControls components.
@@ -11,6 +12,7 @@ import { JS2VideoControls } from "./js2video-controls";
 const JS2VideoLayout = ({ children }) => {
   let preview = null;
   let controls = null;
+  let editor = null;
 
   // slots
   React.Children.forEach(children, (child) => {
@@ -19,14 +21,19 @@ const JS2VideoLayout = ({ children }) => {
         preview = child;
       } else if (child.type === JS2VideoControls) {
         controls = child;
+      } else if (child.type === JS2VideoEditor) {
+        editor = child;
       }
     }
   });
 
   return (
-    <div className="flex-1 bg-black relative">
-      <div>{!!preview && preview}</div>
-      <div className="absolute inset-0 flex">{!!controls && controls}</div>
+    <div className="flex-1 flex">
+      {editor && editor}
+      <div className="flex-1 bg-black relative">
+        <>{preview && preview}</>
+        <>{controls && controls}</>
+      </div>
     </div>
   );
 };
