@@ -92,7 +92,7 @@ class VideoTemplate {
     };
 
     this.timeline.eventCallback("onUpdate", () => {
-      this.canvas.renderAll();
+      this.renderAll();
       this.sendEvent();
     });
 
@@ -163,7 +163,7 @@ class VideoTemplate {
     // forces rendering first video frame on all video objects
     await this.seek(0);
 
-    this.canvas.renderAll();
+    this.renderAll();
     this.sendEvent();
 
     if (autoPlay) {
