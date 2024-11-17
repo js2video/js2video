@@ -135,20 +135,7 @@ class VideoTemplate {
     // puppeteer doesn't use a parent element
     if (this.parentElement) {
       this.parentElement.appendChild(this.canvasElement);
-      this.resizeHandler = () => {
-        const rect = this.parentElement.getBoundingClientRect();
-        const scale = utils.scaleToFit(
-          this.params.size.width,
-          this.params.size.height,
-          rect.width,
-          rect.height,
-          0,
-          1
-        );
-        this.canvasElement.style.width = this.params.size.width * scale + "px";
-        this.canvasElement.style.height =
-          this.params.size.height * scale + "px";
-      };
+      this.resizeHandler = () => this.scaleToFit();
       this.resizeHandler();
       addEventListener("resize", this.resizeHandler);
     }
@@ -171,6 +158,26 @@ class VideoTemplate {
     }
 
     return;
+  }
+
+  /**
+   * Scale the video canvas to fit into its parent element (if any)
+   */
+  scaleToFit() {
+    if (!this.parentElement) {
+      return;
+    }
+    const rect = this.parentElement.getBoundingClientRect();
+    const scale = utils.scaleToFit(
+      this.params.size.width,
+      this.params.size.height,
+      rect.width,
+      rect.height,
+      0,
+      1
+    );
+    this.canvasElement.style.width = this.params.size.width * scale + "px";
+    this.canvasElement.style.height = this.params.size.height * scale + "px";
   }
 
   getJS2VideoObjects() {

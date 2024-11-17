@@ -81,6 +81,21 @@ function cn(...inputs) {
   return twMerge(clsx(inputs));
 }
 
+function stringToBase64(string) {
+  const encoder = new TextEncoder();
+  const uint8Array = encoder.encode(string);
+  let base64String = "";
+  for (let i = 0; i < uint8Array.length; i++) {
+    base64String += String.fromCharCode(uint8Array[i]);
+  }
+  return btoa(base64String);
+}
+
+function stringToBase64Url(string) {
+  const base64 = stringToBase64(string);
+  return `data:application/javascript;base64,${base64}`;
+}
+
 export {
   lerp,
   clamp,
@@ -91,4 +106,6 @@ export {
   formatTime,
   loadGoogleFont,
   cn,
+  stringToBase64,
+  stringToBase64Url,
 };

@@ -77,6 +77,11 @@
     }
   },
   "dependencies": {
+    "@codemirror/lang-javascript": "^6.2.2",
+    "@lezer/highlight": "^1.2.1",
+    "@uiw/codemirror-theme-dracula": "^4.23.6",
+    "@uiw/react-codemirror": "^4.23.6",
+    "clsx": "^2.1.1",
     "esbuild": "0.24.0",
     "fabric": "6.4.3",
     "gsap": "3.12.5",
@@ -87,6 +92,8 @@
     "nanoid": "5.0.7",
     "pixi-filters": "6.0.5",
     "pixi.js": "8.4.1",
+    "react-resizable-panels": "^2.1.7",
+    "tailwind-merge": "^2.5.4",
     "zod": "3.23.8"
   }
 }

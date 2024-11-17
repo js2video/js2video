@@ -2,15 +2,42 @@ import React from "react";
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { VideoTemplate } from "../video-template";
 
+/**
+ * @typedef {object} ContextType
+ * @property {VideoTemplate | null} videoTemplate - An instance of the VideoTemplate class.
+ * @property {React.MutableRefObject<HTMLDivElement | null> | null} previewRef - A reference to the HTML div element where preview should be displayed, or null if not set.
+ * @property {Error | null} templateError - An error message related to the template, or null if no error exists.
+ * @property {React.Dispatch<React.SetStateAction<string>> | null} setTemplateUrl - The setter function for updating the template URL state variable.
+ * @property {boolean} isLoading - A flag to indicate whether the video template is loading.
+ */
+
+/**
+ * The Context object that holds shared data and state for video templates.
+ *
+ * @type {React.Context<ContextType>}
+ */
 const Context = createContext({
+  /** @type {VideoTemplate | null} */
   videoTemplate: null,
+  /** @type {React.MutableRefObject<HTMLDivElement | null> | null} */
   previewRef: null,
+  /** @type {Error | null} */
   templateError: null,
+  /** @type {React.Dispatch<React.SetStateAction<string>>} */
+  setTemplateUrl: () => {},
+  /** @type {boolean} */
+  isLoading: true,
 });
 
 /**
  * Custom hook for accessing the JS2Video context.
- * @returns {{ videoTemplate: VideoTemplate | null, templateError: Error | null, previewRef: React.MutableRefObject<HTMLDivElement | null> | null }} - The video template and preview element ref.
+ * @returns {{
+ * videoTemplate: VideoTemplate | null,
+ * templateError: Error | null,
+ * previewRef: React.MutableRefObject<HTMLDivElement | null> | null
+ * setTemplateUrl: React.Dispatch<React.SetStateAction<string>>,
+ * isLoading: boolean
+ * }}
  * @throws {Error} If used outside of a JS2VideoProvider.
  */
 const useJS2Video = () => {
@@ -36,15 +63,17 @@ const useJS2Video = () => {
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2VideoProvider = ({
-  templateUrl,
+  templateUrl: defaultTemplateUrl,
   params = {},
   autoPlay = false,
   loop = false,
   enableUnsecureMode = false,
   children,
 }) => {
+  const [templateUrl, setTemplateUrl] = useState(defaultTemplateUrl);
   const [videoTemplate, setVideoTemplate] = useState(null);
   const [templateError, setTemplateError] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const vtRef = useRef(null);
   const previewRef = useRef(null);
@@ -54,7 +83,12 @@ const JS2VideoProvider = ({
   }, [videoTemplate]);
 
   useEffect(() => {
+    setTemplateUrl(defaultTemplateUrl);
+  }, [defaultTemplateUrl]);
+
+  useEffect(() => {
     async function load() {
+      setIsLoading(true);
       setTemplateError(null);
       const vt = new VideoTemplate();
       try {
@@ -70,6 +104,8 @@ const JS2VideoProvider = ({
       } catch (err) {
         await vt.dispose();
         setTemplateError(err);
+      } finally {
+        setIsLoading(false);
       }
     }
 
@@ -87,7 +123,15 @@ const JS2VideoProvider = ({
   }, [templateUrl, params]);
 
   return (
-    <Context.Provider value={{ videoTemplate, previewRef, templateError }}>
+    <Context.Provider
+      value={{
+        videoTemplate,
+        previewRef,
+        templateError,
+        setTemplateUrl,
+        isLoading,
+      }}
+    >
       {children}
     </Context.Provider>
   );
