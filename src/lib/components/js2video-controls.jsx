@@ -27,9 +27,9 @@ const Scrubber = () => {
   const { message } = useJS2VideoEvent();
   const progress = message?.timeline ? message.timeline.progress() : 0;
   return (
-    <div className="flex-1 bg-white bg-opacity-10 mx-2">
+    <div className="flex-1 bg-white bg-opacity-30 mx-2">
       <div
-        className="bg-white bg-opacity-80 h-[1px]"
+        className="bg-white bg-opacity-90 h-[1px]"
         style={{
           width: progress * 100 + "%",
         }}
