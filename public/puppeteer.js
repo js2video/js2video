@@ -1,4 +1,4 @@
-import { VideoTemplate } from "../server-client.js";
+import { VideoTemplate } from "../video-template.js";
 
 addEventListener("DOMContentLoaded", async () => {
   async function exportVideo({ templateUrl, params }) {

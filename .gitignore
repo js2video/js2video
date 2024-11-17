@@ -5,3 +5,4 @@ types
 *.local
 typedocs
 server-client.js
+video-template.js
