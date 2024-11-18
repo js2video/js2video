@@ -33,18 +33,18 @@
     "dev": "run-p dev:*",
     "dev:vite": "vite --config vite.config.app.js",
     "dev:server": "node --watch ./server.js",
-    "dev:video-template": "npm run build-video-template -- --watch",
+    "dev:server-client": "npm run build-server-client -- --watch",
     "build": "run-s build:*",
     "build:clean": "rimraf types",
     "build:lib": "vite build --config vite.config.lib.js",
     "build:types": "tsc --project tsconfig.types.json",
     "build:rollup": "rollup -c rollup.config.js",
     "build:css": "tailwindcss -i ./index.css -o ./dist/index.css",
-    "build-video-template": "esbuild ./src/lib/video-template --format=esm --bundle --minify --outfile=./video-template.js",
+    "build-server-client": "esbuild ./src/lib/video-template --format=esm --bundle --minify --outfile=./video-template.js",
     "build-app": "vite build --config vite.config.app.js",
     "release": "node ./scripts/release.js",
     "preview": "vite preview --config vite.config.app.js",
-    "postinstall": "npm run build-video-template"
+    "postinstall": "npm run build-server-client"
   },
   "devDependencies": {
     "@types/react": "18.3.11",
@@ -77,23 +77,23 @@
     }
   },
   "dependencies": {
-    "@codemirror/lang-javascript": "^6.2.2",
-    "@lezer/highlight": "^1.2.1",
-    "@uiw/codemirror-theme-dracula": "^4.23.6",
-    "@uiw/react-codemirror": "^4.23.6",
-    "clsx": "^2.1.1",
+    "@codemirror/lang-javascript": "6.2.2",
+    "@lezer/highlight": "1.2.1",
+    "@uiw/codemirror-theme-dracula": "4.23.6",
+    "@uiw/react-codemirror": "4.23.6",
+    "clsx": "2.1.1",
     "esbuild": "0.24.0",
     "fabric": "6.4.3",
     "gsap": "3.12.5",
-    "lucide-react": "^0.459.0",
+    "lucide-react": "0.459.0",
     "media-codecs": "2.0.1",
     "mp4-muxer": "5.1.3",
     "mp4box": "0.5.2",
     "nanoid": "5.0.7",
     "pixi-filters": "6.0.5",
     "pixi.js": "8.4.1",
-    "react-resizable-panels": "^2.1.7",
-    "tailwind-merge": "^2.5.4",
+    "react-resizable-panels": "2.1.7",
+    "tailwind-merge": "2.5.4",
     "zod": "3.23.8"
   }
 }
