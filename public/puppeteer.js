@@ -2,8 +2,9 @@ import { VideoTemplate } from "../video-template.js";
 
 addEventListener("DOMContentLoaded", async () => {
   async function exportVideo({ templateUrl, params }) {
+    let vt;
     try {
-      const vt = new VideoTemplate({
+      vt = new VideoTemplate({
         templateUrl,
         params,
         enableUnsecureMode: true,
