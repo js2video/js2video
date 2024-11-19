@@ -46,6 +46,10 @@ class JS2VideoAudio extends FabricObject {
     return;
   }
 
+  async __dispose() {
+    console.log("disposed js2video_audio obj");
+  }
+
   _render(ctx) {}
 
   cleanup() {
