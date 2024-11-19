@@ -2,12 +2,14 @@ import { FabricObject } from "fabric";
 import { FrameDecoder } from "../frame-decoder";
 
 class JS2VideoVideo extends FabricObject {
+  static type = "js2video_video";
   static isJS2Video = true;
+  /** @type {boolean} */
+  __isExporting = false;
   /** @type {FrameDecoder} */
   __frameDecoder;
   /** @type {HTMLVideoElement} */
   __video;
-  static type = "js2video_video";
 
   /**
    * Create an instance of the JS2VideoVideo class
@@ -16,8 +18,8 @@ class JS2VideoVideo extends FabricObject {
    */
   constructor(video, options) {
     super(options);
+    this.__video = video;
     super.set({
-      __video: video,
       objectCaching: false,
       selectable: false,
       width: video.videoWidth,
@@ -34,7 +36,7 @@ class JS2VideoVideo extends FabricObject {
   }
 
   /**
-   * @param {number} time - time to seek to in video
+   * @param {number} time - time to seek to
    * @return {Promise<void>}
    */
   async __seek(time) {
@@ -59,6 +61,7 @@ class JS2VideoVideo extends FabricObject {
   }
 
   async __startExport() {
+    this.__isExporting = true;
     if (this.__frameDecoder) {
       console.warn(
         "had lingering framedecoder, destroying before creating new"
@@ -79,6 +82,7 @@ class JS2VideoVideo extends FabricObject {
       }
     }
     this.__frameDecoder = null;
+    this.__isExporting = false;
     return;
   }
 
