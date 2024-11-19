@@ -177,8 +177,11 @@ async function encodeVideo({
   console.log("flushed + closed videoencoder");
   muxer.finalize();
   console.log("finalized muxer");
-  await fileWritableStream.close();
-  console.log("closed file");
+
+  if (fileWritableStream) {
+    await fileWritableStream.close();
+    console.log("closed file");
+  }
 
   return;
 }
