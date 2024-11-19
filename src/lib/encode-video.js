@@ -6,6 +6,42 @@ import {
 import { AVC } from "media-codecs";
 import { canBrowserEncodeVideo } from "./utils";
 
+function audioBufferToAudioData(audioBuffer) {
+  // Create a new Float32Array to hold the planar audio data
+  const numChannels = audioBuffer.numberOfChannels;
+  const lengthPerChannel = audioBuffer.length;
+  const planarData = new Float32Array(numChannels * lengthPerChannel);
+  // Fill the Float32Array with planar audio data
+  for (let channel = 0; channel < numChannels; channel++) {
+    const channelData = audioBuffer.getChannelData(channel);
+    planarData.set(channelData, channel * lengthPerChannel);
+  }
+  // Construct an AudioData object
+  const audioData = new AudioData({
+    format: "f32-planar",
+    sampleRate: audioBuffer.sampleRate,
+    numberOfFrames: lengthPerChannel,
+    numberOfChannels: audioBuffer.numberOfChannels,
+    timestamp: 0,
+    data: planarData,
+  });
+  return audioData;
+}
+
+/**
+ *
+ * @param {Object} options
+ * @param {number} options.bitrate
+ * @param {number} options.width
+ * @param {number} options.height
+ * @param {number} options.fps
+ * @param {Function} options.seek
+ * @param {gsap.core.Timeline} options.timeline
+ * @param {HTMLCanvasElement} options.canvasElement
+ * @param {boolean} options.isPuppeteer
+ * @param {Function} options.progressHandler
+ * @param {AudioBuffer} [options.audioBuffer]
+ */
 async function encodeVideo({
   bitrate,
   width,
@@ -16,11 +52,11 @@ async function encodeVideo({
   canvasElement,
   isPuppeteer,
   progressHandler = () => {},
+  audioBuffer,
 }) {
-  console.log("fps", fps);
-
-  const videoCodec = AVC.getCodec({ profile: "Main", level: "5.2" });
+  let audioEncoder;
   const audioCodec = "mp4a.40.2";
+  const videoCodec = AVC.getCodec({ profile: "Main", level: "5.2" });
 
   let target, fileWritableStream;
 
@@ -58,7 +94,16 @@ async function encodeVideo({
       height: height,
     },
     firstTimestampBehavior: "offset",
+    ...(audioBuffer && {
+      audio: {
+        codec: "aac",
+        numberOfChannels: audioBuffer.numberOfChannels,
+        sampleRate: audioBuffer.sampleRate,
+      },
+    }),
   };
+
+  console.log(muxerOptions);
 
   // @ts-ignore
   const muxer = new Muxer(muxerOptions);
@@ -77,6 +122,30 @@ async function encodeVideo({
     bitrate: bitrate,
     latencyMode: "quality",
   });
+
+  if (audioBuffer) {
+    audioEncoder = new AudioEncoder({
+      output: (chunk, meta) => {
+        const time = chunk.timestamp / 1000 / 1000;
+        if (time <= timeline.duration()) {
+          muxer.addAudioChunk(chunk, meta);
+        }
+      },
+      error: (e) => console.error(e),
+    });
+
+    audioEncoder.configure({
+      codec: audioCodec,
+      sampleRate: audioBuffer.sampleRate,
+      numberOfChannels: audioBuffer.numberOfChannels,
+      bitrate: 192000, // 192 kbps
+    });
+
+    audioEncoder.encode(audioBufferToAudioData(audioBuffer));
+    await audioEncoder.flush();
+    audioEncoder.close();
+    console.log("flushed + closed audioencoder");
+  }
 
   let frame = 0;
   let frames = Math.round(timeline.duration() * fps) + 1;
@@ -105,17 +174,15 @@ async function encodeVideo({
     frame++;
   }
 
-  console.log("videoencoder done");
   await videoEncoder.flush();
-  console.log("videoencoder flushed");
-
+  videoEncoder.close();
+  console.log("flushed + closed videoencoder");
   muxer.finalize();
-  console.log("muxer finalized");
+  console.log("finalized muxer");
+  await fileWritableStream.close();
+  console.log("closed file");
 
-  if (fileWritableStream) {
-    await fileWritableStream.close();
-    console.log("file closed");
-  }
+  return;
 }
 
 export { encodeVideo };

@@ -84,6 +84,7 @@
     "@uiw/codemirror-theme-dracula": "4.23.6",
     "@uiw/react-codemirror": "4.23.6",
     "clsx": "2.1.1",
+    "crunker": "2.4.0",
     "esbuild": "0.24.0",
     "fabric": "6.4.3",
     "gsap": "3.12.5",

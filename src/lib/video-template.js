@@ -6,6 +6,7 @@ import * as utils from "./template-utils";
 import * as fabricUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 import { validateParams } from "./validate-params";
+import { mixAudio } from "./mix-audio";
 
 /** default params for all video templates */
 const globalParams = {
@@ -28,12 +29,15 @@ const globalParams = {
 
 /**
  * @typedef {Object} IJS2VideoObject
+ * @property {string} type
  * @property {Function} __dispose
  * @property {Function} __seek
  * @property {Function} __play
  * @property {Function} __pause
  * @property {Function} __startExport
  * @property {Function} __endExport
+ * @property {boolean} __isExporting
+ * @property {HTMLAudioElement|undefined} [__audio]
  */
 
 /**
@@ -197,6 +201,17 @@ class VideoTemplate {
     this.#canvas.renderAll();
   }
 
+  async #mergeAudio() {
+    const audioInputs = this.#objects
+      .filter((obj) => obj.type === "js2video_audio")
+      .map((obj) => ({ url: obj.__audio.src, startTime: 0 }));
+    if (!audioInputs.length) {
+      return null;
+    }
+    const result = await mixAudio({ inputs: audioInputs });
+    return result;
+  }
+
   /**
    * Scales the video canvas to fit into its parent element.
    * @returns {void}
@@ -296,7 +311,9 @@ class VideoTemplate {
       await this.rewind();
       this.pause();
       this.#sendEvent();
+      const audio = await this.#mergeAudio();
       await encodeVideo({
+        audioBuffer: audio ? audio.buffer : null,
         bitrate: this.#params.bitrate,
         width: this.#params.size.width,
         height: this.#params.size.height,
