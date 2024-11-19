@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<svg viewBox="-200 -100 700 700" xmlns="http://www.w3.org/2000/svg">
+  <rect x="-200" y="-100" width="700" height="700" style="fill: rgb(255, 252, 0);" transform="matrix(1, 0, 0, 1, 0, 5.684341886080802e-14)"/>
+  <path d="M 0 400 L 100 400 L 100 500 L 0 500 Z M 100 300 L 200 300 L 200 400 L 100 400 Z M 200 200 L 300 200 L 300 300 L 200 300 Z M 100 100 L 200 100 L 200 200 L 100 200 Z M 0 0 L 100 0 L 100 100 L 0 100 Z" style="" transform="matrix(1, 0, 0, 1, 0, 5.684341886080802e-14)"/>
+</svg>
