@@ -103,8 +103,6 @@ async function encodeVideo({
     }),
   };
 
-  console.log(muxerOptions);
-
   // @ts-ignore
   const muxer = new Muxer(muxerOptions);
 
