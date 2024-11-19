@@ -6,4 +6,7 @@ export default defineConfig({
   build: {
     emptyOutDir: false,
   },
+  server: {
+    hmr: false,
+  },
 });
