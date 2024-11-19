@@ -26,6 +26,8 @@ class PixiObject extends FabricObject {
   async __seek() {}
   async __play() {}
   async __pause() {}
+  async __startExport() {}
+  async __endExport() {}
 
   async __dispose() {
     this.__pixi.destroy(true, {

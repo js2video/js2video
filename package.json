@@ -40,8 +40,9 @@
     "build:types": "tsc --project tsconfig.types.json",
     "build:rollup": "rollup -c rollup.config.js",
     "build:css": "tailwindcss -i ./index.css -o ./dist/index.css",
+    "build:app": "vite build --config vite.config.app.js",
+    "build:typedoc": "typedoc",
     "build-server-client": "esbuild ./src/lib/video-template --format=esm --bundle --minify --outfile=./video-template.js",
-    "build-app": "vite build --config vite.config.app.js",
     "release": "node ./scripts/release.js",
     "preview": "vite preview --config vite.config.app.js",
     "postinstall": "npm run build-server-client"
@@ -56,6 +57,7 @@
     "rollup": "4.24.4",
     "rollup-plugin-dts": "6.1.1",
     "tailwindcss": "3.4.15",
+    "typedoc": "0.26.11",
     "typescript": "5.6.3",
     "vite": "5.4.8",
     "vite-plugin-externalize-deps": "0.8.0"

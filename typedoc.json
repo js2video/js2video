@@ -1,0 +1,7 @@
+{
+    "entryPoints": ["types/index.d.ts", "types/lib/export-video.d.ts"],
+    "out": "dist/typedocs",
+    "tsconfig": "tsconfig.typedoc.json",
+    "disableSources": true,
+    "name": "JS2Video",
+}

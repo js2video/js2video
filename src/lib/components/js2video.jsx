@@ -9,7 +9,6 @@ import { JS2VideoLayout } from "./js2video-layout";
  *
  * JS2Video Component
  *
- * @component
  * @param {Object} props - Component props
  * @param {string} props.templateUrl - URL to the video template.
  * @param {Object} [props.params] - Video template params. Default; {}.

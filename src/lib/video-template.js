@@ -7,8 +7,9 @@ import * as fabricUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 import { validateParams } from "./validate-params";
 
+/** default params for all video templates */
 const globalParams = {
-  bitrate: 5_000_000,
+  bitrate: 10_000_000,
   fps: 30,
   size: {
     width: 1920,
@@ -17,12 +18,22 @@ const globalParams = {
 };
 
 /**
+ * @typedef {Object} ExportResult
+ * @property {number} videoBitrate - The bitrate used for the export (in kbps).
+ * @property {Object} videoSize - The size of the video.
+ * @property {number} videoSize.width - The width of the video.
+ * @property {number} videoSize.height - The height of the video.
+ * @property {number} videoDuration - The duration of the video in milliseconds.
+ */
+
+/**
  * @typedef {Object} IJS2VideoObject
  * @property {Function} __dispose
  * @property {Function} __seek
  * @property {Function} __play
  * @property {Function} __pause
- * @property {boolean} __isExporting
+ * @property {Function} __startExport
+ * @property {Function} __endExport
  */
 
 /**
@@ -35,73 +46,82 @@ function isJS2VideoObject(obj) {
 }
 
 /**
- * Class representing a video template
+ * A JS2Video class
  */
 class VideoTemplate {
-  /**
-   * Creates a new VideoTemplate instance.
-   */
-  constructor() {}
+  templateUrl;
+  #params;
+  #timeline = gsap.timeline({ paused: true });
+  #canvasElement = document.createElement("canvas");
+  #canvas = new Fabric.StaticCanvas(this.#canvasElement, {
+    enableRetinaScaling: true,
+  });
+  #parentElement;
+  #autoPlay;
+  #loop;
+  #enableUnsecureMode;
+  #isExporting = false;
+  #isLoaded = false;
+  /** @type {Array<IJS2VideoObject>} */
+  #objects = [];
 
   /**
-   * Loads and displays a video template with params + all other options.
+   * Creates an instance of the JS2Video class
    * @param {Object} options
-   * @param {string} options.templateUrl - URL to the video template.
-   * @param {HTMLDivElement} options.parentElement - ID of the div element to put the loaded template canvas in.
-   * @param {Object} [options.params] - Video template params. Default; {}.
+   * @param {string} options.templateUrl - The URL to the video template.
+   * @param {Object} [options.params] - Video template params. Default: {}.
+   * @param {HTMLElement} [options.parentElement] - Parent element. Default: document.body.
    * @param {boolean} [options.autoPlay] - Play video immediately after loading? Default: false.
    * @param {boolean} [options.loop] - Loop the video? Default: false.
    * @param {boolean} [options.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
-   * @param {boolean} [options.isExporting] - Are we exporting this video? Default: false.
    */
-  async load({
+  constructor({
     templateUrl,
     params = {},
-    parentElement,
+    parentElement = document.body,
     autoPlay = false,
     loop = false,
     enableUnsecureMode = false,
-    isExporting = false,
   }) {
     this.templateUrl = templateUrl;
-    this.params = params;
-    this.parentElement = parentElement;
-    this.canvasElement = document.createElement("canvas");
-    this.isExporting = isExporting;
+    this.#params = params;
+    this.#parentElement = parentElement;
+    this.#autoPlay = autoPlay;
+    this.#loop = loop;
+    this.#enableUnsecureMode = enableUnsecureMode;
+  }
+
+  /**
+   * Loads the video template instance
+   *
+   * @returns {Promise<void>}
+   */
+  async load() {
+    if (this.#isLoaded) {
+      throw "Video Template instance was alreadey loaded";
+    }
+
+    this.#isLoaded = true;
 
     // Throw if !enableUnsecureMode and template is loaded outside iframe
-    if (!enableUnsecureMode && window.self === window.top) {
+    if (!this.#enableUnsecureMode && window.self === window.top) {
       console.error(
         "Error: The video template must be loaded from inside an iframe to avoid code execution on this page from the template. If you trust the content of this template or want it to execute anyway, set the option 'enableUnsecureMode' to true in the 'load' function."
       );
       return;
     }
 
-    this.canvas = new Fabric.StaticCanvas(this.canvasElement, {
-      enableRetinaScaling: true,
+    this.#timeline.eventCallback("onUpdate", () => {
+      this.#renderAll();
+      this.#sendEvent();
     });
 
-    this.timeline = gsap.timeline({ paused: true });
-
-    this.sendEvent = function () {
-      const message = { timeline: this.timeline };
-      const timelineEvent = new CustomEvent("js2video", {
-        detail: message,
-      });
-      window.dispatchEvent(timelineEvent);
-    };
-
-    this.timeline.eventCallback("onUpdate", () => {
-      this.renderAll();
-      this.sendEvent();
-    });
-
-    this.timeline.eventCallback("onComplete", async () => {
-      if (loop) {
+    this.#timeline.eventCallback("onComplete", async () => {
+      if (this.#loop && !this.#isExporting) {
         await this.rewind();
         this.play();
       }
-      this.sendEvent();
+      this.#sendEvent();
     });
 
     // import video template from url/path
@@ -109,22 +129,22 @@ class VideoTemplate {
       /* @vite-ignore */ this.templateUrl
     );
 
-    this.params = { ...globalParams, ...defaultParams, ...params };
+    this.#params = { ...globalParams, ...defaultParams, ...this.#params };
 
-    validateParams(this.params);
+    validateParams(this.#params);
 
     // set gsap fps
-    gsap.ticker.fps(this.params.fps);
+    gsap.ticker.fps(this.#params.fps);
 
     // resize canvas
-    this.canvas.setDimensions(this.params.size);
+    this.#canvas.setDimensions(this.#params.size);
 
     // execute template function
     await template({
-      timeline: this.timeline,
-      canvas: this.canvas,
-      canvasElement: this.canvasElement,
-      params: this.params,
+      timeline: this.#timeline,
+      canvas: this.#canvas,
+      canvasElement: this.#canvasElement,
+      params: this.#params,
       Fabric,
       Pixi,
       PixiFilters,
@@ -132,154 +152,195 @@ class VideoTemplate {
       fabricUtils,
     });
 
-    // puppeteer doesn't use a parent element
-    if (this.parentElement) {
-      this.parentElement.appendChild(this.canvasElement);
-      this.resizeHandler = () => this.scaleToFit();
-      this.resizeHandler();
-      addEventListener("resize", this.resizeHandler);
-    }
+    this.#objects = this.#canvas
+      .getObjects()
+      .filter((obj) => isJS2VideoObject(obj));
 
-    // set the isExporting flag on all js2video objects
-    this.canvas.getObjects().map((obj) => {
-      if (isJS2VideoObject(obj)) {
-        return (obj.__isExporting = this.isExporting);
-      }
-    });
+    this.#parentElement.appendChild(this.#canvasElement);
+
+    this.scaleToFit();
+
+    addEventListener("resize", this.#resizeHandler.bind(this));
 
     // forces rendering first video frame on all video objects
     await this.seek(0);
 
-    this.renderAll();
-    this.sendEvent();
+    this.#renderAll();
+    this.#sendEvent();
 
-    if (autoPlay) {
+    if (this.#autoPlay) {
       this.play();
     }
 
     return;
   }
 
+  #resizeHandler() {
+    this.scaleToFit();
+  }
+
+  #sendEvent() {
+    const message = {
+      currentTime: this.#timeline.time(),
+      duration: this.#timeline.duration(),
+      progress: this.#timeline.progress(),
+      isPlaying: this.#timeline.isActive(),
+      isExporting: this.#isExporting,
+    };
+    const ev = new CustomEvent("js2video", {
+      detail: message,
+    });
+    window.dispatchEvent(ev);
+  }
+
+  #renderAll() {
+    this.#canvas.renderAll();
+  }
+
   /**
-   * Scale the video canvas to fit into its parent element (if any)
+   * Scales the video canvas to fit into its parent element.
+   * @returns {void}
    */
   scaleToFit() {
-    if (!this.parentElement) {
+    if (!this.#parentElement) {
       return;
     }
-    const rect = this.parentElement.getBoundingClientRect();
+    const rect = this.#parentElement.getBoundingClientRect();
     const scale = utils.scaleToFit(
-      this.params.size.width,
-      this.params.size.height,
+      this.#params.size.width,
+      this.#params.size.height,
       rect.width,
       rect.height,
       0,
       1
     );
-    this.canvasElement.style.width = this.params.size.width * scale + "px";
-    this.canvasElement.style.height = this.params.size.height * scale + "px";
-  }
-
-  getJS2VideoObjects() {
-    return this.canvas.getObjects().filter((obj) => isJS2VideoObject(obj));
-  }
-
-  renderAll() {
-    this.canvas.renderAll();
-  }
-
-  play() {
-    this.timeline.play();
-    this.getJS2VideoObjects().map((obj) => {
-      obj.__play();
-    });
-    this.sendEvent();
-  }
-
-  pause() {
-    this.timeline.pause();
-    this.getJS2VideoObjects().map((obj) => {
-      obj.__pause();
-    });
-    this.sendEvent();
-  }
-
-  togglePlay() {
-    this.timeline.isActive() ? this.pause() : this.play();
+    this.#canvasElement.style.width = this.#params.size.width * scale + "px";
+    this.#canvasElement.style.height = this.#params.size.height * scale + "px";
   }
 
   /**
-   * Seek to a specific time in the video
+   * Starts/resumes video playback
+   * @returns {void}
+   */
+  play() {
+    this.#timeline.play();
+    this.#objects.map((obj) => {
+      obj.__play();
+    });
+    this.#sendEvent();
+  }
+
+  /**
+   * Pauses the video playback
+   * @returns {void}
+   */
+  pause() {
+    this.#timeline.pause();
+    this.#objects.map((obj) => {
+      obj.__pause();
+    });
+    this.#sendEvent();
+  }
+
+  /**
+   * Toggles play/pause playback
+   * @returns {void}
+   */
+  togglePlay() {
+    this.#timeline.isActive() ? this.pause() : this.play();
+  }
+
+  /**
+   * Seeks to a specific time in the video
    * @param {number} time - Time to seek to
+   * @returns {Promise<void>}
    */
   async seek(time) {
     // seek in all objects
     await Promise.all(
-      this.getJS2VideoObjects().map((obj) => {
-        return obj.__seek(time);
+      this.#objects.map((obj) => {
+        return obj.__seek(time, this.#isExporting);
       })
     );
-    this.timeline.time(time);
+    this.#timeline.time(time);
   }
 
+  /**
+   * Rewinds the video playback to its starting position
+   * @returns {Promise<void>}
+   */
   async rewind() {
     return this.seek(0);
   }
 
+  async cleanupExport() {
+    await this.rewind();
+    await Promise.all(this.#objects.map((obj) => obj.__endExport()));
+    this.#isExporting = false;
+    this.#sendEvent();
+    console.log("export ended");
+  }
+
   /**
+   * Exports the video to MP4 from the browser or server.
    *
-   * @param {Object} options
-   * @param {boolean} [options.isPuppeteer] - Is video exported from server/puppeteer? Default is false.
+   * @param {Object} options - The options for the export.
+   * @param {boolean} [options.isPuppeteer] - Is this method called from puppeteer?. Default: false.
+   * @returns {Promise<ExportResult>}
    */
   async export({ isPuppeteer = false }) {
-    await encodeVideo({
-      bitrate: this.params.bitrate,
-      width: this.params.size.width,
-      height: this.params.size.height,
-      canvasElement: this.canvasElement,
-      seek: async (/** @type {number} */ time) => await this.seek(time),
-      fps: this.params.fps,
-      timeline: this.timeline,
-      isPuppeteer,
-    });
+    try {
+      console.log("startExport");
+      this.#isExporting = true;
+      await Promise.all(this.#objects.map((obj) => obj.__startExport()));
+      await this.rewind();
+      this.pause();
+      this.#sendEvent();
+      await encodeVideo({
+        bitrate: this.#params.bitrate,
+        width: this.#params.size.width,
+        height: this.#params.size.height,
+        canvasElement: this.#canvasElement,
+        seek: async (/** @type {number} */ time) => await this.seek(time),
+        fps: this.#params.fps,
+        timeline: this.#timeline,
+        isPuppeteer,
+        progressHandler: () => this.#sendEvent(),
+      });
+      await this.cleanupExport();
+    } catch (err) {
+      await this.cleanupExport();
+      throw err;
+    }
     const result = {
-      videoBitrate: this.params.bitrate,
-      videoSize: this.params.size,
-      videoDuration: this.timeline.duration() * 1000,
+      videoBitrate: this.#params.bitrate,
+      videoSize: this.#params.size,
+      videoDuration: this.#timeline.duration() * 1000,
     };
     return result;
   }
 
   /**
-   * Dispose of all objects on the canvas.
-   * @returns {Promise<void>} - A promise that resolves when all objects have been disposed of.
+   * Disposes the video template and all its resources.
+   * @returns {Promise<void>}
    */
   async dispose() {
     console.log("dispose video template");
     try {
-      if (this.timeline) {
-        this.timeline.clear();
-      }
-      if (this.canvas) {
-        await Promise.all(
-          this.getJS2VideoObjects().map((obj) => {
-            return obj.__dispose();
-          })
-        );
-        this.canvas.clear();
-        await this.canvas.dispose();
-      }
-      if (this.resizeHandler) {
-        window.removeEventListener("resize", this.resizeHandler);
-      }
+      window.removeEventListener("resize", this.#resizeHandler);
+      this.#timeline.clear();
+      await Promise.all(
+        this.#objects.map((obj) => {
+          return obj.__dispose();
+        })
+      );
+      this.#canvas.clear();
+      await this.#canvas.dispose();
       console.log("disposed video template");
     } catch (e) {
       console.error("error disposing", e.message);
     } finally {
-      // remove canvas from parent
-      if (this.parentElement) {
-        this.parentElement.innerHTML = "";
-      }
+      this.#canvasElement.remove();
     }
   }
 }

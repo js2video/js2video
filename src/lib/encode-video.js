@@ -4,14 +4,7 @@ import {
   FileSystemWritableFileStreamTarget,
 } from "mp4-muxer";
 import { AVC } from "media-codecs";
-
-function canBrowserEncode() {
-  return (
-    typeof window.showSaveFilePicker !== "undefined" &&
-    typeof window.VideoEncoder !== "undefined" &&
-    typeof window.AudioEncoder !== "undefined"
-  );
-}
+import { canBrowserEncodeVideo } from "./utils";
 
 async function encodeVideo({
   bitrate,
@@ -22,6 +15,7 @@ async function encodeVideo({
   timeline,
   canvasElement,
   isPuppeteer,
+  progressHandler = () => {},
 }) {
   console.log("fps", fps);
 
@@ -39,7 +33,7 @@ async function encodeVideo({
       },
     });
   } else {
-    if (!canBrowserEncode()) {
+    if (!canBrowserEncodeVideo()) {
       throw "This browser cannot encode video yet. Please try Chrome/Chromium";
     }
     const fileHandle = await window.showSaveFilePicker({
@@ -80,7 +74,7 @@ async function encodeVideo({
     codec: videoCodec,
     width: width,
     height: height,
-    bitrate: 10_000_000,
+    bitrate: bitrate,
     latencyMode: "quality",
   });
 
@@ -91,20 +85,23 @@ async function encodeVideo({
   while (frame < frames) {
     const time = frame / fps;
     // update timeline
-    await seek(Math.min(time, timeline.duration()), true);
+    await seek(Math.min(time, timeline.duration()));
     // grab the canvas into a frame
     const videoFrame = new VideoFrame(canvasElement, {
       timestamp: time * 1000 * 1000,
     });
+    // TODO: maybe make this user configurable?
+    // Frequent flushes/keyframes = larger sizes. 5s is a OK setting.
     // keyframe first and every 5s
     videoEncoder.encode(videoFrame, {
       keyFrame: frame === 0 || frame % Math.round(fps * 5) === 0,
     });
+    // flush every keyframe
     videoFrame.close();
-    // flush to disk every 10 seconds?
-    if (frame % Math.round(fps * 10) === 0) {
+    if (frame % Math.round(fps * 5) === 0) {
       await videoEncoder.flush();
     }
+    progressHandler();
     frame++;
   }
 

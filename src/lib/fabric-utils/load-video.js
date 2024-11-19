@@ -3,7 +3,6 @@ import { FrameDecoder } from "../frame-decoder";
 
 class JS2VideoVideo extends FabricObject {
   static isJS2Video = true;
-  __isExporting = false;
   /** @type {FrameDecoder} */
   __frameDecoder;
   /** @type {HTMLVideoElement} */
@@ -24,12 +23,11 @@ class JS2VideoVideo extends FabricObject {
       width: video.videoWidth,
       height: video.videoHeight,
     });
-    this.__frameDecoder = new FrameDecoder(video.src);
   }
 
   _render(ctx) {
     ctx.drawImage(
-      this.__isExporting ? this.__frameDecoder.canvas : this.__video,
+      this.__frameDecoder ? this.__frameDecoder.canvas : this.__video,
       (this.width / 2) * -1,
       (this.height / 2) * -1
     );
@@ -40,7 +38,7 @@ class JS2VideoVideo extends FabricObject {
    * @return {Promise<void>}
    */
   async __seek(time) {
-    if (this.__isExporting) {
+    if (this.__frameDecoder) {
       await this.__frameDecoder.decode(time);
     } else {
       await new Promise((resolve) => {
@@ -60,8 +58,34 @@ class JS2VideoVideo extends FabricObject {
     this.__video.pause();
   }
 
+  async __startExport() {
+    if (this.__frameDecoder) {
+      console.warn(
+        "had lingering framedecoder, destroying before creating new"
+      );
+      await this.__frameDecoder.destroy();
+    }
+    this.__frameDecoder = new FrameDecoder(this.__video.src);
+    return;
+  }
+
+  async __endExport() {
+    if (this.__frameDecoder) {
+      console.log("removing frame decoder");
+      try {
+        await this.__frameDecoder.destroy();
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+    this.__frameDecoder = null;
+    return;
+  }
+
   async __dispose() {
-    await this.__frameDecoder.destroy();
+    if (this.__frameDecoder) {
+      await this.__frameDecoder.destroy();
+    }
     console.log("disposed js2video_video obj");
   }
 }

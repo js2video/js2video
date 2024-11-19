@@ -96,6 +96,14 @@ function stringToBase64Url(string) {
   return `data:application/javascript;base64,${base64}`;
 }
 
+function canBrowserEncodeVideo() {
+  return (
+    typeof window.showSaveFilePicker !== "undefined" &&
+    typeof window.VideoEncoder !== "undefined" &&
+    typeof window.AudioEncoder !== "undefined"
+  );
+}
+
 export {
   lerp,
   clamp,
@@ -108,4 +116,5 @@ export {
   cn,
   stringToBase64,
   stringToBase64Url,
+  canBrowserEncodeVideo,
 };

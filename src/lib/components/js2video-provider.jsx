@@ -79,10 +79,6 @@ const JS2VideoProvider = ({
   const previewRef = useRef(null);
 
   useEffect(() => {
-    vtRef.current = videoTemplate;
-  }, [videoTemplate]);
-
-  useEffect(() => {
     setTemplateUrl(defaultTemplateUrl);
   }, [defaultTemplateUrl]);
 
@@ -90,36 +86,30 @@ const JS2VideoProvider = ({
     async function load() {
       setIsLoading(true);
       setTemplateError(null);
-      const vt = new VideoTemplate();
       try {
-        await vt.load({
-          templateUrl,
-          enableUnsecureMode,
-          parentElement: previewRef.current,
-          autoPlay,
-          loop,
-          params,
-        });
-        setVideoTemplate(vt);
+        vtRef.current?.dispose();
       } catch (err) {
-        await vt.dispose();
+        console.error(err);
+      }
+      vtRef.current = new VideoTemplate({
+        templateUrl,
+        enableUnsecureMode,
+        parentElement: previewRef.current,
+        autoPlay,
+        loop,
+        params,
+      });
+      try {
+        await vtRef.current.load();
+        setVideoTemplate(vtRef.current);
+      } catch (err) {
+        await vtRef.current.dispose();
         setTemplateError(err);
       } finally {
         setIsLoading(false);
       }
     }
-
     load();
-
-    return () => {
-      async function dispose() {
-        if (!vtRef.current) {
-          return;
-        }
-        await vtRef.current.dispose();
-      }
-      dispose();
-    };
   }, [templateUrl, params]);
 
   return (

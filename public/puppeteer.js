@@ -2,17 +2,16 @@ import { VideoTemplate } from "../video-template.js";
 
 addEventListener("DOMContentLoaded", async () => {
   async function exportVideo({ templateUrl, params }) {
-    const vt = new VideoTemplate();
     try {
-      await vt.load({
+      const vt = new VideoTemplate({
         templateUrl,
         params,
         enableUnsecureMode: true,
-        parentId: null,
         autoPlay: false,
         loop: false,
         isExporting: true,
       });
+      await vt.load();
       const result = await vt.export({ isPuppeteer: true });
       await vt.dispose();
       return result;

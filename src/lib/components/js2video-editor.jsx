@@ -54,21 +54,19 @@ const JS2VideoEditor = () => {
 
   return (
     <div className="flex-1 flex flex-col">
-      <div className="p-2 flex justify-between items-center bg-black text-white">
-        <div>
+      <div className="p-2 flex justify-end items-center bg-black text-white">
+        {/* <button>
           <MenuIcon size={22} />
-        </div>
-        <div>
-          <button disabled={!isChanged} onClick={updatePreview}>
-            <RefreshCwIcon
-              className={cn({
-                "opacity-50": !isChanged,
-                "animate-spin": isLoading,
-              })}
-              size={22}
-            />
-          </button>
-        </div>
+        </button> */}
+        <button disabled={!isChanged} onClick={updatePreview}>
+          <RefreshCwIcon
+            className={cn({
+              "opacity-50": !isChanged,
+              "animate-spin": isLoading,
+            })}
+            size={22}
+          />
+        </button>
       </div>
       <div className="flex-1 relative">
         <div className="absolute inset-0">

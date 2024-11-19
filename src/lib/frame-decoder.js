@@ -89,11 +89,14 @@ export class FrameDecoder {
     if (this.videoDecoder) {
       try {
         await this.videoDecoder.flush();
+        this.frameBuffer.map((f) => f.close());
+        console.log("flushed decoder");
       } catch (e) {
         console.error(e.message);
       }
       try {
         this.videoDecoder.close();
+        console.log("closed decoder");
       } catch (e) {
         console.error(e.message);
       }
