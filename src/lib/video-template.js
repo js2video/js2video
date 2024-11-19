@@ -201,14 +201,14 @@ class VideoTemplate {
     this.#canvas.renderAll();
   }
 
-  async #mergeAudio() {
+  async #mergeAudio({ isPuppeteer }) {
     const audioInputs = this.#objects
       .filter((obj) => obj.type === "js2video_audio")
       .map((obj) => ({ url: obj.__audio.src, startTime: 0 }));
     if (!audioInputs.length) {
       return null;
     }
-    const result = await mixAudio({ inputs: audioInputs });
+    const result = await mixAudio({ inputs: audioInputs, isPuppeteer });
     return result;
   }
 
@@ -311,7 +311,7 @@ class VideoTemplate {
       await this.rewind();
       this.pause();
       this.#sendEvent();
-      const audio = await this.#mergeAudio();
+      const audio = await this.#mergeAudio({ isPuppeteer });
       await encodeVideo({
         audioBuffer: audio ? audio.buffer : null,
         bitrate: this.#params.bitrate,
