@@ -155,7 +155,7 @@ const JS2VideoControls = () => {
         <div className="flex flex-1 flex-col items-center justify-center">
           <PlayButton />
         </div>
-        <div className="flex  items-center bg-black bg-opacity-50 px-2">
+        <div className="flex items-center bg-black bg-opacity-50 px-2">
           <RewindButton />
           <TogglePlayButton />
           <Scrubber />
