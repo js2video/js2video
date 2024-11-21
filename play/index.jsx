@@ -5,7 +5,7 @@ import "../index.css";
 
 const App = () => {
   const [templateUrl, setTemplateUrl] = useState(
-    location.origin + "/template.js"
+    location.origin + "/templates/hello-world.js"
   );
 
   const [params, setParams] = useState({});
@@ -23,7 +23,6 @@ const App = () => {
           <div className="opacity-50">Play</div>
         </div>
         <div className="flex gap-4">
-          <a href="/docs">Docs</a>
           <a href="https://github.com/js2video/js2video" target="_blank">
             <img
               className="invert"
