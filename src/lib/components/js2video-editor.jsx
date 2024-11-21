@@ -3,9 +3,8 @@ import CodeMirror from "@uiw/react-codemirror";
 import { tags as t } from "@lezer/highlight";
 import { draculaInit } from "@uiw/codemirror-theme-dracula";
 import { RefreshCwIcon } from "lucide-react";
-import { MenuIcon } from "lucide-react";
 import { useJS2Video } from "./js2video-provider";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import { cn, stringToBase64Url } from "../utils";
 
 const JS2VideoEditor = () => {
