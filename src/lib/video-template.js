@@ -156,6 +156,10 @@ class VideoTemplate {
       fabricUtils,
     });
 
+    if (this.#timeline.duration() > 3600) {
+      throw "Total video duration is too long. Max duration: 1 hour";
+    }
+
     this.#objects = this.#canvas
       .getObjects()
       .filter((obj) => isJS2VideoObject(obj));
