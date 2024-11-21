@@ -14,10 +14,20 @@ class JS2VideoImage extends FabricImage {
   }
 
   async __seek() {}
+
   async __play() {}
+
   async __pause() {}
-  async __startExport() {}
-  async __endExport() {}
+
+  async __startExport() {
+    this.__isExporting = true;
+    return;
+  }
+
+  async __endExport() {
+    this.__isExporting = false;
+    return;
+  }
 
   async __dispose() {
     console.log("disposed js2video_image obj");
