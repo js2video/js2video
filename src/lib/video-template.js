@@ -201,6 +201,10 @@ class VideoTemplate {
     window.dispatchEvent(ev);
   }
 
+  triggerEvent() {
+    this.#sendEvent();
+  }
+
   #renderAll() {
     this.#canvas.renderAll();
   }

@@ -1,4 +1,3 @@
-import React from "react";
 import { useJS2VideoEvent } from "./hooks/use-js2video-event";
 import { useJS2Video } from "./js2video-provider";
 import { canBrowserEncodeVideo, formatTime } from "../utils";
@@ -12,6 +11,10 @@ import { useState, useEffect } from "react";
 
 const CurrentTime = () => {
   const { currentTime, duration } = useJS2VideoEvent();
+  const { videoTemplate } = useJS2Video();
+  useEffect(() => {
+    videoTemplate.triggerEvent();
+  }, []);
   return (
     <div className="tabular-nums px-2 text-white text-sm opacity-60">
       {formatTime(currentTime)} / {formatTime(duration)}
