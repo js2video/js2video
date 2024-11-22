@@ -14,6 +14,7 @@ import { JS2VideoLayout } from "./js2video-layout";
  * @param {boolean} [props.autoPlay] - Play video immediately after loading? Default: false.
  * @param {boolean} [props.loop] - Loop the video? Default: false.
  * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
+ * @param {boolean} [props.showEditor] - Show toe video template code editor. Default: true.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2Video = ({
@@ -22,6 +23,7 @@ const JS2Video = ({
   autoPlay = false,
   loop = false,
   enableUnsecureMode = false,
+  showEditor = true,
 }) => {
   return (
     <JS2VideoProvider
@@ -32,7 +34,7 @@ const JS2Video = ({
       enableUnsecureMode={enableUnsecureMode}
     >
       <JS2VideoLayout>
-        <JS2VideoEditor />
+        {showEditor && <JS2VideoEditor />}
         <JS2VideoPreview />
         <JS2VideoControls />
       </JS2VideoLayout>
