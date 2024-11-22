@@ -11,10 +11,6 @@ import { useState, useEffect } from "react";
 
 const CurrentTime = () => {
   const { currentTime, duration } = useJS2VideoEvent();
-  const { videoTemplate } = useJS2Video();
-  useEffect(() => {
-    videoTemplate.triggerEvent();
-  }, []);
   return (
     <div className="tabular-nums px-2 text-white text-sm opacity-60">
       {formatTime(currentTime)} / {formatTime(duration)}
@@ -146,9 +142,18 @@ const ExportStatus = () => {
  */
 const JS2VideoControls = () => {
   const { videoTemplate } = useJS2Video();
+
+  // trigger event so that controls are updated
+  useEffect(() => {
+    if (videoTemplate) {
+      videoTemplate.triggerEvent();
+    }
+  }, [videoTemplate]);
+
   if (!videoTemplate) {
     return;
   }
+
   return (
     <>
       <div
