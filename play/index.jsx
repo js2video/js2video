@@ -11,7 +11,7 @@ const App = () => {
   const [params, setParams] = useState({});
 
   return (
-    <div className="h-screen flex flex-col max-w-screen-xl w-full mx-auto">
+    <div className="h-screen flex flex-col max-w-screen-2xl w-full mx-auto">
       <header className="p-3 bg-black border-b border-gray-600 text-white flex justify-between items-center">
         <div className="flex items-center">
           <a href="/">
