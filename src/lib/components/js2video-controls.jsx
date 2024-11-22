@@ -8,6 +8,7 @@ import {
   ArrowDownToLineIcon,
 } from "lucide-react";
 import { useState, useEffect } from "react";
+import * as Slider from "@radix-ui/react-slider";
 
 const CurrentTime = () => {
   const { currentTime, duration } = useJS2VideoEvent();
@@ -20,14 +21,32 @@ const CurrentTime = () => {
 
 const Scrubber = () => {
   const { progress } = useJS2VideoEvent();
+  const { videoTemplate } = useJS2Video();
+  const handleChange = (value) => videoTemplate.scrub(value[0] / 1000);
+  const handleCommit = async (value) => {
+    const progress = value[0] / 1000;
+    const time = videoTemplate.duration * progress;
+    await videoTemplate.seek(time);
+  };
   return (
-    <div className="flex-1 bg-white bg-opacity-30 mx-2">
-      <div
-        className="bg-white bg-opacity-90 h-[1px]"
-        style={{
-          width: progress * 100 + "%",
-        }}
-      ></div>
+    <div className="flex-1 px-4" onClick={(e) => e.stopPropagation()}>
+      {/* https://www.radix-ui.com/primitives/docs/components/slider#api-reference */}
+      <Slider.Root
+        className="relative flex h-5 flex-1 touch-none select-none items-center"
+        value={[progress * 1000]}
+        max={1000}
+        step={1}
+        onValueChange={handleChange}
+        onValueCommit={handleCommit}
+      >
+        <Slider.Track className="relative h-[2px] grow rounded-full bg-[#333333]">
+          <Slider.Range className="absolute h-full rounded-full bg-white" />
+        </Slider.Track>
+        <Slider.Thumb
+          className="block size-5 rounded-[10px] bg-white focus:outline-none"
+          aria-label="Position"
+        />
+      </Slider.Root>
     </div>
   );
 };
@@ -54,7 +73,7 @@ const ExportButton = () => {
         await videoTemplate.export({ isPuppeteer: false });
       }}
     >
-      <ArrowDownToLineIcon size={22} />
+      <ArrowDownToLineIcon size={26} />
     </ControlButton>
   );
 };

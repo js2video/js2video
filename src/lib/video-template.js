@@ -68,6 +68,7 @@ class VideoTemplate {
   #isLoaded = false;
   /** @type {Array<IJS2VideoObject>} */
   #objects = [];
+  isPlaying = false;
 
   /**
    * Creates an instance of the JS2Video class
@@ -121,9 +122,12 @@ class VideoTemplate {
     });
 
     this.#timeline.eventCallback("onComplete", async () => {
-      if (this.#loop && !this.#isExporting) {
-        await this.rewind();
-        this.play();
+      if (this.isPlaying) {
+        if (this.#loop) {
+          await this.rewind();
+        } else {
+          this.pause();
+        }
       }
       this.#sendEvent();
     });
@@ -246,6 +250,7 @@ class VideoTemplate {
    * @returns {void}
    */
   play() {
+    this.isPlaying = true;
     this.#timeline.play();
     this.#objects.map((obj) => {
       obj.__play();
@@ -258,6 +263,7 @@ class VideoTemplate {
    * @returns {void}
    */
   pause() {
+    this.isPlaying = false;
     this.#timeline.pause();
     this.#objects.map((obj) => {
       obj.__pause();
@@ -270,7 +276,7 @@ class VideoTemplate {
    * @returns {void}
    */
   togglePlay() {
-    this.#timeline.isActive() ? this.pause() : this.play();
+    this.isPlaying ? this.pause() : this.play();
   }
 
   /**
@@ -286,6 +292,18 @@ class VideoTemplate {
       })
     );
     this.#timeline.time(time);
+  }
+
+  /**
+   * Updates the progress of the video timeline.
+   *
+   * This method calls the `progress()` method of the associated `timeline`
+   * with the given progress value to update the video's current position.
+   *
+   * @param {number} progress - The progress value,  between 0 and 1, representing the current position in the video timeline.
+   */
+  scrub(progress) {
+    this.#timeline.progress(progress);
   }
 
   /**
@@ -367,6 +385,15 @@ class VideoTemplate {
     } finally {
       this.#canvasElement.remove();
     }
+  }
+
+  /**
+   * Gets the duration of the video.
+   *
+   * @returns {number} The duration of the video, in seconds.
+   */
+  get duration() {
+    return this.#timeline.duration();
   }
 }
 

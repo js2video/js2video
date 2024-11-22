@@ -63,7 +63,7 @@ const JS2VideoEditor = () => {
               "opacity-50": !isChanged,
               "animate-spin": isLoading,
             })}
-            size={22}
+            size={26}
           />
         </button>
       </div>

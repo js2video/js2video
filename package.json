@@ -83,6 +83,7 @@
   "dependencies": {
     "@codemirror/lang-javascript": "6.2.2",
     "@lezer/highlight": "1.2.1",
+    "@radix-ui/react-slider": "1.2.1",
     "@uiw/codemirror-theme-dracula": "4.23.6",
     "@uiw/react-codemirror": "4.23.6",
     "clsx": "2.1.1",
