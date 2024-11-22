@@ -1,4 +1,3 @@
-import React from "react";
 import { useJS2Video } from "./js2video-provider";
 
 /**

@@ -1,4 +1,3 @@
-import React from "react";
 import { JS2VideoProvider } from "./js2video-provider";
 import { JS2VideoPreview } from "./js2video-preview";
 import { JS2VideoControls } from "./js2video-controls";

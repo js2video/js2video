@@ -1,9 +1,9 @@
-import React from "react";
 import { JS2VideoPreview } from "./js2video-preview";
 import { JS2VideoControls } from "./js2video-controls";
 import { JS2VideoEditor } from "./js2video-editor";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { useJS2Video } from "./js2video-provider";
+import { Children, isValidElement } from "react";
 
 /**
  * A React helper component that wraps the other JS2Video React components in a pre-defined layout.
@@ -20,8 +20,8 @@ const JS2VideoLayout = ({ children }) => {
   const { videoTemplate } = useJS2Video();
 
   // component slots
-  React.Children.forEach(children, (child) => {
-    if (React.isValidElement(child)) {
+  Children.forEach(children, (child) => {
+    if (isValidElement(child)) {
       if (child.type === JS2VideoPreview) {
         preview = child;
       } else if (child.type === JS2VideoControls) {
