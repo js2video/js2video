@@ -7,6 +7,7 @@ import { VideoTemplate } from "../video-template";
  * @property {React.MutableRefObject<HTMLDivElement | null> | null} previewRef - A reference to the HTML div element where preview should be displayed, or null if not set.
  * @property {Error | null} templateError - An error message related to the template, or null if no error exists.
  * @property {React.Dispatch<React.SetStateAction<string>> | null} setTemplateUrl - The setter function for updating the template URL state variable.
+ * @property {React.Dispatch<React.SetStateAction<Object>> | null} setParams - The setter function for updating the template params state variable.
  * @property {boolean} isLoading - A flag to indicate whether the video template is loading.
  */
 
@@ -24,6 +25,8 @@ const Context = createContext({
   templateError: null,
   /** @type {React.Dispatch<React.SetStateAction<string>>} */
   setTemplateUrl: () => {},
+  /** @type {React.Dispatch<React.SetStateAction<Object>>} */
+  setParams: () => {},
   /** @type {boolean} */
   isLoading: true,
 });
@@ -63,13 +66,14 @@ const useJS2Video = () => {
  */
 const JS2VideoProvider = ({
   templateUrl: defaultTemplateUrl,
-  params = {},
+  params: defaultParams = {},
   autoPlay = false,
   loop = false,
   enableUnsecureMode = false,
   children,
 }) => {
   const [templateUrl, setTemplateUrl] = useState(defaultTemplateUrl);
+  const [params, setParams] = useState(defaultParams);
   const [videoTemplate, setVideoTemplate] = useState(null);
   const [templateError, setTemplateError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
@@ -80,6 +84,10 @@ const JS2VideoProvider = ({
   useEffect(() => {
     setTemplateUrl(defaultTemplateUrl);
   }, [defaultTemplateUrl]);
+
+  useEffect(() => {
+    setParams(defaultParams);
+  }, [defaultParams]);
 
   useEffect(() => {
     async function load() {
@@ -118,6 +126,7 @@ const JS2VideoProvider = ({
         previewRef,
         templateError,
         setTemplateUrl,
+        setParams,
         isLoading,
       }}
     >
