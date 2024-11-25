@@ -6,3 +6,6 @@ export {
   scaleToCover,
   loadGoogleFont,
 } from "./utils";
+
+export { analyzeAudio } from "./analyze-audio";
+export { loadFont } from "./load-font";

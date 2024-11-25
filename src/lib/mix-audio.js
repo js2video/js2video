@@ -1,7 +1,7 @@
 import Crunker from "crunker";
 
 /**
- * @typedef {Object} AudioInput
+ * @typedef {Object} MixAudioInput
  * @property {string} url The URL of the audio resource.
  * @property {number} startTime The time (in seconds) when the audio should start.
  */
@@ -9,7 +9,7 @@ import Crunker from "crunker";
 /**
  * Mix 1+ audio sources together
  * @param {Object} options
- * @param {Array<AudioInput>} options.inputs
+ * @param {Array<MixAudioInput>} options.inputs
  * @param {boolean} options.isPuppeteer
  * @returns
  */

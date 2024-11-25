@@ -30,14 +30,17 @@ const globalParams = {
 /**
  * @typedef {Object} IJS2VideoObject
  * @property {string} type
- * @property {Function} __dispose
- * @property {Function} __seek
- * @property {Function} __play
- * @property {Function} __pause
- * @property {Function} __startExport
- * @property {Function} __endExport
- * @property {boolean} __isExporting
- * @property {HTMLAudioElement|undefined} [__audio]
+ * @property {Object} js2video_params
+ * @property {gsap.core.Timeline} js2video_timeline
+ * @property {Function} js2video_dispose
+ * @property {Function} js2video_seek
+ * @property {Function} js2video_play
+ * @property {Function} js2video_pause
+ * @property {Function} js2video_startExport
+ * @property {Function} js2video_endExport
+ * @property {boolean} js2video_isExporting
+ * @property {HTMLAudioElement | undefined} [js2video_audio]
+ * @property {HTMLVideoElement | undefined} [js2video_video]
  */
 
 /**
@@ -69,6 +72,7 @@ class VideoTemplate {
   /** @type {Array<IJS2VideoObject>} */
   #objects = [];
   isPlaying = false;
+  #videoFilePrefix = "js2video";
 
   /**
    * Creates an instance of the JS2Video class
@@ -77,6 +81,7 @@ class VideoTemplate {
    * @param {Object} [options.params] - Video template params. Default: {}.
    * @param {HTMLElement} [options.parentElement] - Parent element. Default: document.body.
    * @param {boolean} [options.autoPlay] - Play video immediately after loading? Default: false.
+   * @param {string} [options.videoFilePrefix] - String to prefix exported video file names with. default: js2video.
    * @param {boolean} [options.loop] - Loop the video? Default: false.
    * @param {boolean} [options.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
    */
@@ -87,6 +92,7 @@ class VideoTemplate {
     autoPlay = false,
     loop = false,
     enableUnsecureMode = false,
+    videoFilePrefix = "js2video",
   }) {
     this.templateUrl = templateUrl;
     this.#params = params;
@@ -94,6 +100,7 @@ class VideoTemplate {
     this.#autoPlay = autoPlay;
     this.#loop = loop;
     this.#enableUnsecureMode = enableUnsecureMode;
+    this.#videoFilePrefix = videoFilePrefix;
   }
 
   /**
@@ -164,14 +171,25 @@ class VideoTemplate {
       throw "Total video duration is too long. Max duration: 1 hour";
     }
 
+    // store all custom objects
     this.#objects = this.#canvas
       .getObjects()
       .filter((obj) => isJS2VideoObject(obj));
 
+    // attach timeline and params to all custom objects
+    this.#objects.map((obj) => {
+      console.log(obj);
+      obj.js2video_timeline = this.#timeline;
+      obj.js2video_params = this.#params;
+    });
+
+    // add canvas to DOM
     this.#parentElement.appendChild(this.#canvasElement);
 
+    // scale canvas to fit parent
     this.scaleToFit();
 
+    // attach resize handler
     addEventListener("resize", this.#resizeHandler.bind(this));
 
     // forces rendering first video frame on all video objects
@@ -216,7 +234,7 @@ class VideoTemplate {
   async #mergeAudio({ isPuppeteer }) {
     const audioInputs = this.#objects
       .filter((obj) => obj.type === "js2video_audio")
-      .map((obj) => ({ url: obj.__audio.src, startTime: 0 }));
+      .map((obj) => ({ url: obj.js2video_audio.src, startTime: 0 }));
     if (!audioInputs.length) {
       return null;
     }
@@ -253,7 +271,7 @@ class VideoTemplate {
     this.isPlaying = true;
     this.#timeline.play();
     this.#objects.map((obj) => {
-      obj.__play();
+      obj.js2video_play();
     });
     this.#sendEvent();
   }
@@ -266,7 +284,7 @@ class VideoTemplate {
     this.isPlaying = false;
     this.#timeline.pause();
     this.#objects.map((obj) => {
-      obj.__pause();
+      obj.js2video_pause();
     });
     this.#sendEvent();
   }
@@ -288,7 +306,7 @@ class VideoTemplate {
     // seek in all objects
     await Promise.all(
       this.#objects.map((obj) => {
-        return obj.__seek(time, this.#isExporting);
+        return obj.js2video_seek(time, this.#isExporting);
       })
     );
     this.#timeline.time(time);
@@ -316,7 +334,7 @@ class VideoTemplate {
 
   async cleanupExport() {
     await this.rewind();
-    await Promise.all(this.#objects.map((obj) => obj.__endExport()));
+    await Promise.all(this.#objects.map((obj) => obj.js2video_endExport()));
     this.#isExporting = false;
     this.#sendEvent();
     console.log("export ended");
@@ -327,13 +345,14 @@ class VideoTemplate {
    *
    * @param {Object} options - The options for the export.
    * @param {boolean} [options.isPuppeteer] - Is this method called from puppeteer?. Default: false.
+   * @param {Function} [options.progressHandler]
    * @returns {Promise<ExportResult>}
    */
-  async export({ isPuppeteer = false }) {
+  async export({ isPuppeteer = false, progressHandler }) {
     try {
       console.log("startExport");
       this.#isExporting = true;
-      await Promise.all(this.#objects.map((obj) => obj.__startExport()));
+      await Promise.all(this.#objects.map((obj) => obj.js2video_startExport()));
       await this.rewind();
       this.pause();
       this.#sendEvent();
@@ -348,7 +367,13 @@ class VideoTemplate {
         fps: this.#params.fps,
         timeline: this.#timeline,
         isPuppeteer,
-        progressHandler: () => this.#sendEvent(),
+        filePrefix: this.#videoFilePrefix,
+        progressHandler: async (message) => {
+          this.#sendEvent();
+          if (progressHandler) {
+            await progressHandler(message);
+          }
+        },
       });
       await this.cleanupExport();
     } catch (err) {
@@ -374,7 +399,7 @@ class VideoTemplate {
       this.#timeline.clear();
       await Promise.all(
         this.#objects.map((obj) => {
-          return obj.__dispose();
+          return obj.js2video_dispose();
         })
       );
       this.#canvas.clear();

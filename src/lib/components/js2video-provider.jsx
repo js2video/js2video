@@ -59,6 +59,7 @@ const useJS2Video = () => {
  * @param {string} props.templateUrl - URL to the video template.
  * @param {React.ReactNode} props.children
  * @param {Object} [props.params] - Video template params. Default; {}.
+ * @param {string} [props.videoFilePrefix] - String to prefix exported video file names with. default: js2video.
  * @param {boolean} [props.autoPlay] - Play video immediately after loading? Default: false.
  * @param {boolean} [props.loop] - Loop the video? Default: false.
  * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
@@ -67,6 +68,7 @@ const useJS2Video = () => {
 const JS2VideoProvider = ({
   templateUrl: defaultTemplateUrl,
   params: defaultParams = {},
+  videoFilePrefix = "js2video",
   autoPlay = false,
   loop = false,
   enableUnsecureMode = false,
@@ -105,6 +107,7 @@ const JS2VideoProvider = ({
         autoPlay,
         loop,
         params,
+        videoFilePrefix,
       });
       try {
         await vtRef.current.load();

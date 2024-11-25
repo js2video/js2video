@@ -1,7 +1,7 @@
 import { FabricImage } from "fabric";
+import { JS2VideoMixin } from "./js2video-mixin";
 
-class JS2VideoImage extends FabricImage {
-  static isJS2Video = true;
+class JS2VideoImage extends JS2VideoMixin(FabricImage) {
   static type = "js2video_image";
 
   /**
@@ -11,26 +11,7 @@ class JS2VideoImage extends FabricImage {
    */
   constructor(image, options) {
     super(image, options);
-  }
-
-  async __seek() {}
-
-  async __play() {}
-
-  async __pause() {}
-
-  async __startExport() {
-    this.__isExporting = true;
-    return;
-  }
-
-  async __endExport() {
-    this.__isExporting = false;
-    return;
-  }
-
-  async __dispose() {
-    console.log("disposed js2video_image obj");
+    super.set({ objectCaching: false });
   }
 }
 

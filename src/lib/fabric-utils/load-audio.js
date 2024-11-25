@@ -1,59 +1,41 @@
 import { FabricObject } from "fabric";
+import { JS2VideoMixin } from "./js2video-mixin";
 
-class JS2VideoAudio extends FabricObject {
+class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   static type = "js2video_audio";
-  static isJS2Video = true;
-  /** @type {boolean} */
-  __isExporting = false;
-  /** @type {HTMLAudioElement} */
-  __audio;
 
+  /**
+   *
+   * @param {HTMLAudioElement} audio
+   * @param {Object} options
+   */
   constructor(audio, options) {
     super(options);
-    this.__audio = audio;
-    super.set({ objectCaching: false, selectable: true });
+    this.js2video_audio = audio;
   }
 
-  __play() {
-    this.__audio.play();
+  js2video_play() {
+    this.js2video_audio.play();
   }
 
-  __pause() {
-    this.__audio.pause();
+  js2video_pause() {
+    this.js2video_audio.pause();
   }
 
   /**
    * @param {number} time - time to seek to
    * @return {Promise<void>}
    */
-  async __seek(time) {
-    if (this.__isExporting) {
+  async js2video_seek(time) {
+    if (this.js2video_isExporting) {
       return;
     }
     return new Promise((resolve) => {
-      this.__audio.addEventListener("seeked", () => resolve(), { once: true });
-      this.__audio.currentTime = time;
+      this.js2video_audio.addEventListener("seeked", () => resolve(), {
+        once: true,
+      });
+      this.js2video_audio.currentTime = time;
     });
-  }
-
-  async __startExport() {
-    this.__isExporting = true;
-    return;
-  }
-
-  async __endExport() {
-    this.__isExporting = false;
-    return;
-  }
-
-  async __dispose() {
-    console.log("disposed js2video_audio obj");
-  }
-
-  _render(ctx) {}
-
-  cleanup() {
-    console.log("cleanup audio", this);
   }
 }
 

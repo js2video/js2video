@@ -29,7 +29,7 @@ function audioBufferToAudioData(audioBuffer) {
 }
 
 /**
- *
+ * Exports a video template to MP4
  * @param {Object} options
  * @param {number} options.bitrate
  * @param {number} options.width
@@ -40,6 +40,7 @@ function audioBufferToAudioData(audioBuffer) {
  * @param {HTMLCanvasElement} options.canvasElement
  * @param {boolean} options.isPuppeteer
  * @param {Function} options.progressHandler
+ * @param {string} options.filePrefix
  * @param {AudioBuffer} [options.audioBuffer]
  */
 async function encodeVideo({
@@ -51,7 +52,8 @@ async function encodeVideo({
   timeline,
   canvasElement,
   isPuppeteer,
-  progressHandler = () => {},
+  progressHandler,
+  filePrefix,
   audioBuffer,
 }) {
   let audioEncoder;
@@ -73,7 +75,7 @@ async function encodeVideo({
       throw "This browser cannot encode video yet. Please try Chrome/Chromium";
     }
     const fileHandle = await window.showSaveFilePicker({
-      suggestedName: `js2video-${Date.now()}.mp4`,
+      suggestedName: `${filePrefix}-${Date.now()}.mp4`,
       types: [
         {
           description: "Video File",
@@ -168,7 +170,7 @@ async function encodeVideo({
     if (frame % Math.round(fps * 5) === 0) {
       await videoEncoder.flush();
     }
-    progressHandler();
+    await progressHandler({ progress: timeline.progress() });
     frame++;
   }
 

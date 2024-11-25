@@ -1,7 +1,7 @@
 import { FabricText } from "fabric";
+import { JS2VideoMixin } from "./js2video-mixin";
 
-class JS2VideoText extends FabricText {
-  static isJS2Video = true;
+class JS2VideoText extends JS2VideoMixin(FabricText) {
   static type = "js2video_text";
 
   /**
@@ -11,26 +11,7 @@ class JS2VideoText extends FabricText {
    */
   constructor(text, options) {
     super(text, options);
-  }
-
-  async __seek() {}
-
-  async __play() {}
-
-  async __pause() {}
-
-  async __startExport() {
-    this.__isExporting = true;
-    return;
-  }
-
-  async __endExport() {
-    this.__isExporting = false;
-    return;
-  }
-
-  async __dispose() {
-    console.log("disposed js2video_text obj");
+    super.set({ objectCaching: false });
   }
 }
 
