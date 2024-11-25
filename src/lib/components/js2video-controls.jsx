@@ -9,7 +9,6 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import * as Slider from "@radix-ui/react-slider";
-import confetti from "canvas-confetti";
 
 const CurrentTime = () => {
   const { currentTime, duration } = useJS2VideoEvent();
@@ -62,43 +61,20 @@ const ControlButton = ({ children, ...rest }) => {
 
 const ExportButton = () => {
   const { videoTemplate } = useJS2Video();
-  const [isExporting, setIsExporting] = useState(false);
-  const [progress, setProgress] = useState(0);
   return (
-    <>
-      {!!isExporting && (
-        <div className="absolute inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
-          <div className="text-white">
-            Exporting MP4 to disk... {Math.round(progress * 100)}%
-          </div>
-        </div>
-      )}
-      <ControlButton
-        onClick={async (e) => {
-          e.stopPropagation();
-          if (!canBrowserEncodeVideo()) {
-            return alert(
-              "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
-            );
-          }
-          setIsExporting(true);
-          try {
-            await videoTemplate.export({
-              isPuppeteer: false,
-              progressHandler: async (message) => {
-                setProgress(message.progress);
-              },
-            });
-            confetti();
-            setIsExporting(false);
-          } catch (err) {
-            setIsExporting(false);
-          }
-        }}
-      >
-        <ArrowDownToLineIcon size={26} />
-      </ControlButton>
-    </>
+    <ControlButton
+      onClick={async (e) => {
+        e.stopPropagation();
+        if (!canBrowserEncodeVideo()) {
+          return alert(
+            "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
+          );
+        }
+        await videoTemplate.export({ isPuppeteer: false });
+      }}
+    >
+      <ArrowDownToLineIcon size={26} />
+    </ControlButton>
   );
 };
 
@@ -158,6 +134,27 @@ const PlayButton = () => {
   }
 };
 
+const ExportStatus = () => {
+  const [isExporting, setIsExporting] = useState(false);
+  useEffect(() => {
+    const listener = (e) => {
+      setIsExporting(e.detail.isExporting);
+    };
+    window.addEventListener("js2video", listener);
+    return () => {
+      window.removeEventListener("js2video", listener);
+    };
+  }, []);
+  if (!isExporting) {
+    return;
+  }
+  return (
+    <div className="absolute inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
+      <div className="text-white">Exporting MP4 to disk...</div>
+    </div>
+  );
+};
+
 /**
  * Simple playback controls
  * @returns {JSX.Element}
@@ -177,21 +174,24 @@ const JS2VideoControls = () => {
   }
 
   return (
-    <div
-      className="absolute inset-0 flex flex-col"
-      onClick={(e) => videoTemplate.togglePlay()}
-    >
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <PlayButton />
+    <>
+      <div
+        className="absolute inset-0 flex flex-col"
+        onClick={(e) => videoTemplate.togglePlay()}
+      >
+        <div className="flex flex-1 flex-col items-center justify-center">
+          <PlayButton />
+        </div>
+        <div className="flex items-center bg-black bg-opacity-50 px-2">
+          <RewindButton />
+          <TogglePlayButton />
+          <Scrubber />
+          <CurrentTime />
+          <ExportButton />
+        </div>
       </div>
-      <div className="flex items-center bg-black bg-opacity-50 px-2">
-        <RewindButton />
-        <TogglePlayButton />
-        <Scrubber />
-        <CurrentTime />
-        <ExportButton />
-      </div>
-    </div>
+      <ExportStatus />
+    </>
   );
 };
 
