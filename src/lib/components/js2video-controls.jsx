@@ -203,8 +203,6 @@ const JS2VideoControls = () => {
 
   const isVisible = isHovered || !isPlaying || isMouseActive;
 
-  console.log({ isHovered, isPlaying, isMouseActive, isVisible });
-
   return (
     <div
       ref={elementRef}
