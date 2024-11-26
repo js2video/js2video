@@ -5,7 +5,7 @@ import "../index.css";
 
 const App = () => {
   const [templateUrl, setTemplateUrl] = useState(
-    location.origin + "/templates/hello-world.js"
+    location.origin + "/dev/dev.js"
   );
 
   const [params, setParams] = useState({});
@@ -39,6 +39,7 @@ const App = () => {
         autoPlay={false}
         loop={true}
         enableUnsecureMode={true}
+        videoFilePrefix="anjuna"
       />
     </div>
   );
