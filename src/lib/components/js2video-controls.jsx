@@ -72,12 +72,43 @@ const ExportButton = () => {
   const { videoTemplate } = useJS2Video();
   const progress = useProgress();
   const isExporting = useIsExporting();
+  const [abortController, setAbortController] = useState(null);
+  const [isAborted, setIsAborted] = useState(false);
+
+  // cleanup
+  useEffect(() => {
+    return () => {
+      if (abortController) {
+        abortController.abort();
+      }
+    };
+  }, [abortController]);
+
+  const handleAbort = () => {
+    if (isAborted) {
+      return;
+    }
+    if (abortController) {
+      setIsAborted(true);
+      abortController.abort();
+      setAbortController(null);
+    }
+  };
+
   return (
     <>
       {!!isExporting && (
         <div className="absolute inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
-          <div className="text-white">
-            Exporting MP4 to disk... {Math.round(progress * 100)}%
+          <div className="flex items-center flex-col gap-4">
+            <div className="text-white">
+              Exporting MP4 to disk... {Math.round(progress * 100)}%
+            </div>
+            <button
+              onClick={handleAbort}
+              className="bg-black px-4 py-2 rounded text-white text-sm"
+            >
+              Abort
+            </button>
           </div>
         </div>
       )}
@@ -89,13 +120,18 @@ const ExportButton = () => {
               "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
             );
           }
+          const controller = new AbortController(); // Create a new controller
+          setAbortController(controller);
           try {
             await videoTemplate.export({
               isPuppeteer: false,
+              signal: controller.signal,
             });
+            setIsAborted(false);
             confetti();
           } catch (err) {
             console.error(err);
+            setIsAborted(false);
           }
         }}
       >

@@ -42,6 +42,7 @@ function audioBufferToAudioData(audioBuffer) {
  * @param {Function} options.progressHandler
  * @param {string} options.filePrefix
  * @param {AudioBuffer} [options.audioBuffer]
+ * @param {AbortSignal} [options.signal] - The signal that can be used to abort the export process.
  */
 async function encodeVideo({
   bitrate,
@@ -55,137 +56,173 @@ async function encodeVideo({
   progressHandler,
   filePrefix,
   audioBuffer,
+  signal,
 }) {
-  let audioEncoder;
-  const audioCodec = "mp4a.40.2";
-  const videoCodec = AVC.getCodec({ profile: "Main", level: "5.2" });
+  let muxer, audioEncoder, videoEncoder, target, fileWritableStream, fileHandle;
 
-  let target, fileWritableStream;
-
-  if (isPuppeteer) {
-    target = new StreamTarget({
-      onData: async (chunk, position) => {
-        // see puppeteer
-        // @ts-ignore
-        await window.writeChunk(Array.from(chunk), position);
-      },
-    });
-  } else {
-    if (!canBrowserEncodeVideo()) {
-      throw "This browser cannot encode video yet. Please try Chrome/Chromium";
+  async function close() {
+    if (audioEncoder) {
+      try {
+        await audioEncoder.flush();
+        audioEncoder.close();
+        console.log("closed audioEncoder");
+      } catch (err) {
+        console.warn(err);
+      }
     }
-    const fileHandle = await window.showSaveFilePicker({
-      suggestedName: `${filePrefix}-${Date.now()}.mp4`,
-      types: [
-        {
-          description: "Video File",
-          accept: { "video/mp4": [".mp4"] },
-        },
-      ],
-    });
-    fileWritableStream = await fileHandle.createWritable();
-    target = new FileSystemWritableFileStreamTarget(fileWritableStream);
+    if (videoEncoder) {
+      try {
+        await videoEncoder.flush();
+        videoEncoder.close();
+        console.log("closed videoEncoder");
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+    if (muxer) {
+      try {
+        muxer.finalize();
+        console.log("finalized muxer");
+      } catch (err) {
+        console.warn(err);
+      }
+    }
+    if (fileWritableStream) {
+      try {
+        await fileWritableStream.close();
+        console.log("closed fileWritableStream");
+      } catch (err) {
+        console.warn(err);
+      }
+    }
   }
 
-  const muxerOptions = {
-    fastStart: false,
-    target,
-    video: {
-      codec: "avc",
-      width: width,
-      height: height,
-    },
-    firstTimestampBehavior: "offset",
-    ...(audioBuffer && {
-      audio: {
-        codec: "aac",
-        numberOfChannels: audioBuffer.numberOfChannels,
-        sampleRate: audioBuffer.sampleRate,
+  try {
+    const audioCodec = "mp4a.40.2";
+    const videoCodec = AVC.getCodec({ profile: "Main", level: "5.2" });
+
+    if (isPuppeteer) {
+      target = new StreamTarget({
+        onData: async (chunk, position) => {
+          // see puppeteer
+          // @ts-ignore
+          await window.writeChunk(Array.from(chunk), position);
+        },
+      });
+    } else {
+      if (!canBrowserEncodeVideo()) {
+        throw "This browser cannot encode video yet. Please try Chrome/Chromium";
+      }
+      fileHandle = await window.showSaveFilePicker({
+        suggestedName: `${filePrefix}-${Date.now()}.mp4`,
+        types: [
+          {
+            description: "Video File",
+            accept: { "video/mp4": [".mp4"] },
+          },
+        ],
+      });
+      fileWritableStream = await fileHandle.createWritable();
+      target = new FileSystemWritableFileStreamTarget(fileWritableStream);
+    }
+
+    const muxerOptions = {
+      fastStart: false,
+      target,
+      video: {
+        codec: "avc",
+        width: width,
+        height: height,
       },
-    }),
-  };
+      firstTimestampBehavior: "offset",
+      ...(audioBuffer && {
+        audio: {
+          codec: "aac",
+          numberOfChannels: audioBuffer.numberOfChannels,
+          sampleRate: audioBuffer.sampleRate,
+        },
+      }),
+    };
 
-  // @ts-ignore
-  const muxer = new Muxer(muxerOptions);
+    // @ts-ignore
+    muxer = new Muxer(muxerOptions);
 
-  const videoEncoder = new VideoEncoder({
-    output: (chunk, meta) => {
-      muxer.addVideoChunk(chunk, meta);
-    },
-    error: (e) => console.error(e),
-  });
-
-  videoEncoder.configure({
-    codec: videoCodec,
-    width: width,
-    height: height,
-    bitrate: bitrate,
-    latencyMode: "quality",
-  });
-
-  if (audioBuffer) {
-    audioEncoder = new AudioEncoder({
+    videoEncoder = new VideoEncoder({
       output: (chunk, meta) => {
-        const time = chunk.timestamp / 1000 / 1000;
-        if (time <= timeline.duration()) {
-          muxer.addAudioChunk(chunk, meta);
-        }
+        muxer.addVideoChunk(chunk, meta);
       },
       error: (e) => console.error(e),
     });
 
-    audioEncoder.configure({
-      codec: audioCodec,
-      sampleRate: audioBuffer.sampleRate,
-      numberOfChannels: audioBuffer.numberOfChannels,
-      bitrate: 192000, // 192 kbps
+    videoEncoder.configure({
+      codec: videoCodec,
+      width: width,
+      height: height,
+      bitrate: bitrate,
+      latencyMode: "quality",
     });
 
-    audioEncoder.encode(audioBufferToAudioData(audioBuffer));
-    await audioEncoder.flush();
-    audioEncoder.close();
-    console.log("flushed + closed audioencoder");
-  }
+    if (audioBuffer) {
+      audioEncoder = new AudioEncoder({
+        output: (chunk, meta) => {
+          const time = chunk.timestamp / 1000 / 1000;
+          if (time <= timeline.duration()) {
+            muxer.addAudioChunk(chunk, meta);
+          }
+        },
+        error: (e) => console.error(e),
+      });
 
-  let frame = 0;
-  let frames = Math.round(timeline.duration() * fps) + 1;
+      audioEncoder.configure({
+        codec: audioCodec,
+        sampleRate: audioBuffer.sampleRate,
+        numberOfChannels: audioBuffer.numberOfChannels,
+        bitrate: 192000, // 192 kbps
+      });
 
-  // loop through and encode all frames
-  while (frame < frames) {
-    const time = frame / fps;
-    // update timeline
-    await seek(Math.min(time, timeline.duration()));
-    // grab the canvas into a frame
-    const videoFrame = new VideoFrame(canvasElement, {
-      timestamp: time * 1000 * 1000,
-    });
-    // TODO: maybe make this user configurable?
-    // Frequent flushes/keyframes = larger sizes. 5s is a OK setting.
-    // keyframe first and every 5s
-    videoEncoder.encode(videoFrame, {
-      keyFrame: frame === 0 || frame % Math.round(fps * 5) === 0,
-    });
-    // flush every keyframe
-    videoFrame.close();
-    if (frame % Math.round(fps * 5) === 0) {
-      await videoEncoder.flush();
+      audioEncoder.encode(audioBufferToAudioData(audioBuffer));
+      await audioEncoder.flush();
+      audioEncoder.close();
+      console.log("flushed + closed audioencoder");
     }
-    await progressHandler({ progress: timeline.progress() });
-    frame++;
+
+    let frame = 0;
+    let frames = Math.round(timeline.duration() * fps) + 1;
+
+    // loop through and encode all frames
+    while (frame < frames) {
+      if (signal && signal.aborted) {
+        throw new DOMException("The operation was aborted", "AbortError");
+      }
+      const time = frame / fps;
+      // update timeline
+      await seek(Math.min(time, timeline.duration()));
+      // grab the canvas into a frame
+      const videoFrame = new VideoFrame(canvasElement, {
+        timestamp: time * 1000 * 1000,
+      });
+      // TODO: maybe make this user configurable?
+      // Frequent flushes/keyframes = larger sizes. 5s is a OK setting.
+      // keyframe first and every 5s
+      videoEncoder.encode(videoFrame, {
+        keyFrame: frame === 0 || frame % Math.round(fps * 5) === 0,
+      });
+      // flush every keyframe
+      videoFrame.close();
+      if (frame % Math.round(fps * 5) === 0) {
+        await videoEncoder.flush();
+      }
+      await progressHandler({ progress: timeline.progress() });
+      frame++;
+    }
+
+    await close();
+
+    return;
+  } catch (err) {
+    await close();
+    throw err;
   }
-
-  await videoEncoder.flush();
-  videoEncoder.close();
-  console.log("flushed + closed videoencoder");
-  muxer.finalize();
-  console.log("finalized muxer");
-
-  if (fileWritableStream) {
-    await fileWritableStream.close();
-    console.log("closed file");
-  }
-
-  return;
 }
 
 export { encodeVideo };

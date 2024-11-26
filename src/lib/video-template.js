@@ -350,9 +350,10 @@ class VideoTemplate {
    *
    * @param {Object} options - The options for the export.
    * @param {boolean} [options.isPuppeteer] - Is this method called from puppeteer?. Default: false.
+   * @param {AbortSignal} [options.signal] - The signal that can be used to abort the export process.
    * @returns {Promise<ExportResult>}
    */
-  async export({ isPuppeteer = false }) {
+  async export({ isPuppeteer = false, signal }) {
     try {
       console.log("startExport");
       this.#isExporting = true;
@@ -373,6 +374,7 @@ class VideoTemplate {
         isPuppeteer,
         filePrefix: this.#videoFilePrefix,
         progressHandler: () => this.#sendEvent(),
+        signal,
       });
       await this.cleanupExport();
     } catch (err) {
