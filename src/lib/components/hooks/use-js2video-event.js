@@ -5,7 +5,7 @@ const useJS2VideoEvent = () => {
     isPlaying: false,
     duration: 0,
     currentTime: 0,
-    isExporting: 0,
+    isExporting: false,
     progress: 0,
   });
   useEffect(() => {
