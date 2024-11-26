@@ -7,7 +7,7 @@ import {
   RewindIcon,
   ArrowDownToLineIcon,
 } from "lucide-react";
-import { useEffect } from "react";
+import { useEffect, useState, useRef } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import confetti from "canvas-confetti";
 
@@ -108,7 +108,6 @@ const ExportButton = () => {
 const TogglePlayButton = () => {
   const { videoTemplate } = useJS2Video();
   const isPlaying = useIsPlaying();
-  console.log("render", isPlaying);
   return (
     <ControlButton
       onClick={(e) => {
@@ -168,27 +167,59 @@ const PlayButton = () => {
  */
 const JS2VideoControls = () => {
   const { videoTemplate } = useJS2Video();
+  const [isMouseActive, setIsMouseActive] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [timer, setTimer] = useState(null);
+  const elementRef = useRef(null);
+  const isPlaying = useIsPlaying();
 
-  // trigger event so that controls are updated
+  const handleMouseMove = () => {
+    if (timer) {
+      clearTimeout(timer);
+    }
+    setIsMouseActive(true);
+    setTimer(setTimeout(() => setIsMouseActive(false), 2000));
+  };
+
   useEffect(() => {
     if (videoTemplate) {
       videoTemplate.triggerEvent();
     }
   }, [videoTemplate]);
 
+  useEffect(() => {
+    document.addEventListener("mousemove", handleMouseMove);
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      if (timer) {
+        clearTimeout(timer);
+      }
+    };
+  }, [isPlaying, timer]);
+
   if (!videoTemplate) {
     return;
   }
 
+  const isVisible = isHovered || !isPlaying || isMouseActive;
+
+  console.log({ isHovered, isPlaying, isMouseActive, isVisible });
+
   return (
     <div
+      ref={elementRef}
       className="absolute inset-0 flex flex-col"
       onClick={(e) => videoTemplate.togglePlay()}
+      style={{ transition: "opacity 0.5s ease", opacity: isVisible ? 1 : 0 }}
     >
       <div className="flex flex-1 flex-col items-center justify-center">
         <PlayButton />
       </div>
-      <div className="flex items-center bg-black bg-opacity-50 px-2">
+      <div
+        onMouseEnter={(e) => setIsHovered(true)}
+        onMouseLeave={(e) => setIsHovered(false)}
+        className="flex items-center bg-black bg-opacity-50 px-2"
+      >
         <RewindButton />
         <TogglePlayButton />
         <Scrubber />
