@@ -267,6 +267,9 @@ class VideoTemplate {
    * @returns {void}
    */
   play() {
+    if (this.#isExporting) {
+      return;
+    }
     this.#isPlaying = true;
     this.#timeline.play();
     this.#objects.map((obj) => {
@@ -293,6 +296,9 @@ class VideoTemplate {
    * @returns {void}
    */
   togglePlay() {
+    if (this.#isExporting) {
+      return;
+    }
     this.#isPlaying ? this.pause() : this.play();
   }
 
