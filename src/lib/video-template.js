@@ -71,7 +71,7 @@ class VideoTemplate {
   #isLoaded = false;
   /** @type {Array<IJS2VideoObject>} */
   #objects = [];
-  isPlaying = false;
+  #isPlaying = false;
   #videoFilePrefix = "js2video";
 
   /**
@@ -129,7 +129,7 @@ class VideoTemplate {
     });
 
     this.#timeline.eventCallback("onComplete", async () => {
-      if (this.isPlaying) {
+      if (this.#isPlaying) {
         if (this.#loop) {
           await this.rewind();
         } else {
@@ -213,7 +213,7 @@ class VideoTemplate {
       currentTime: this.#timeline.time(),
       duration: this.#timeline.duration(),
       progress: this.#timeline.progress(),
-      isPlaying: this.#timeline.isActive(),
+      isPlaying: this.#isPlaying,
       isExporting: this.#isExporting,
     };
     const ev = new CustomEvent("js2video", {
@@ -267,7 +267,7 @@ class VideoTemplate {
    * @returns {void}
    */
   play() {
-    this.isPlaying = true;
+    this.#isPlaying = true;
     this.#timeline.play();
     this.#objects.map((obj) => {
       obj.js2video_play();
@@ -280,7 +280,7 @@ class VideoTemplate {
    * @returns {void}
    */
   pause() {
-    this.isPlaying = false;
+    this.#isPlaying = false;
     this.#timeline.pause();
     this.#objects.map((obj) => {
       obj.js2video_pause();
@@ -293,7 +293,7 @@ class VideoTemplate {
    * @returns {void}
    */
   togglePlay() {
-    this.isPlaying ? this.pause() : this.play();
+    this.#isPlaying ? this.pause() : this.play();
   }
 
   /**
@@ -332,9 +332,9 @@ class VideoTemplate {
   }
 
   async cleanupExport() {
+    this.#isExporting = false;
     await this.rewind();
     await Promise.all(this.#objects.map((obj) => obj.js2video_endExport()));
-    this.#isExporting = false;
     this.#sendEvent();
     console.log("export ended");
   }
