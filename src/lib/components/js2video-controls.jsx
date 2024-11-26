@@ -1,4 +1,4 @@
-import { useJS2VideoEvent } from "./hooks/use-js2video-event";
+import { useJS2VideoEventProperty } from "./hooks/use-js2video-event-property";
 import { useJS2Video } from "./js2video-provider";
 import { canBrowserEncodeVideo, formatTime } from "../utils";
 import {
@@ -11,12 +11,11 @@ import { useEffect } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import confetti from "canvas-confetti";
 
-// create "atomic" hooks to prevent re-rendering
-const useDuration = () => useJS2VideoEvent().duration;
-const useCurrentTime = () => useJS2VideoEvent().currentTime;
-const useProgress = () => useJS2VideoEvent().progress;
-const useIsExporting = () => useJS2VideoEvent().isExporting;
-const useIsPlaying = () => useJS2VideoEvent().isPlaying;
+const useDuration = () => useJS2VideoEventProperty("duration", 0);
+const useCurrentTime = () => useJS2VideoEventProperty("currentTime", 0);
+const useProgress = () => useJS2VideoEventProperty("progress", 0);
+const useIsExporting = () => useJS2VideoEventProperty("isExporting", 0);
+const useIsPlaying = () => useJS2VideoEventProperty("isPlaying", false);
 
 const CurrentTime = () => {
   const currentTime = useCurrentTime();
@@ -109,6 +108,7 @@ const ExportButton = () => {
 const TogglePlayButton = () => {
   const { videoTemplate } = useJS2Video();
   const isPlaying = useIsPlaying();
+  console.log("render", isPlaying);
   return (
     <ControlButton
       onClick={(e) => {

@@ -1,13 +1,7 @@
 import { useEffect, useState } from "react";
 
 const useJS2VideoEvent = () => {
-  const [message, setMessage] = useState({
-    isPlaying: false,
-    duration: 0,
-    currentTime: 0,
-    isExporting: false,
-    progress: 0,
-  });
+  const [message, setMessage] = useState(null);
   useEffect(() => {
     const listener = (e) => setMessage(e.detail);
     window.addEventListener("js2video", listener);
