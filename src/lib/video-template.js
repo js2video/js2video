@@ -178,7 +178,6 @@ class VideoTemplate {
 
     // attach timeline and params to all custom objects
     this.#objects.map((obj) => {
-      console.log(obj);
       obj.js2video_timeline = this.#timeline;
       obj.js2video_params = this.#params;
     });
@@ -345,10 +344,9 @@ class VideoTemplate {
    *
    * @param {Object} options - The options for the export.
    * @param {boolean} [options.isPuppeteer] - Is this method called from puppeteer?. Default: false.
-   * @param {Function} [options.progressHandler]
    * @returns {Promise<ExportResult>}
    */
-  async export({ isPuppeteer = false, progressHandler }) {
+  async export({ isPuppeteer = false }) {
     try {
       console.log("startExport");
       this.#isExporting = true;
@@ -368,12 +366,7 @@ class VideoTemplate {
         timeline: this.#timeline,
         isPuppeteer,
         filePrefix: this.#videoFilePrefix,
-        progressHandler: async (message) => {
-          this.#sendEvent();
-          if (progressHandler) {
-            await progressHandler(message);
-          }
-        },
+        progressHandler: () => this.#sendEvent(),
       });
       await this.cleanupExport();
     } catch (err) {

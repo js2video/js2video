@@ -7,12 +7,20 @@ import {
   RewindIcon,
   ArrowDownToLineIcon,
 } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import confetti from "canvas-confetti";
 
+// create "atomic" hooks to prevent re-rendering
+const useDuration = () => useJS2VideoEvent().duration;
+const useCurrentTime = () => useJS2VideoEvent().currentTime;
+const useProgress = () => useJS2VideoEvent().progress;
+const useIsExporting = () => useJS2VideoEvent().isExporting;
+const useIsPlaying = () => useJS2VideoEvent().isPlaying;
+
 const CurrentTime = () => {
-  const { currentTime, duration } = useJS2VideoEvent();
+  const currentTime = useCurrentTime();
+  const duration = useDuration();
   return (
     <div className="tabular-nums px-2 text-white text-sm opacity-60">
       {formatTime(currentTime)} / {formatTime(duration)}
@@ -21,11 +29,12 @@ const CurrentTime = () => {
 };
 
 const Scrubber = () => {
-  const { progress } = useJS2VideoEvent();
+  const resolution = 1000;
+  const progress = useProgress();
   const { videoTemplate } = useJS2Video();
-  const handleChange = (value) => videoTemplate.scrub(value[0] / 1000);
+  const handleChange = (value) => videoTemplate.scrub(value[0] / resolution);
   const handleCommit = async (value) => {
-    const progress = value[0] / 1000;
+    const progress = value[0] / resolution;
     const time = videoTemplate.duration * progress;
     await videoTemplate.seek(time);
   };
@@ -34,8 +43,8 @@ const Scrubber = () => {
       {/* https://www.radix-ui.com/primitives/docs/components/slider#api-reference */}
       <Slider.Root
         className="relative flex h-5 flex-1 touch-none select-none items-center"
-        value={[progress * 1000]}
-        max={1000}
+        value={[progress * resolution]}
+        max={resolution}
         step={1}
         onValueChange={handleChange}
         onValueCommit={handleCommit}
@@ -62,8 +71,8 @@ const ControlButton = ({ children, ...rest }) => {
 
 const ExportButton = () => {
   const { videoTemplate } = useJS2Video();
-  const [isExporting, setIsExporting] = useState(false);
-  const [progress, setProgress] = useState(0);
+  const progress = useProgress();
+  const isExporting = useIsExporting();
   return (
     <>
       {!!isExporting && (
@@ -81,18 +90,13 @@ const ExportButton = () => {
               "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
             );
           }
-          setIsExporting(true);
           try {
             await videoTemplate.export({
               isPuppeteer: false,
-              progressHandler: async (message) => {
-                setProgress(message.progress);
-              },
             });
             confetti();
-            setIsExporting(false);
           } catch (err) {
-            setIsExporting(false);
+            console.error(err);
           }
         }}
       >
@@ -104,7 +108,7 @@ const ExportButton = () => {
 
 const TogglePlayButton = () => {
   const { videoTemplate } = useJS2Video();
-  const { isPlaying } = useJS2VideoEvent();
+  const isPlaying = useIsPlaying();
   return (
     <ControlButton
       onClick={(e) => {
@@ -133,7 +137,7 @@ const RewindButton = () => {
 
 const PlayButton = () => {
   const { videoTemplate } = useJS2Video();
-  const { isPlaying } = useJS2VideoEvent();
+  const isPlaying = useIsPlaying();
   if (isPlaying) {
     return;
   } else {
