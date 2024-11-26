@@ -1,4 +1,5 @@
 import { freq2bin } from "./utils";
+import { cache } from "./cache";
 
 /**
  * Transforms an array of numbers into a bell curve shape while preserving a minimum value from the original data.
@@ -67,6 +68,24 @@ const analyzeAudio = async ({
   maxFreq = 800,
   numberOfBins = 64,
 }) => {
+  const cacheKey = {
+    audioUrl,
+    fftSize,
+    minDb,
+    maxDb,
+    audioSmoothing,
+    fps,
+    minFreq,
+    maxFreq,
+    numberOfBins,
+  };
+
+  let result = await cache.get(cacheKey);
+
+  if (result) {
+    return result;
+  }
+
   const arrayBuffer = await fetch(audioUrl).then((res) => res.arrayBuffer());
 
   const audioContext = new AudioContext();
@@ -131,7 +150,11 @@ const analyzeAudio = async ({
   bufferSource.start(0);
   await offlineContext.startRendering();
 
-  return { bins, fps };
+  result = { bins, fps };
+
+  await cache.set(cacheKey, result);
+
+  return result;
 };
 
 export { analyzeAudio };
