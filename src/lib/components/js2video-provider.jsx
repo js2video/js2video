@@ -63,6 +63,7 @@ const useJS2Video = () => {
  * @param {boolean} [props.autoPlay] - Play video immediately after loading? Default: false.
  * @param {boolean} [props.loop] - Loop the video? Default: false.
  * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
+ * @param {OnLoadingFunction | undefined} [props.onLoading] - OnLoading callback function.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2VideoProvider = ({
@@ -72,6 +73,7 @@ const JS2VideoProvider = ({
   autoPlay = false,
   loop = false,
   enableUnsecureMode = false,
+  onLoading,
   children,
 }) => {
   const [templateUrl, setTemplateUrl] = useState(defaultTemplateUrl);
@@ -121,6 +123,12 @@ const JS2VideoProvider = ({
     }
     load();
   }, [templateUrl, params]);
+
+  useEffect(() => {
+    if (onLoading) {
+      onLoading(isLoading);
+    }
+  }, [isLoading]);
 
   return (
     <Context.Provider
