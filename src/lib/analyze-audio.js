@@ -68,7 +68,7 @@ const analyzeAudio = async ({
   maxFreq = 800,
   numberOfBins = 64,
 }) => {
-  const cacheKey = {
+  const cacheKey = [
     audioUrl,
     fftSize,
     minDb,
@@ -78,7 +78,7 @@ const analyzeAudio = async ({
     minFreq,
     maxFreq,
     numberOfBins,
-  };
+  ].join(",");
 
   let result = await cache.get(cacheKey);
 
