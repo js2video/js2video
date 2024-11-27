@@ -1,4 +1,4 @@
-import Crunker from "crunker";
+import { isPuppeteer, getCrunker } from "./utils";
 
 /**
  * @typedef {Object} MixAudioInput
@@ -10,17 +10,10 @@ import Crunker from "crunker";
  * Mix 1+ audio sources together
  * @param {Object} options
  * @param {Array<MixAudioInput>} options.inputs
- * @param {boolean} options.isPuppeteer
  * @returns
  */
-const mixAudio = async ({ inputs, isPuppeteer }) => {
-  // don't why we must do this, but I don't have a better solution :/
-  let crunker;
-  if (isPuppeteer) {
-    crunker = new Crunker.default();
-  } else {
-    crunker = new Crunker();
-  }
+const mixAudio = async ({ inputs }) => {
+  const crunker = getCrunker();
 
   // load buffers
   const buffers = await crunker.fetchAudio(...inputs.map((item) => item.url));

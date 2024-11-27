@@ -124,7 +124,6 @@ const ExportButton = () => {
           setAbortController(controller);
           try {
             await videoTemplate.export({
-              isPuppeteer: false,
               signal: controller.signal,
             });
             setIsAborted(false);

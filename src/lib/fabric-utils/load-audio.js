@@ -1,5 +1,6 @@
 import { FabricObject } from "fabric";
 import { JS2VideoMixin } from "./js2video-mixin";
+import { getCrunker, isObjectUrl } from "../utils";
 
 class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   static type = "js2video_audio";
@@ -7,10 +8,12 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   /**
    *
    * @param {HTMLAudioElement} audio
+   * @param {string} audioUrl
    * @param {Object} options
    */
-  constructor(audio, options) {
+  constructor(audio, audioUrl, options) {
     super(options);
+    this.js2video_audioUrl = audioUrl;
     this.js2video_audio = audio;
   }
 
@@ -37,16 +40,39 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
       this.js2video_audio.currentTime = time;
     });
   }
+
+  async js2video_dispose() {
+    if (isObjectUrl(this.js2video_audioUrl)) {
+      URL.revokeObjectURL(this.js2video_audioUrl);
+      console.log("disposed audio obj url", this.js2video_audioUrl);
+    }
+    console.log("disposed", this.type);
+  }
 }
 
-const loadAudio = async ({ url, options = {} }) => {
+const loadAudio = async ({
+  url,
+  startTime = 0,
+  endTime = -1,
+  options = {},
+}) => {
+  let audioUrl = url;
+  // slice audio
+  if (startTime >= 0 && endTime > -1 && endTime > startTime) {
+    const crunker = getCrunker();
+    const buffers = await crunker.fetchAudio([audioUrl]);
+    const buffer = crunker.sliceAudio(buffers[0], startTime, endTime);
+    const result = crunker.export(buffer, "audio/mp3");
+    audioUrl = result.url;
+    crunker.close();
+  }
   const audio = await new Promise((resolve, reject) => {
     const audio = new Audio();
     audio.addEventListener("canplaythrough", () => resolve(audio));
     audio.crossOrigin = "anonymous";
-    audio.src = url;
+    audio.src = audioUrl;
   });
-  const obj = new JS2VideoAudio(audio, options);
+  const obj = new JS2VideoAudio(audio, audioUrl, options);
   return obj;
 };
 

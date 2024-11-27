@@ -83,7 +83,10 @@ const analyzeAudio = async ({
   let result = await cache.get(cacheKey);
 
   if (result) {
+    console.log("analyzed audio found in cache");
     return result;
+  } else {
+    console.log("analyzed audio not found in cache");
   }
 
   const arrayBuffer = await fetch(audioUrl).then((res) => res.arrayBuffer());

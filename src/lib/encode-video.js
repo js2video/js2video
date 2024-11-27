@@ -4,7 +4,7 @@ import {
   FileSystemWritableFileStreamTarget,
 } from "mp4-muxer";
 import { AVC } from "media-codecs";
-import { canBrowserEncodeVideo } from "./utils";
+import { canBrowserEncodeVideo, isPuppeteer } from "./utils";
 
 function audioBufferToAudioData(audioBuffer) {
   // Create a new Float32Array to hold the planar audio data
@@ -38,7 +38,6 @@ function audioBufferToAudioData(audioBuffer) {
  * @param {Function} options.seek
  * @param {gsap.core.Timeline} options.timeline
  * @param {HTMLCanvasElement} options.canvasElement
- * @param {boolean} options.isPuppeteer
  * @param {Function} options.progressHandler
  * @param {string} options.filePrefix
  * @param {AudioBuffer} [options.audioBuffer]
@@ -52,7 +51,6 @@ async function encodeVideo({
   seek,
   timeline,
   canvasElement,
-  isPuppeteer,
   progressHandler,
   filePrefix,
   audioBuffer,
@@ -101,7 +99,7 @@ async function encodeVideo({
     const audioCodec = "mp4a.40.2";
     const videoCodec = AVC.getCodec({ profile: "Main", level: "5.2" });
 
-    if (isPuppeteer) {
+    if (isPuppeteer()) {
       target = new StreamTarget({
         onData: async (chunk, position) => {
           // see puppeteer

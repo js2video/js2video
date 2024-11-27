@@ -1,5 +1,6 @@
 import { clsx } from "clsx";
 import { twMerge } from "tailwind-merge";
+import Crunker from "crunker";
 
 function cn(...inputs) {
   return twMerge(clsx(inputs));
@@ -242,6 +243,24 @@ function djb2Hash(str) {
   return "h" + (hash >>> 0); // Convert to unsigned 32-bit integer and prepend "h"
 }
 
+function isPuppeteer() {
+  // @ts-ignore
+  return window.isPuppeteer === true;
+}
+
+// don't know why we must do this, but I don't have a better solution :/
+function getCrunker() {
+  return isPuppeteer() ? new Crunker.default() : new Crunker();
+}
+
+function isObjectUrl(url) {
+  return (
+    url &&
+    typeof url === "string" &&
+    (url.startsWith("blob:") || url.startsWith("file:"))
+  );
+}
+
 export {
   lerp,
   clamp,
@@ -258,4 +277,7 @@ export {
   freq2bin,
   bin2freq,
   djb2Hash,
+  isPuppeteer,
+  getCrunker,
+  isObjectUrl,
 };

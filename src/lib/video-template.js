@@ -230,14 +230,14 @@ class VideoTemplate {
     this.#canvas.renderAll();
   }
 
-  async #mergeAudio({ isPuppeteer }) {
+  async #mergeAudio() {
     const audioInputs = this.#objects
       .filter((obj) => obj.type === "js2video_audio")
       .map((obj) => ({ url: obj.js2video_audio.src, startTime: 0 }));
     if (!audioInputs.length) {
       return null;
     }
-    const result = await mixAudio({ inputs: audioInputs, isPuppeteer });
+    const result = await mixAudio({ inputs: audioInputs });
     return result;
   }
 
@@ -349,11 +349,10 @@ class VideoTemplate {
    * Exports the video to MP4 from the browser or server.
    *
    * @param {Object} options - The options for the export.
-   * @param {boolean} [options.isPuppeteer] - Is this method called from puppeteer?. Default: false.
    * @param {AbortSignal} [options.signal] - The signal that can be used to abort the export process.
    * @returns {Promise<ExportResult>}
    */
-  async export({ isPuppeteer = false, signal }) {
+  async export({ signal }) {
     try {
       console.log("startExport");
       this.#isExporting = true;
@@ -361,7 +360,7 @@ class VideoTemplate {
       await this.rewind();
       this.pause();
       this.#sendEvent();
-      const audio = await this.#mergeAudio({ isPuppeteer });
+      const audio = await this.#mergeAudio();
       await encodeVideo({
         audioBuffer: audio ? audio.buffer : null,
         bitrate: this.#params.bitrate,
@@ -371,7 +370,6 @@ class VideoTemplate {
         seek: async (/** @type {number} */ time) => await this.seek(time),
         fps: this.#params.fps,
         timeline: this.#timeline,
-        isPuppeteer,
         filePrefix: this.#videoFilePrefix,
         progressHandler: () => this.#sendEvent(),
         signal,
