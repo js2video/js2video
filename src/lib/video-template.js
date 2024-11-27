@@ -397,12 +397,9 @@ class VideoTemplate {
     console.log("dispose video template");
     try {
       window.removeEventListener("resize", this.#resizeHandler);
+      this.pause();
       this.#timeline.clear();
-      await Promise.all(
-        this.#objects.map((obj) => {
-          return obj.js2video_dispose();
-        })
-      );
+      await Promise.all(this.#objects.map((obj) => obj.js2video_dispose()));
       this.#canvas.clear();
       await this.#canvas.dispose();
       console.log("disposed video template");
