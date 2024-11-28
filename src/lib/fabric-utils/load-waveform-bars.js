@@ -139,6 +139,7 @@ async function loadWaveformBars({
   anchor = Anchor.BOTTOM,
   options = {},
   roundedCaps = false,
+  startOffset = 0,
 }) {
   const obj = new JS2VideoWaveformBars(
     audio,
@@ -147,7 +148,8 @@ async function loadWaveformBars({
     paddingOuter,
     orientation,
     anchor,
-    roundedCaps
+    roundedCaps,
+    startOffset
   );
   return obj;
 }
