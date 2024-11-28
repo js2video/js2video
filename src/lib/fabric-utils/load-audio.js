@@ -11,10 +11,11 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
    * @param {string} audioUrl
    * @param {Object} options
    */
-  constructor(audio, audioUrl, options) {
+  constructor(audio, audioUrl, startOffset = 0, options) {
     super(options);
     this.js2video_audioUrl = audioUrl;
     this.js2video_audio = audio;
+    this.js2video_startOffset = startOffset;
   }
 
   js2video_play() {
@@ -37,7 +38,7 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
       this.js2video_audio.addEventListener("seeked", () => resolve(), {
         once: true,
       });
-      this.js2video_audio.currentTime = time;
+      this.js2video_audio.currentTime = time + this.js2video_startOffset;
     });
   }
 
@@ -54,6 +55,7 @@ const loadAudio = async ({
   url,
   startTime = 0,
   endTime = -1,
+  startOffset = 0,
   options = {},
 }) => {
   let audioUrl = url;
@@ -72,7 +74,7 @@ const loadAudio = async ({
     audio.crossOrigin = "anonymous";
     audio.src = audioUrl;
   });
-  const obj = new JS2VideoAudio(audio, audioUrl, options);
+  const obj = new JS2VideoAudio(audio, audioUrl, startOffset, options);
   return obj;
 };
 
