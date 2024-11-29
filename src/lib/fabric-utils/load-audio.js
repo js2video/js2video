@@ -75,24 +75,18 @@ const loadAudio = async ({ url, offset = 0, duration, options = {} }) => {
     throw "offset + duration must be larger than 0";
   }
 
-  const cacheKey = ["load-audio", url, offset, duration].join(",");
+  const cacheKey = ["load-audio", url].join(",");
 
-  let result = await cache.get(cacheKey);
+  let audioBuffer = await cache.get(cacheKey);
 
-  if (result) {
-    console.log("audio found in cache");
-    return result;
-  } else {
-    console.log("audio not found in cache");
+  if (!audioBuffer) {
+    const audioContext = getAudioContext();
+    const arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
+    audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+    await cache.set(cacheKey, audioBuffer);
   }
 
-  const audioContext = getAudioContext();
-  const arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
   const obj = new JS2VideoAudio(audioBuffer, options, offset, duration);
-
-  await cache.set(cacheKey, obj);
-
   return obj;
 };
 
