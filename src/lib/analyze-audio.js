@@ -58,7 +58,8 @@ function compressArray(arr, targetLength) {
 }
 
 const analyzeAudio = async ({
-  audioUrl,
+  url,
+  audioBuffer,
   fftSize = 16384,
   minDb = -90,
   maxDb = -10,
@@ -69,7 +70,8 @@ const analyzeAudio = async ({
   numberOfBins = 64,
 }) => {
   const cacheKey = [
-    audioUrl,
+    "analyze-audio",
+    url,
     fftSize,
     minDb,
     maxDb,
@@ -88,11 +90,6 @@ const analyzeAudio = async ({
   } else {
     console.log("analyzed audio not found in cache");
   }
-
-  const arrayBuffer = await fetch(audioUrl).then((res) => res.arrayBuffer());
-
-  const audioContext = new AudioContext();
-  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
 
   const bins = [];
 

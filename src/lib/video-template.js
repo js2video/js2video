@@ -6,7 +6,7 @@ import * as utils from "./template-utils";
 import * as fabricUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 import { validateParams } from "./validate-params";
-import { mixAudio } from "./mix-audio";
+import { getCrunker } from "./utils";
 
 /** default params for all video templates */
 const globalParams = {
@@ -41,6 +41,9 @@ const globalParams = {
  * @property {boolean} js2video_isExporting
  * @property {HTMLAudioElement | undefined} [js2video_audio]
  * @property {HTMLVideoElement | undefined} [js2video_video]
+ * @property {AudioBuffer | undefined} [js2video_audioBuffer]
+ * @property {number | undefined} [js2video_offset]
+ * @property {number | undefined} [js2video_duration]
  */
 
 /**
@@ -58,7 +61,7 @@ function isJS2VideoObject(obj) {
 class VideoTemplate {
   templateUrl;
   #params;
-  #timeline = gsap.timeline({ paused: true });
+  #timeline = gsap.timeline({ paused: true, repeat: -1 });
   #canvasElement = document.createElement("canvas");
   #canvas = new Fabric.StaticCanvas(this.#canvasElement, {
     enableRetinaScaling: true,
@@ -128,14 +131,8 @@ class VideoTemplate {
       this.#sendEvent();
     });
 
-    this.#timeline.eventCallback("onComplete", async () => {
-      if (this.#isPlaying) {
-        if (this.#loop) {
-          await this.rewind();
-        } else {
-          this.pause();
-        }
-      }
+    this.#timeline.eventCallback("onRepeat", async () => {
+      await this.rewind();
       this.#sendEvent();
     });
 
@@ -231,14 +228,43 @@ class VideoTemplate {
   }
 
   async #mergeAudio() {
-    const audioInputs = this.#objects
-      .filter((obj) => obj.type === "js2video_audio")
-      .map((obj) => ({ url: obj.js2video_audio.src, startTime: 0 }));
+    const audioInputs = this.#objects.filter(
+      (obj) => obj.type === "js2video_audio"
+    );
+
     if (!audioInputs.length) {
       return null;
     }
-    const result = await mixAudio({ inputs: audioInputs });
-    return result;
+
+    const crunker = getCrunker();
+
+    // merge buffers into one
+    const mergedBuffer = crunker.mergeAudio(
+      audioInputs.map((obj) => {
+        let buffer = obj.js2video_audioBuffer;
+        if (obj.js2video_offset > 0) {
+          buffer = crunker.padAudio(buffer, 0, obj.js2video_offset);
+          buffer = crunker.sliceAudio(
+            buffer,
+            0,
+            obj.js2video_offset + obj.js2video_duration
+          );
+        } else if (obj.js2video_offset < 0) {
+          buffer = crunker.sliceAudio(
+            buffer,
+            -obj.js2video_offset,
+            obj.js2video_duration - obj.js2video_offset
+          );
+        } else {
+          buffer = crunker.sliceAudio(buffer, 0, obj.js2video_duration);
+        }
+        return buffer;
+      })
+    );
+
+    crunker.close();
+
+    return mergedBuffer;
   }
 
   /**
@@ -308,13 +334,13 @@ class VideoTemplate {
    * @returns {Promise<void>}
    */
   async seek(time) {
+    this.#timeline.time(time);
     // seek in all objects
     await Promise.all(
       this.#objects.map((obj) => {
         return obj.js2video_seek(time, this.#isExporting);
       })
     );
-    this.#timeline.time(time);
   }
 
   /**
@@ -360,9 +386,9 @@ class VideoTemplate {
       await this.rewind();
       this.pause();
       this.#sendEvent();
-      const audio = await this.#mergeAudio();
+      const audioBuffer = await this.#mergeAudio();
       await encodeVideo({
-        audioBuffer: audio ? audio.buffer : null,
+        audioBuffer,
         bitrate: this.#params.bitrate,
         width: this.#params.size.width,
         height: this.#params.size.height,

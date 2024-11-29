@@ -28,22 +28,24 @@ class JS2VideoWaveformBars extends JS2VideoMixin(FabricObject) {
    * Create an instance of the JS2VideoWaveformBars class
    * @param {Object} audio
    * @param {Object} options
-   * @param {number} [paddingInner]
-   * @param {number} [paddingOuter]
-   * @param {Orientation} [orientation=Orientation.VERTICAL]
-   * @param {Anchor} [anchor]
-   * @param {boolean} [roundedCaps]
-   * @param {number} [startOffset]
+   * @param {number} paddingInner
+   * @param {number} paddingOuter
+   * @param {Orientation} orientation=Orientation.VERTICAL
+   * @param {Anchor} anchor
+   * @param {boolean} roundedCaps
+   * @param {number} offset
+   * @param {number} duration
    */
   constructor(
     audio,
     options,
-    paddingInner = 0,
-    paddingOuter = 0,
-    orientation = Orientation.VERTICAL,
-    anchor = Anchor.BOTTOM,
-    roundedCaps = false,
-    startOffset = 0
+    paddingInner,
+    paddingOuter,
+    orientation,
+    anchor,
+    roundedCaps,
+    offset,
+    duration
   ) {
     super(options);
     super.set({
@@ -62,24 +64,35 @@ class JS2VideoWaveformBars extends JS2VideoMixin(FabricObject) {
         orientation === Orientation.VERTICAL ? this.width : this.height,
       ]);
     this.js2video_barThickness = this.js2video_barSize.bandwidth();
-    this.js2video_startOffset = startOffset;
+    this.js2video_offset = offset;
+    this.js2video_duration = duration;
   }
 
   _render(ctx) {
     if (!this.js2video_timeline) {
       return;
     }
-    const currentFrame = Math.round(
-      (this.js2video_timeline.time() + this.js2video_startOffset) *
-        this.js2video_params.fps
-    );
+
+    const currentTime = this.js2video_timeline.time();
+    const offsetTime = currentTime + this.js2video_offset * -1;
+
+    if (offsetTime < 0 || offsetTime > this.js2video_duration) {
+      return;
+    }
+
+    const currentFrame = Math.round(offsetTime * this.js2video_params.fps);
+
     if (currentFrame >= this.js2video_audio.bins.length) {
       return;
     }
+
     const frameBins = this.js2video_audio.bins[currentFrame];
+
     // draw bars
     ctx.save();
+
     ctx.fillStyle = this.fill;
+
     for (var i = 0; i < frameBins.length; i++) {
       if (this.js2video_orientation === Orientation.VERTICAL) {
         const h = -lerp(0, this.height, frameBins[i]);
@@ -127,6 +140,7 @@ class JS2VideoWaveformBars extends JS2VideoMixin(FabricObject) {
         }
       }
     }
+
     ctx.restore();
   }
 }
@@ -139,8 +153,12 @@ async function loadWaveformBars({
   anchor = Anchor.BOTTOM,
   options = {},
   roundedCaps = false,
-  startOffset = 0,
+  offset = 0,
+  duration = 1e6,
 }) {
+  if (offset + duration <= 0) {
+    throw "offset + duration must be larger than 0";
+  }
   const obj = new JS2VideoWaveformBars(
     audio,
     options,
@@ -149,7 +167,8 @@ async function loadWaveformBars({
     orientation,
     anchor,
     roundedCaps,
-    startOffset
+    offset,
+    duration
   );
   return obj;
 }

@@ -1,80 +1,98 @@
 import { FabricObject } from "fabric";
 import { JS2VideoMixin } from "./js2video-mixin";
-import { getCrunker, isObjectUrl } from "../utils";
+import { getAudioContext } from "../get-audio-context";
+import { cache } from "../cache";
 
 class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   static type = "js2video_audio";
 
   /**
-   *
-   * @param {HTMLAudioElement} audio
-   * @param {string} audioUrl
+   * @param {AudioBuffer} audioBuffer
    * @param {Object} options
+   * @param {number} offset
+   * @param {number} [duration]
    */
-  constructor(audio, audioUrl, startOffset = 0, options) {
+  constructor(audioBuffer, options, offset, duration) {
     super(options);
-    this.js2video_audioUrl = audioUrl;
-    this.js2video_audio = audio;
-    this.js2video_startOffset = startOffset;
+    this.js2video_audioBuffer = audioBuffer;
+    this.js2video_offset = offset;
+    this.js2video_duration =
+      duration !== undefined ? duration : audioBuffer.duration;
+    this.js2video_isAudioPlaying = false;
+  }
+
+  stop() {
+    if (this.js2video_isAudioPlaying) {
+      this.source?.stop();
+      this.source?.disconnect();
+      this.js2video_isAudioPlaying = false;
+    }
+  }
+
+  play() {
+    const currentTime = this.js2video_timeline.time();
+    const delay = this.js2video_offset - currentTime;
+    const duration = this.js2video_duration + Math.min(0, delay);
+    if (duration <= 0) {
+      return;
+    }
+    const ctx = getAudioContext();
+    this.source = ctx.createBufferSource();
+    this.source.buffer = this.js2video_audioBuffer;
+    this.source.connect(ctx.destination);
+    this.source.start(
+      ctx.currentTime + Math.max(0, delay),
+      Math.max(0, -delay),
+      duration
+    );
+    this.js2video_isAudioPlaying = true;
   }
 
   js2video_play() {
-    this.js2video_audio.play();
+    this.play();
   }
 
   js2video_pause() {
-    this.js2video_audio.pause();
+    this.stop();
   }
 
-  /**
-   * @param {number} time - time to seek to
-   * @return {Promise<void>}
-   */
   async js2video_seek(time) {
-    if (this.js2video_isExporting) {
-      return;
+    if (this.js2video_timeline.isActive()) {
+      this.stop();
+      this.play();
     }
-    return new Promise((resolve) => {
-      this.js2video_audio.addEventListener("seeked", () => resolve(), {
-        once: true,
-      });
-      this.js2video_audio.currentTime = time + this.js2video_startOffset;
-    });
   }
 
   async js2video_dispose() {
-    if (isObjectUrl(this.js2video_audioUrl)) {
-      URL.revokeObjectURL(this.js2video_audioUrl);
-      console.log("disposed audio obj url", this.js2video_audioUrl);
-    }
+    this.stop();
+    // this.js2video_audioBuffer = null;
     console.log("disposed", this.type);
   }
 }
 
-const loadAudio = async ({
-  url,
-  startTime = 0,
-  endTime = -1,
-  startOffset = 0,
-  options = {},
-}) => {
-  let audioUrl = url;
-  // slice audio
-  if (startTime >= 0 && endTime > -1 && endTime > startTime) {
-    const crunker = getCrunker();
-    const buffers = await crunker.fetchAudio([audioUrl]);
-    const buffer = crunker.sliceAudio(buffers[0], startTime, endTime);
-    const result = crunker.export(buffer, "audio/mp3");
-    audioUrl = result.url;
-    crunker.close();
+const loadAudio = async ({ url, offset = 0, duration, options = {} }) => {
+  if (duration !== undefined && offset + duration <= 0) {
+    throw "offset + duration must be larger than 0";
   }
-  const audio = await new Promise((resolve, reject) => {
-    const audio = new Audio();
-    audio.addEventListener("canplaythrough", () => resolve(audio));
-    audio.crossOrigin = "anonymous";
-    audio.src = audioUrl;
-  });
-  const obj = new JS2VideoAudio(audio, audioUrl, startOffset, options);
+
+  const cacheKey = ["load-audio", url, offset, duration].join(",");
+
+  let result = await cache.get(cacheKey);
+
+  if (result) {
+    console.log("audio found in cache");
+    return result;
+  } else {
+    console.log("audio not found in cache");
+  }
+
+  const audioContext = getAudioContext();
+  const arrayBuffer = await fetch(url).then((res) => res.arrayBuffer());
+  const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+  const obj = new JS2VideoAudio(audioBuffer, options, offset, duration);
+
+  await cache.set(cacheKey, obj);
+
   return obj;
 };
 
