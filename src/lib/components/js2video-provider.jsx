@@ -98,7 +98,7 @@ const JS2VideoProvider = ({
       setIsLoading(true);
       setTemplateError(null);
       try {
-        vtRef.current?.dispose();
+        await vtRef.current?.dispose();
       } catch (err) {
         console.error(err);
       }
