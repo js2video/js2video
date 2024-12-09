@@ -13,7 +13,7 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
+const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   // set background color
   canvas.set({ backgroundColor: "#ececec" });
 
@@ -21,7 +21,7 @@ const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
   await utils.loadGoogleFont(params.fontFamily);
 
   // load text object
-  const text = await fabricUtils.loadTextbox({
+  const text = await canvasUtils.loadTextbox({
     text: "",
     options: {
       width: params.size.width * 0.8,

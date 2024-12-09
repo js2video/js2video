@@ -12,12 +12,12 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
+const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   // set background color
   canvas.set({ backgroundColor: "green" });
 
   // load video from URL
-  const video = await fabricUtils.loadVideo({
+  const video = await canvasUtils.loadVideo({
     url: params.videoUrl,
     options: {
       originX: "center",
@@ -29,13 +29,13 @@ const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
   canvas.add(video);
 
   // scale video to fit canvas
-  fabricUtils.scaleToFitCanvas(video, canvas);
+  canvasUtils.scaleToFitCanvas(video, canvas);
 
   // center video on canvas
   canvas.centerObject(video);
 
   // load text object
-  const text = await fabricUtils.loadText({
+  const text = await canvasUtils.loadText({
     text: params.text,
     options: {
       fontSize: 200,

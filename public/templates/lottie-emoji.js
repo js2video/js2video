@@ -11,12 +11,12 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
+const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   // set canvas background color
   canvas.set({ backgroundColor: "papayawhip" });
 
   // load lottie animation from URL
-  const lottie = await fabricUtils.loadLottie({
+  const lottie = await canvasUtils.loadLottie({
     url: params.lottieUrl,
     options: {
       width: params.size.width / 2,

@@ -1,4 +1,4 @@
-import { loadSVGFromString, util as fabricUtils } from "fabric";
+import { loadSVGFromString, util as canvasUtils } from "fabric";
 
 const loadSvg = async ({ url, options }) => {
   const svgString = await fetch(url).then((res) => res.text());
@@ -8,7 +8,7 @@ const loadSvg = async ({ url, options }) => {
 
 const loadSvgFromString = async ({ string, options }) => {
   const { objects } = await loadSVGFromString(string);
-  const obj = fabricUtils.groupSVGElements(objects);
+  const obj = canvasUtils.groupSVGElements(objects);
   obj.set(options);
   return obj;
 };

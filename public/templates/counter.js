@@ -15,7 +15,7 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
+const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   canvas.set({ backgroundColor: "#ececec" });
 
   // create a formatter from the number
@@ -29,7 +29,7 @@ const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
   await utils.loadGoogleFont(params.fontFamily);
 
   // load text object
-  const text = await fabricUtils.loadText({
+  const text = await canvasUtils.loadText({
     text: params.from,
     options: {
       fontSize: 300,

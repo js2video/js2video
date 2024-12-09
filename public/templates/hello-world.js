@@ -7,10 +7,10 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
+const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   canvas.set({ backgroundColor: "#0000ee" });
 
-  const text = await fabricUtils.loadText({
+  const text = await canvasUtils.loadText({
     text: `Hello ${params.name}!`,
     options: {
       fontSize: 200,

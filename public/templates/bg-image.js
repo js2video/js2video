@@ -12,9 +12,9 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
+const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   // load image from URL
-  const image = await fabricUtils.loadImage({
+  const image = await canvasUtils.loadImage({
     url: params.imageUrl,
     options: {
       originX: "center",
@@ -26,13 +26,13 @@ const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
   canvas.add(image);
 
   // scale video to cover canvas
-  fabricUtils.scaleToCoverCanvas(image, canvas);
+  canvasUtils.scaleToCoverCanvas(image, canvas);
 
   // center video on canvas
   canvas.centerObject(image);
 
   // load text object
-  const text = await fabricUtils.loadText({
+  const text = await canvasUtils.loadText({
     text: params.text,
     options: {
       fontSize: 200,

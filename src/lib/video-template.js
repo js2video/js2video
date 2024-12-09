@@ -3,7 +3,7 @@ import * as Pixi from "pixi.js";
 import * as PixiFilters from "pixi-filters";
 import * as Fabric from "fabric";
 import * as utils from "./template-utils";
-import * as fabricUtils from "./fabric-utils";
+import * as canvasUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 import { validateParams } from "./validate-params";
 import { getCrunker } from "./utils";
@@ -161,7 +161,7 @@ class VideoTemplate {
       Pixi,
       PixiFilters,
       utils,
-      fabricUtils,
+      canvasUtils,
     });
 
     if (this.#timeline.duration() > 3600) {

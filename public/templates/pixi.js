@@ -18,10 +18,10 @@ const template = async ({
   params,
   utils,
   PixiFilters,
-  fabricUtils,
+  canvasUtils,
   Pixi,
 }) => {
-  const pixi = await fabricUtils.loadPixi({ canvas });
+  const pixi = await canvasUtils.loadPixi({ canvas });
   canvas.add(pixi);
 
   const text = new Pixi.HTMLText({

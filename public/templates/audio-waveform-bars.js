@@ -11,12 +11,12 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
+const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   // set background color
   canvas.set({ backgroundColor: "hotpink" });
 
   // load audio from URL
-  const audio = await fabricUtils.loadAudio({ url: params.audioUrl });
+  const audio = await canvasUtils.loadAudio({ url: params.audioUrl });
 
   // add audio to canvas
   canvas.add(audio);
@@ -36,7 +36,7 @@ const template = async ({ canvas, timeline, params, utils, fabricUtils }) => {
   });
 
   // display waveform bars
-  const waveform = await fabricUtils.loadWaveformBars({
+  const waveform = await canvasUtils.loadWaveformBars({
     audio: analyzedAudio,
     paddingInner: 0.2,
     paddingOuter: 0,
