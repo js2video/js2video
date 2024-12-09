@@ -39,52 +39,31 @@ const JS2VideoMixin = (Base) =>
     }
 
     async js2video_seek(time) {
-      if (typeof super.js2video_seek === "function") {
-        try {
-          await super.js2video_seek(time);
-        } catch (err) {
-          console.error(err);
-        }
-      }
+      console.log("fallback seek for", super.type);
+      return;
+    }
+
+    js2video_scrub(progress) {
       return;
     }
 
     async js2video_startExport() {
-      this.js2video_isExporting = true;
-      if (typeof super.js2video_startExport === "function") {
-        try {
-          await super.js2video_startExport();
-          this.js2video_isExporting = false;
-        } catch (err) {
-          this.js2video_isExporting = false;
-          throw err;
-        }
-      }
+      console.log("fallback end export for", super.type);
       return;
     }
 
     async js2video_endExport() {
-      if (typeof super.js2video_endExport === "function") {
-        try {
-          await super.js2video_endExport();
-          this.js2video_isExporting = false;
-        } catch (err) {
-          this.js2video_isExporting = false;
-          throw err;
-        }
-      }
+      console.log("fallback end export for", super.type);
       return;
     }
 
     async js2video_dispose() {
-      if (typeof super.js2video_dispose === "function") {
-        try {
-          await super.js2video_dispose();
-        } catch (err) {
-          console.warn(err);
-        }
-      }
+      console.log("fallback dispose for", super.type);
       return;
+    }
+
+    js2video_renderImage(ctx, image) {
+      ctx.drawImage(image, -this.width / 2, -this.height / 2);
     }
   };
 

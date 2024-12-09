@@ -21,12 +21,11 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
   }
 
   _render(ctx) {
-    ctx.drawImage(
+    super.js2video_renderImage(
+      ctx,
       this.js2video_frameDecoder
         ? this.js2video_frameDecoder.canvas
-        : this.js2video_video,
-      (this.width / 2) * -1,
-      (this.height / 2) * -1
+        : this.js2video_video
     );
   }
 
@@ -40,11 +39,13 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
     } else {
       await new Promise((resolve) => {
         this.js2video_video.requestVideoFrameCallback((now, metadata) => {
+          console.log(time, metadata);
           resolve();
         });
         this.js2video_video.currentTime = time + 0.001;
       });
     }
+    this.canvas.renderAll();
   }
 
   js2video_play() {
@@ -56,6 +57,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
   }
 
   async js2video_startExport() {
+    this.js2video_isExporting = true;
     if (this.js2video_frameDecoder) {
       console.warn(
         "had lingering framedecoder, destroying before creating new"
@@ -67,6 +69,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
   }
 
   async js2video_endExport() {
+    this.js2video_isExporting = false;
     if (this.js2video_frameDecoder) {
       console.log("removing frame decoder");
       try {

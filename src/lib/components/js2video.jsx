@@ -11,6 +11,7 @@ import { JS2VideoLayout } from "./js2video-layout";
  * @param {Object} props - Component props
  * @param {string} props.templateUrl - URL to the video template.
  * @param {Object} [props.params] - Video template params. Default; {}.
+ * @param {React.ReactNode} [props.EditorHeader] - An array of templates
  * @param {string} [props.videoFilePrefix] - String to prefix exported video file names with. default: js2video.
  * @param {boolean} [props.autoPlay] - Play video immediately after loading? Default: false.
  * @param {boolean} [props.loop] - Loop the video? Default: false.
@@ -22,6 +23,7 @@ import { JS2VideoLayout } from "./js2video-layout";
 const JS2Video = ({
   templateUrl,
   params = {},
+  EditorHeader,
   videoFilePrefix = "js2video",
   autoPlay = false,
   loop = false,
@@ -40,7 +42,7 @@ const JS2Video = ({
       onLoading={onLoading}
     >
       <JS2VideoLayout>
-        {showEditor && <JS2VideoEditor />}
+        {showEditor && <JS2VideoEditor Header={EditorHeader} />}
         <JS2VideoPreview />
         <JS2VideoControls />
       </JS2VideoLayout>

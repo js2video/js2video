@@ -34,6 +34,7 @@ const globalParams = {
  * @property {gsap.core.Timeline} js2video_timeline
  * @property {Function} js2video_dispose
  * @property {Function} js2video_seek
+ * @property {Function} js2video_scrub
  * @property {Function} js2video_play
  * @property {Function} js2video_pause
  * @property {Function} js2video_startExport
@@ -59,7 +60,6 @@ function isJS2VideoObject(obj) {
  * A JS2Video class
  */
 class VideoTemplate {
-  templateUrl;
   #params;
   #timeline = gsap.timeline({ paused: true, repeat: -1 });
   #canvasElement = document.createElement("canvas");
@@ -188,11 +188,9 @@ class VideoTemplate {
     // attach resize handler
     addEventListener("resize", this.#resizeHandler.bind(this));
 
-    // forces rendering first video frame on all video objects
+    // hack: forces rendering first video frame on all video objects
+    await this.seek(0.001);
     await this.seek(0);
-
-    this.#renderAll();
-    this.#sendEvent();
 
     if (this.#autoPlay) {
       this.play();
@@ -353,6 +351,9 @@ class VideoTemplate {
    */
   scrub(progress) {
     this.#timeline.progress(progress);
+    this.#objects.map((obj) => {
+      return obj.js2video_scrub(progress);
+    });
   }
 
   /**

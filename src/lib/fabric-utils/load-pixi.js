@@ -1,74 +1,66 @@
-import { Application } from "pixi.js";
+import { Application, Container, Texture, Sprite, Assets } from "pixi.js";
 import { FabricObject } from "fabric";
+import { JS2VideoMixin } from "./js2video-mixin";
 
-class PixiObject extends FabricObject {
-  static isJS2Video = true;
-
-  /** @type {Application} */
-  __pixi;
+class JS2VideoPixi extends JS2VideoMixin(FabricObject) {
   static type = "js2video_pixi";
 
   /**
-   *
-   * @param {Application} pixi
    * @param {Object} options
    */
-  constructor(pixi, options) {
+  constructor(canvas, options) {
     super(options);
-    super.set({ __pixi: pixi, objectCaching: false, selectable: false });
+    super.set({ objectCaching: false, selectable: false });
+    this.js2video_canvas = document.createElement("canvas");
+    this.js2video_app = new Application();
+    this.js2video_container = new Container();
+    this.js2video_texture = Texture.from(canvas.getElement());
+    this.js2video_canvas.style.background = "none";
+  }
+
+  async load() {
+    await this.js2video_app.init({
+      canvas: this.js2video_canvas,
+      resolution: 1,
+      backgroundAlpha: 0,
+      autoDensity: true,
+      width: 1920,
+      height: 1080,
+      antialias: true,
+    });
+    // this.js2video_texture = await Assets.load(
+    //   "https://pixijs.com/assets/video.mp4"
+    // );
+
+    this.js2video_sprite = new Sprite(this.js2video_texture);
+    this.js2video_sprite.width = 1920;
+    this.js2video_sprite.height = 1080;
+    this.js2video_app.stage.addChild(this.js2video_sprite);
   }
 
   _render(ctx) {
-    this.__pixi.render();
-    ctx.drawImage(this.__pixi, (this.width / 2) * -1, (this.height / 2) * -1);
+    // console.log(this.canvas.renderAll());
+    this.js2video_texture.update();
+    this.js2video_app.render();
+    super.js2video_renderImage(ctx, this.js2video_canvas);
   }
 
-  async __seek() {}
-  async __play() {}
-  async __pause() {}
-  async __startExport() {}
-  async __endExport() {}
-
-  async __dispose() {
-    this.__pixi.destroy(true, {
+  async js2video_dispose() {
+    this.js2video_app.destroy(true, {
       children: true,
       texture: true,
     });
-    console.log("disposed js2video_pixi obj");
   }
 }
 
-/**
- * load pixi
- * @export
- */
-async function loadPixi({
-  backgroundAlpha = 0,
-  width = 1920,
-  height = 1080,
-  options = {},
-} = {}) {
-  const canvasElement = document.createElement("canvas");
-  canvasElement.style.background = "none";
-  const app = new Application();
+async function loadPixi({ canvas, options = {} }) {
   /**
    * @see https://pixijs.download/release/docs/app.Application.html#init
    * @see https://pixijs.download/release/docs/rendering.SharedRendererOptions.html
    */
-  await app.init({
-    // preference: "webgpsu",
-    // powerPreference: "high-performance",
-    canvas: canvasElement,
-    resolution: 1,
-    backgroundAlpha,
-    autoDensity: true,
-    width,
-    height,
-    hello: true,
-    antialias: true,
-  });
-  const obj = new PixiObject(app, options);
-  return { obj, app };
+  const obj = new JS2VideoPixi(canvas, options);
+  await obj.load();
+  return obj;
 }
 
 export { loadPixi };

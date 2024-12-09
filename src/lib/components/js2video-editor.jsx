@@ -2,12 +2,20 @@ import { javascript } from "@codemirror/lang-javascript";
 import CodeMirror from "@uiw/react-codemirror";
 import { tags as t } from "@lezer/highlight";
 import { draculaInit } from "@uiw/codemirror-theme-dracula";
-import { RefreshCwIcon } from "lucide-react";
+import { RefreshCwIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
 import { useJS2Video } from "./js2video-provider";
 import { useEffect, useState } from "react";
 import { cn, stringToBase64Url } from "../utils";
 
-const JS2VideoEditor = () => {
+/**
+ *
+ * JS2Video Component
+ *
+ * @param {Object} props - Component props
+ * @param {any} [props.Header] - An array of templates
+ * @returns {JSX.Element} - The video template preview wrapped a context
+ */
+const JS2VideoEditor = ({ Header }) => {
   const {
     videoTemplate,
     isLoading: isLoadingTemplate,
@@ -47,16 +55,15 @@ const JS2VideoEditor = () => {
 
   async function updatePreview() {
     const templateUrl = stringToBase64Url(code);
+    console.log(templateUrl);
     setIsChanged(false);
     setTemplateUrl(templateUrl);
   }
 
   return (
-    <div className="flex-1 flex flex-col">
-      <div className="p-2 flex justify-end items-center bg-black text-white">
-        {/* <button>
-          <MenuIcon size={22} />
-        </button> */}
+    <div className="flex-1 flex flex-col relative">
+      <div className="p-2 flex justify-between items-center bg-black text-white">
+        {Header && <Header />}
         <button disabled={!isChanged} onClick={updatePreview}>
           <RefreshCwIcon
             className={cn({
