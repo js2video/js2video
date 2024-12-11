@@ -4,7 +4,7 @@ Background image with text overlay
 
 const defaultParams = {
   text: "Don't panic!",
-  imageUrl: "/images/ocean.jpg",
+  imageUrl: "https://js2video.com/images/ocean.jpg",
   fps: 30,
   size: {
     width: 1920,

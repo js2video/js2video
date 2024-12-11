@@ -2,7 +2,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import CodeMirror from "@uiw/react-codemirror";
 import { tags as t } from "@lezer/highlight";
 import { draculaInit } from "@uiw/codemirror-theme-dracula";
-import { RefreshCwIcon, ChevronsUpDownIcon, XIcon } from "lucide-react";
+import { RefreshCwIcon } from "lucide-react";
 import { useJS2Video } from "./js2video-provider";
 import { useEffect, useState } from "react";
 import { cn, stringToBase64Url } from "../utils";
@@ -55,7 +55,6 @@ const JS2VideoEditor = ({ Header }) => {
 
   async function updatePreview() {
     const templateUrl = stringToBase64Url(code);
-    console.log(templateUrl);
     setIsChanged(false);
     setTemplateUrl(templateUrl);
   }

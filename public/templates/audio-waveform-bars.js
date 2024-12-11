@@ -3,7 +3,7 @@ Load audio from URL and display waveform bars
 */
 
 const defaultParams = {
-  audioUrl: "/audio/audio.mp3",
+  audioUrl: "https://js2video.com/audio/audio.mp3",
   fps: 30,
   size: {
     width: 1920,
@@ -13,7 +13,7 @@ const defaultParams = {
 
 const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   // set background color
-  canvas.set({ backgroundColor: "hotpink" });
+  canvas.set({ backgroundColor: "#ff0200" });
 
   // load audio from URL
   const audio = await canvasUtils.loadAudio({ url: params.audioUrl });
@@ -44,7 +44,7 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
     anchor: "center",
     roundedCaps: true,
     options: {
-      fill: "white",
+      fill: "#ffffff",
       width: params.size.width * 0.5,
       height: params.size.height * 0.9,
       originY: "center",

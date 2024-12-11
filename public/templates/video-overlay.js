@@ -4,7 +4,7 @@ Background video with text overlay
 
 const defaultParams = {
   text: "Don't panic!",
-  videoUrl: "/video/bbb.mp4",
+  videoUrl: "https://js2video.com/video/bbb.mp4",
   fps: 30,
   size: {
     width: 1920,

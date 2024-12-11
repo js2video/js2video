@@ -15,7 +15,7 @@ const defaultParams = {
 
 const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   // set background color
-  canvas.set({ backgroundColor: "#ececec" });
+  canvas.set({ backgroundColor: "#fefb9f" });
 
   // load google font
   await utils.loadGoogleFont(params.fontFamily);
@@ -28,7 +28,7 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
       fontSize: 140,
       fontFamily: params.fontFamily,
       fontWeight: "bold",
-      fill: "#121212",
+      fill: "#000000",
       originX: "center",
       originY: "center",
       textAlign: "center",

@@ -16,7 +16,8 @@ const defaultParams = {
 };
 
 const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
-  canvas.set({ backgroundColor: "#ececec" });
+  // set background color
+  canvas.set({ backgroundColor: "#204440" });
 
   // create a formatter from the number
   const formatter = new Intl.NumberFormat("en-US", {
@@ -35,7 +36,7 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
       fontSize: 300,
       fontFamily: params.fontFamily,
       fontWeight: "bold",
-      fill: "#121212",
+      fill: "#ffffff",
       originX: "center",
       originY: "center",
     },

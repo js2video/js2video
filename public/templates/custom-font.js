@@ -4,7 +4,7 @@ Load custom font by URL
 
 const defaultParams = {
   text: "Don't panic!",
-  fontUrl: "/fonts/calsans-semibold.woff2",
+  fontUrl: "https://js2video.com/fonts/calsans-semibold.woff2",
   fps: 30,
   size: {
     width: 1920,
@@ -14,7 +14,7 @@ const defaultParams = {
 
 const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   // set background color
-  canvas.set({ backgroundColor: "#002299" });
+  canvas.set({ backgroundColor: "#1f7dff" });
 
   // load font from URL
   const fontFamily = await utils.loadFont(params.fontUrl);
@@ -25,7 +25,7 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
     options: {
       fontSize: 200,
       fontFamily: fontFamily,
-      fill: "white",
+      fill: "#000000",
       originX: "center",
       originY: "center",
     },
