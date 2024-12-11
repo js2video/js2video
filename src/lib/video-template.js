@@ -7,6 +7,9 @@ import * as canvasUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 import { validateParams } from "./validate-params";
 import { getCrunker } from "./utils";
+import { registerGsapEffects } from "./gsap-effects/register-gsap-effects";
+
+registerGsapEffects();
 
 /** default params for all video templates */
 const globalParams = {
@@ -379,7 +382,7 @@ class VideoTemplate {
    * @param {AbortSignal} [options.signal] - The signal that can be used to abort the export process.
    * @returns {Promise<ExportResult>}
    */
-  async export({ signal }) {
+  async export({ signal } = {}) {
     try {
       console.log("startExport");
       this.#isExporting = true;

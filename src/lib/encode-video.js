@@ -189,7 +189,7 @@ async function encodeVideo({
 
     // loop through and encode all frames
     while (frame < frames) {
-      if (signal && signal.aborted) {
+      if (typeof signal !== "undefined" && signal.aborted) {
         throw new DOMException("The operation was aborted", "AbortError");
       }
       const time = frame / fps;
