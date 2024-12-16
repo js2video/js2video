@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@font-face {
+  font-family: "mona-sans";
+  src: url("/fonts/MonaSansVF-Regular.woff2")
+    format("woff2 supports variations");
+  src: url("/fonts/MonaSansVF-Regular.woff2") format("woff2-variations");
+  font-weight: 200 900;
+  font-stretch: 75% 125%;
+}
+
+:root {
+  --font-ui: "mona-sans";
+}
+
+html {
+  /* https://github.com/github/mona-sans?tab=readme-ov-file#stylistic-sets */
+  font-feature-settings: "ss05" off;
+}
+
+body {
+  @apply font-ui antialiased;
+}
