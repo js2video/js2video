@@ -21,7 +21,7 @@ const CurrentTime = () => {
   const currentTime = useCurrentTime();
   const duration = useDuration();
   return (
-    <div className="tabular-nums px-2 text-white text-sm opacity-60">
+    <div className="tabular-nums px-2 text-white text-sm opacity-70 font-mono">
       {formatTime(currentTime)} / {formatTime(duration)}
     </div>
   );
