@@ -250,6 +250,7 @@ function isPuppeteer() {
 
 // don't know why we must do this, but I don't have a better solution :/
 function getCrunker() {
+  // @ts-ignore
   return isPuppeteer() ? new Crunker.default() : new Crunker();
 }
 
@@ -259,6 +260,34 @@ function isObjectUrl(url) {
     typeof url === "string" &&
     (url.startsWith("blob:") || url.startsWith("file:"))
   );
+}
+
+/**
+ * Repeatedly calls the given function until it returns `true` or the timeout is reached.
+ *
+ * @param {() => Promise<boolean>} func - An asynchronous function to evaluate. It should return `true` when the condition is met.
+ * @param {number} timeout - The maximum time (in milliseconds) to wait before rejecting.
+ * @returns {Promise<boolean>} Resolves with `true` if the function returns `true` within the timeout, otherwise rejects with an error.
+ * @throws {Error} Throws an error if the timeout is reached before the function returns `true`.
+ */
+async function waitFor(func, timeout) {
+  return new Promise((resolve, reject) => {
+    const startTime = Date.now();
+    const intervalId = setInterval(async () => {
+      // Call the function
+      const result = await func();
+      // If the function returns true, resolve with true
+      if (result === true) {
+        clearInterval(intervalId);
+        resolve(true);
+      }
+      // Check if the timeout has been reached
+      if (Date.now() - startTime >= timeout) {
+        clearInterval(intervalId);
+        reject(new Error("waitFor timeout"));
+      }
+    }, 100);
+  });
 }
 
 export {
@@ -280,4 +309,5 @@ export {
   isPuppeteer,
   getCrunker,
   isObjectUrl,
+  waitFor,
 };

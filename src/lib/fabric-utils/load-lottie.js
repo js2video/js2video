@@ -1,6 +1,7 @@
 import { FabricObject } from "fabric";
 import { JS2VideoMixin } from "./js2video-mixin";
 import { DotLottie } from "@lottiefiles/dotlottie-web";
+import { waitFor } from "../utils";
 
 class JS2VideoLottie extends JS2VideoMixin(FabricObject) {
   static type = "js2video_lottie";
@@ -32,7 +33,7 @@ class JS2VideoLottie extends JS2VideoMixin(FabricObject) {
   }
 
   async load() {
-    await new Promise((resolve) => setTimeout(resolve, 300));
+    await waitFor(async () => this.js2video_lottie.isLoaded, 2000);
   }
 
   async js2video_seek(time) {
