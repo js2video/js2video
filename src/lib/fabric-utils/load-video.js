@@ -39,7 +39,6 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
     } else {
       await new Promise((resolve) => {
         this.js2video_video.requestVideoFrameCallback((now, metadata) => {
-          console.log(time, metadata);
           resolve();
         });
         this.js2video_video.currentTime = time + 0.001;
