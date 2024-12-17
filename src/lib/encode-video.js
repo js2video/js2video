@@ -4,7 +4,6 @@ import {
   FileSystemWritableFileStreamTarget,
 } from "mp4-muxer";
 import { AVC } from "media-codecs";
-import { canBrowserEncodeVideo, isPuppeteer } from "./utils";
 
 function audioBufferToAudioData(audioBuffer) {
   // Create a new Float32Array to hold the planar audio data
@@ -39,9 +38,9 @@ function audioBufferToAudioData(audioBuffer) {
  * @param {gsap.core.Timeline} options.timeline
  * @param {HTMLCanvasElement} options.canvasElement
  * @param {Function} options.progressHandler
- * @param {string} options.filePrefix
  * @param {AudioBuffer} [options.audioBuffer]
  * @param {AbortSignal} [options.signal] - The signal that can be used to abort the export process.
+ * @param {FileSystemWritableFileStream} [options.fileStream]
  */
 async function encodeVideo({
   bitrate,
@@ -52,11 +51,11 @@ async function encodeVideo({
   timeline,
   canvasElement,
   progressHandler,
-  filePrefix,
   audioBuffer,
   signal,
+  fileStream,
 }) {
-  let muxer, audioEncoder, videoEncoder, target, fileWritableStream, fileHandle;
+  let muxer, audioEncoder, videoEncoder, target;
 
   async function close() {
     if (audioEncoder) {
@@ -85,9 +84,9 @@ async function encodeVideo({
         console.warn(err);
       }
     }
-    if (fileWritableStream) {
+    if (fileStream) {
       try {
-        await fileWritableStream.close();
+        await fileStream.close();
         console.log("closed fileWritableStream");
       } catch (err) {
         console.warn(err);
@@ -99,7 +98,7 @@ async function encodeVideo({
     const audioCodec = "mp4a.40.2";
     const videoCodec = AVC.getCodec({ profile: "Main", level: "5.2" });
 
-    if (isPuppeteer()) {
+    if (!fileStream) {
       target = new StreamTarget({
         onData: async (chunk, position) => {
           // see puppeteer
@@ -108,20 +107,7 @@ async function encodeVideo({
         },
       });
     } else {
-      if (!canBrowserEncodeVideo()) {
-        throw "This browser cannot encode video yet. Please try Chrome/Chromium";
-      }
-      fileHandle = await window.showSaveFilePicker({
-        suggestedName: `${filePrefix}-${Date.now()}.mp4`,
-        types: [
-          {
-            description: "Video File",
-            accept: { "video/mp4": [".mp4"] },
-          },
-        ],
-      });
-      fileWritableStream = await fileHandle.createWritable();
-      target = new FileSystemWritableFileStreamTarget(fileWritableStream);
+      target = new FileSystemWritableFileStreamTarget(fileStream);
     }
 
     const muxerOptions = {

@@ -78,7 +78,7 @@ class VideoTemplate {
   /** @type {Array<IJS2VideoObject>} */
   #objects = [];
   #isPlaying = false;
-  #videoFilePrefix = "js2video";
+  videoFilePrefix = "js2video";
 
   /**
    * Creates an instance of the JS2Video class
@@ -106,7 +106,7 @@ class VideoTemplate {
     this.#autoPlay = autoPlay;
     this.#loop = loop;
     this.#enableUnsecureMode = enableUnsecureMode;
-    this.#videoFilePrefix = videoFilePrefix;
+    this.videoFilePrefix = videoFilePrefix;
   }
 
   /**
@@ -380,17 +380,22 @@ class VideoTemplate {
    *
    * @param {Object} options - The options for the export.
    * @param {AbortSignal} [options.signal] - The signal that can be used to abort the export process.
+   * @param {FileSystemWritableFileStream} [options.fileStream]
    * @returns {Promise<ExportResult>}
    */
-  async export({ signal } = {}) {
+  async export({ signal, fileStream } = {}) {
     try {
       console.log("startExport");
       this.#isExporting = true;
+      this.#sendEvent();
+
       await Promise.all(this.#objects.map((obj) => obj.js2video_startExport()));
       await this.rewind();
       this.pause();
       this.#sendEvent();
+
       const audioBuffer = await this.#mergeAudio();
+
       await encodeVideo({
         audioBuffer,
         bitrate: this.#params.bitrate,
@@ -400,10 +405,11 @@ class VideoTemplate {
         seek: async (/** @type {number} */ time) => await this.seek(time),
         fps: this.#params.fps,
         timeline: this.#timeline,
-        filePrefix: this.#videoFilePrefix,
         progressHandler: () => this.#sendEvent(),
         signal,
+        fileStream,
       });
+
       await this.cleanupExport();
     } catch (err) {
       await this.cleanupExport();

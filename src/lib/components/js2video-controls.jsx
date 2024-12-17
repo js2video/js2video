@@ -123,8 +123,21 @@ const ExportButton = () => {
           const controller = new AbortController(); // Create a new controller
           setAbortController(controller);
           try {
+            const fileHandle = await window.showSaveFilePicker({
+              suggestedName: `${
+                videoTemplate.videoFilePrefix
+              }-${Date.now()}.mp4`,
+              types: [
+                {
+                  description: "Video File",
+                  accept: { "video/mp4": [".mp4"] },
+                },
+              ],
+            });
+            const fileStream = await fileHandle.createWritable();
             await videoTemplate.export({
               signal: controller.signal,
+              fileStream,
             });
             setIsAborted(false);
             confetti();
