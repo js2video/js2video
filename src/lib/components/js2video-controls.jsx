@@ -6,8 +6,9 @@ import {
   PauseIcon,
   RewindIcon,
   ArrowDownToLineIcon,
+  SquareArrowDownIcon,
 } from "lucide-react";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import * as Slider from "@radix-ui/react-slider";
 import confetti from "canvas-confetti";
 
@@ -68,6 +69,29 @@ const ControlButton = ({ children, ...rest }) => {
   );
 };
 
+const ExportServerButton = () => {
+  const { videoTemplate } = useJS2Video();
+  // @ts-ignore
+  const apiUrl = import.meta.env.VITE_EXPORT_API_URL;
+  if (!apiUrl) {
+    return;
+  }
+  const handleClick = async (e) => {
+    e.stopPropagation();
+    await fetch(apiUrl, {
+      method: "POST",
+      body: JSON.stringify({
+        templateUrl: videoTemplate.templateUrl,
+      }),
+    });
+  };
+  return (
+    <ControlButton onClick={handleClick}>
+      <SquareArrowDownIcon size={26} />
+    </ControlButton>
+  );
+};
+
 const ExportButton = () => {
   const { videoTemplate } = useJS2Video();
   const progress = useProgress();
@@ -95,6 +119,39 @@ const ExportButton = () => {
     }
   };
 
+  const handleClick = async (e) => {
+    console.log(videoTemplate.templateUrl);
+    e.stopPropagation();
+    if (!canBrowserEncodeVideo()) {
+      return alert(
+        "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
+      );
+    }
+    const controller = new AbortController(); // Create a new controller
+    setAbortController(controller);
+    try {
+      const fileHandle = await window.showSaveFilePicker({
+        suggestedName: `${videoTemplate.videoFilePrefix}-${Date.now()}.mp4`,
+        types: [
+          {
+            description: "Video File",
+            accept: { "video/mp4": [".mp4"] },
+          },
+        ],
+      });
+      const fileStream = await fileHandle.createWritable();
+      await videoTemplate.export({
+        signal: controller.signal,
+        fileStream,
+      });
+      setIsAborted(false);
+      confetti();
+    } catch (err) {
+      console.error(err);
+      setIsAborted(false);
+    }
+  };
+
   return (
     <>
       {!!isExporting && (
@@ -112,41 +169,8 @@ const ExportButton = () => {
           </div>
         </div>
       )}
-      <ControlButton
-        onClick={async (e) => {
-          e.stopPropagation();
-          if (!canBrowserEncodeVideo()) {
-            return alert(
-              "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
-            );
-          }
-          const controller = new AbortController(); // Create a new controller
-          setAbortController(controller);
-          try {
-            const fileHandle = await window.showSaveFilePicker({
-              suggestedName: `${
-                videoTemplate.videoFilePrefix
-              }-${Date.now()}.mp4`,
-              types: [
-                {
-                  description: "Video File",
-                  accept: { "video/mp4": [".mp4"] },
-                },
-              ],
-            });
-            const fileStream = await fileHandle.createWritable();
-            await videoTemplate.export({
-              signal: controller.signal,
-              fileStream,
-            });
-            setIsAborted(false);
-            confetti();
-          } catch (err) {
-            console.error(err);
-            setIsAborted(false);
-          }
-        }}
-      >
+
+      <ControlButton onClick={handleClick}>
         <ArrowDownToLineIcon size={26} />
       </ControlButton>
     </>
@@ -217,17 +241,21 @@ const JS2VideoControls = () => {
   const { videoTemplate } = useJS2Video();
   const [isMouseActive, setIsMouseActive] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
-  const [timer, setTimer] = useState(null);
+  const timerRef = useRef(null);
   const elementRef = useRef(null);
   const isPlaying = useIsPlaying();
 
-  const handleMouseMove = () => {
-    if (timer) {
-      clearTimeout(timer);
+  console.log("render");
+
+  const handleMouseMove = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
     }
     setIsMouseActive(true);
-    setTimer(setTimeout(() => setIsMouseActive(false), 2000));
-  };
+    timerRef.current = setTimeout(() => {
+      setIsMouseActive(false);
+    }, 2000);
+  }, []);
 
   useEffect(() => {
     if (videoTemplate) {
@@ -239,11 +267,11 @@ const JS2VideoControls = () => {
     document.addEventListener("mousemove", handleMouseMove);
     return () => {
       document.removeEventListener("mousemove", handleMouseMove);
-      if (timer) {
-        clearTimeout(timer);
+      if (timerRef.current) {
+        clearTimeout(timerRef.current);
       }
     };
-  }, [isPlaying, timer]);
+  }, [isPlaying]);
 
   if (!videoTemplate) {
     return;
@@ -271,6 +299,7 @@ const JS2VideoControls = () => {
         <Scrubber />
         <CurrentTime />
         <ExportButton />
+        <ExportServerButton />
       </div>
     </div>
   );
