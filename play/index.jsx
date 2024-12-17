@@ -9,7 +9,7 @@ const EditorHeader = () => {
   const [activeTab, setActiveTab] = useState("");
   if (activeTab === "examples") {
     return (
-      <div className="bg-[#282a36] absolute inset-0 p-2 z-50 mt-[1px] flex flex-col gap-4">
+      <div className="bg-[#282a36] absolute overflow-scroll whitespace-nowrap inset-0 p-2 z-50 mt-[1px] flex flex-col gap-4">
         <div className="flex justify-between">
           <div className="flex text-lg pt-[2px] font-bold">
             Template examples
