@@ -70,9 +70,19 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   }
 }
 
-const loadAudio = async ({ url, offset = 0, duration, options = {} }) => {
+const loadAudio = async ({
+  url,
+  video,
+  offset = 0,
+  duration,
+  options = {},
+}) => {
   if (duration !== undefined && offset + duration <= 0) {
     throw "offset + duration must be larger than 0";
+  }
+
+  if (video) {
+    url = video.js2video_video.src;
   }
 
   const cacheKey = ["load-audio", url].join(",");
