@@ -29,6 +29,21 @@ const JS2VideoEditor = ({ Header }) => {
   const isLoading = isLoadingTemplate || isLoadingTemplateUrl;
 
   useEffect(() => {
+    const handleBeforeUnload = (e) => {
+      if (isChanged) {
+        const message =
+          "Are you sure you want to leave? Any unsaved data will be lost.";
+        e.returnValue = message;
+        return message;
+      }
+    };
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+    };
+  }, [isChanged]);
+
+  useEffect(() => {
     async function load() {
       if (!videoTemplate) {
         return;
