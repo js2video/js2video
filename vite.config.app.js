@@ -22,6 +22,12 @@ export default defineConfig({
         changeOrigin: true,
         rewrite: (path) => path.replace(/^\/cdn/, "/js2video-public-cdn"),
       },
+      ...(process.env.NODE_ENV === "development" && {
+        "/docs": {
+          target: "http://localhost:5173", // VitePress server
+          changeOrigin: true,
+        },
+      }),
     },
   },
 });

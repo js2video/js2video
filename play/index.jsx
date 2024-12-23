@@ -80,11 +80,13 @@ const App = () => {
             src="/images/js2video-logo-dark.svg"
           />
         </div>
-        <div className="flex gap-4">
+        <div className="flex gap-6 items-center text-sm font-medium">
+          {/* <a href="/play/">Playground</a>
+          <a href="/docs/">Docs</a> */}
           <a href="https://github.com/js2video/js2video" target="_blank">
             <img
               className="invert"
-              style={{ height: "26px" }}
+              style={{ height: "32px" }}
               src="/images/github-mark.png"
             />
           </a>
