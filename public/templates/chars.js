@@ -12,7 +12,14 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
+const template = async ({
+  canvas,
+  timeline,
+  params,
+  utils,
+  canvasUtils,
+  PixiFilters,
+}) => {
   canvas.set({ backgroundColor: "#002299" });
 
   // load Google font by name
@@ -23,7 +30,7 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
     canvas,
     text: params.text,
     options: {
-      width: 1200,
+      width: canvas.width * 0.8,
       fontSize: 120,
       fontFamily: params.fontFamily,
       fill: "white",
@@ -31,22 +38,18 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
     },
   });
 
-  // add text to canvas
-  canvas.add(text);
-
   // center text on canvas
   canvas.centerObject(text);
 
   // animate chars
-  timeline
-    .from(text._objects, {
-      left: "-=100",
-      opacity: 0,
-      duration: 0.2,
-      stagger: 0.02,
-      ease: "back",
-    })
-    .to({}, { duration: 1 });
+  timeline.from(text._objects, {
+    left: "-=100",
+    opacity: 0,
+    duration: 0.2,
+    stagger: 0.02,
+    ease: "back",
+    duration: 1,
+  });
 };
 
 export { template, defaultParams };
