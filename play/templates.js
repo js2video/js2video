@@ -59,6 +59,10 @@ const templates = [
         label: "Background video with text overlay",
         url: "/templates/video-overlay.js",
       },
+      {
+        label: "Video with filter",
+        url: "/templates/video-pixi-filter.js",
+      },
     ],
   },
   {
