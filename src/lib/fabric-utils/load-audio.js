@@ -77,12 +77,14 @@ const loadAudio = async ({
   duration,
   options = {},
 }) => {
-  if (duration !== undefined && offset + duration <= 0) {
-    throw "offset + duration must be larger than 0";
-  }
-
   if (video) {
     url = video.js2video_video.src;
+    offset = video.js2video_start * -1;
+    duration = video.js2video_start + video.js2video_duration;
+  }
+
+  if (duration !== undefined && offset + duration <= 0) {
+    throw "offset + duration must be larger than 0";
   }
 
   const cacheKey = ["load-audio", url].join(",");

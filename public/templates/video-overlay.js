@@ -67,7 +67,7 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   timeline.to(
     {},
     {
-      duration: video.js2video_video.duration,
+      duration: video.js2video_duration,
     },
     0
   );

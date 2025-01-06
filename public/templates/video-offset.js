@@ -5,55 +5,54 @@ Background video with text overlay
 const defaultParams = {
   text: "Don't panic!",
   videoUrl: "https://js2video.com/video/bbb.mp4",
-  fps: 15,
+  fps: 30,
   size: {
-    width: 1080,
+    width: 1920,
     height: 1080,
   },
 };
 
 const template = async ({
   canvas,
-  Pixi,
   timeline,
   params,
   utils,
   canvasUtils,
   PixiFilters,
 }) => {
+  // set background color
+  canvas.set({ backgroundColor: "green" });
+
   // load video from URL
   const video = await canvasUtils.loadVideo({
     url: params.videoUrl,
+    start: 10,
+    end: 15,
     options: {
       originX: "center",
       originY: "center",
     },
   });
 
+  // add video to canvas
   canvas.add(video);
-  canvasUtils.scaleToCoverCanvas(video, canvas);
+
+  // scale video to fit canvas
+  canvasUtils.scaleToFitCanvas(video, canvas);
+
+  // center video on canvas
   canvas.centerObject(video);
 
-  const oldFilmFilter = new PixiFilters.OldFilmFilter({
-    sepia: 1,
-    noise: 0.1,
-    noiseSize: 2,
-    seed: Math.random(),
-    scratchWidth: 8,
-    vignettingAlpha: 0.2,
-  });
-  const filters = [oldFilmFilter];
-  const pixiFilters = await canvasUtils.loadPixiFilters({ canvas, filters });
-  canvas.add(pixiFilters);
+  const audio = await canvasUtils.loadAudio({ video });
+  canvas.add(audio);
+
+  console.log(audio.js2video_duration);
 
   // create a no-op animation with the duration of the video
   timeline.to(
     {},
     {
       duration: video.js2video_duration,
-      onUpdate: () => {
-        filters.map((f) => (f.seed = Math.random()));
-      },
     },
     0
   );
