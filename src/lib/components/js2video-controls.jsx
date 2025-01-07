@@ -1,12 +1,13 @@
 import { useJS2VideoEventProperty } from "./hooks/use-js2video-event-property";
 import { useJS2Video } from "./js2video-provider";
-import { canBrowserEncodeVideo, formatTime } from "../utils";
+import { canBrowserEncodeVideo, formatTime, cn } from "../utils";
 import {
   PlayIcon,
   PauseIcon,
   RewindIcon,
   ArrowDownToLineIcon,
   SquareArrowDownIcon,
+  Loader2Icon,
 } from "lucide-react";
 import { useEffect, useState, useRef, useCallback } from "react";
 import * as Slider from "@radix-ui/react-slider";
@@ -31,9 +32,17 @@ const CurrentTime = () => {
 const Scrubber = () => {
   const resolution = 1000;
   const progress = useProgress();
-  const { videoTemplate } = useJS2Video();
-  const handleChange = (value) => videoTemplate.scrub(value[0] / resolution);
+  const { isLoading, videoTemplate } = useJS2Video();
+  const handleChange = (value) => {
+    if (isLoading) {
+      return;
+    }
+    videoTemplate.scrub(value[0] / resolution);
+  };
   const handleCommit = async (value) => {
+    if (isLoading) {
+      return;
+    }
     const progress = value[0] / resolution;
     const time = videoTemplate.duration * progress;
     await videoTemplate.seek(time);
@@ -62,8 +71,13 @@ const Scrubber = () => {
 };
 
 const ControlButton = ({ children, ...rest }) => {
+  const { isLoading } = useJS2Video();
   return (
-    <button {...rest} className="text-white p-2">
+    <button
+      {...rest}
+      disabled={isLoading}
+      className={cn("text-white p-2", { "text-white/60": isLoading })}
+    >
       {children}
     </button>
   );
@@ -178,7 +192,7 @@ const ExportButton = () => {
 };
 
 const TogglePlayButton = () => {
-  const { videoTemplate } = useJS2Video();
+  const { isLoading, videoTemplate } = useJS2Video();
   const isPlaying = useIsPlaying();
   return (
     <ControlButton
@@ -207,30 +221,39 @@ const RewindButton = () => {
 };
 
 const PlayButton = () => {
-  const { videoTemplate } = useJS2Video();
+  const { isLoading, videoTemplate } = useJS2Video();
   const isPlaying = useIsPlaying();
+
   if (isPlaying) {
     return;
-  } else {
+  }
+
+  if (isLoading) {
     return (
-      <button
-        className="bg-black size-[66px] rounded-full flex items-center justify-center"
-        onClick={(e) => {
-          e.stopPropagation();
-          videoTemplate.togglePlay();
-        }}
-      >
-        <div
-          style={{
-            borderLeft: "24px solid white",
-            borderTop: "15px solid transparent",
-            borderBottom: "15px solid transparent",
-            marginLeft: "6px",
-          }}
-        />
-      </button>
+      <div className="text-white">
+        <Loader2Icon className="animate-spin" />
+      </div>
     );
   }
+
+  return (
+    <button
+      className="bg-black size-[66px] rounded-full flex items-center justify-center"
+      onClick={(e) => {
+        e.stopPropagation();
+        videoTemplate.togglePlay();
+      }}
+    >
+      <div
+        style={{
+          borderLeft: "24px solid white",
+          borderTop: "15px solid transparent",
+          borderBottom: "15px solid transparent",
+          marginLeft: "6px",
+        }}
+      />
+    </button>
+  );
 };
 
 /**
@@ -238,7 +261,7 @@ const PlayButton = () => {
  * @returns {JSX.Element}
  */
 const JS2VideoControls = () => {
-  const { videoTemplate } = useJS2Video();
+  const { isLoading, videoTemplate } = useJS2Video();
   const [isMouseActive, setIsMouseActive] = useState(false);
   const [isHovered, setIsHovered] = useState(false);
   const timerRef = useRef(null);
@@ -273,17 +296,13 @@ const JS2VideoControls = () => {
     };
   }, [isPlaying]);
 
-  if (!videoTemplate) {
-    return;
-  }
-
   const isVisible = isHovered || !isPlaying || isMouseActive;
 
   return (
     <div
       ref={elementRef}
       className="absolute inset-0 flex flex-col"
-      onClick={(e) => videoTemplate.togglePlay()}
+      onClick={(e) => (isLoading ? null : videoTemplate.togglePlay())}
       style={{ transition: "opacity 0.5s ease", opacity: isVisible ? 1 : 0 }}
     >
       <div className="flex flex-1 flex-col items-center justify-center">
