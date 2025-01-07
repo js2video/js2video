@@ -114,7 +114,7 @@ async function loadVideo({ url, start = 0, end = -1, options = {} }) {
         once: true,
       }
     );
-    video.addEventListener("canplay", () => resolve(video), {
+    video.addEventListener("canplaythrough", () => resolve(video), {
       once: true,
     });
     video.muted = true;
