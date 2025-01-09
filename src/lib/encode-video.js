@@ -4,6 +4,7 @@ import {
   FileSystemWritableFileStreamTarget,
 } from "mp4-muxer";
 import { AVC } from "media-codecs";
+import { getCrunker } from "./utils";
 
 function audioBufferToAudioData(audioBuffer) {
   // Create a new Float32Array to hold the planar audio data
@@ -34,6 +35,8 @@ function audioBufferToAudioData(audioBuffer) {
  * @param {number} options.width
  * @param {number} options.height
  * @param {number} options.fps
+ * @param {number} options.rangeStart
+ * @param {number} options.rangeEnd
  * @param {Function} options.seek
  * @param {gsap.core.Timeline} options.timeline
  * @param {HTMLCanvasElement} options.canvasElement
@@ -47,6 +50,8 @@ async function encodeVideo({
   width,
   height,
   fps,
+  rangeStart,
+  rangeEnd,
   seek,
   timeline,
   canvasElement,
@@ -149,10 +154,7 @@ async function encodeVideo({
     if (audioBuffer) {
       audioEncoder = new AudioEncoder({
         output: (chunk, meta) => {
-          const time = chunk.timestamp / 1000 / 1000;
-          if (time <= timeline.duration()) {
-            muxer.addAudioChunk(chunk, meta);
-          }
+          muxer.addAudioChunk(chunk, meta);
         },
         error: (e) => console.error(e),
       });
@@ -171,7 +173,8 @@ async function encodeVideo({
     }
 
     let frame = 0;
-    let frames = Math.round(timeline.duration() * fps) + 1;
+    let currentFrame = 0;
+    const frames = Math.round(timeline.duration() * fps) + 1;
 
     // loop through and encode all frames
     while (frame < frames) {
@@ -179,24 +182,31 @@ async function encodeVideo({
         throw new DOMException("The operation was aborted", "AbortError");
       }
       const time = frame / fps;
-      // update timeline
-      await seek(Math.min(time, timeline.duration()));
-      // grab the canvas into a frame
-      const videoFrame = new VideoFrame(canvasElement, {
-        timestamp: time * 1000 * 1000,
-      });
-      // TODO: maybe make this user configurable?
-      // Frequent flushes/keyframes = larger sizes. 5s is a OK setting.
-      // keyframe first and every 5s
-      videoEncoder.encode(videoFrame, {
-        keyFrame: frame === 0 || frame % Math.round(fps * 5) === 0,
-      });
-      // flush every keyframe
-      videoFrame.close();
-      if (frame % Math.round(fps * 5) === 0) {
-        await videoEncoder.flush();
+      if (time > rangeEnd || time > timeline.duration()) {
+        break;
       }
-      await progressHandler({ progress: timeline.progress() });
+      if (time >= rangeStart) {
+        // update timeline + canvas
+        await seek(time);
+        // grab the canvas into a frame
+        const videoFrame = new VideoFrame(canvasElement, {
+          timestamp: (time - rangeStart) * 1000 * 1000,
+        });
+        // TODO: maybe make this user configurable?
+        // Frequent flushes/keyframes = larger sizes. 5s is a OK setting.
+        // keyframe first and every 5s
+        videoEncoder.encode(videoFrame, {
+          keyFrame:
+            currentFrame === 0 || currentFrame % Math.round(fps * 5) === 0,
+        });
+        // flush every keyframe
+        videoFrame.close();
+        if (currentFrame % Math.round(fps * 5) === 0) {
+          await videoEncoder.flush();
+        }
+        await progressHandler({ progress: timeline.progress() });
+        currentFrame++;
+      }
       frame++;
     }
 

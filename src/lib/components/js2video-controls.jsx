@@ -18,6 +18,8 @@ const useCurrentTime = () => useJS2VideoEventProperty("currentTime", 0);
 const useProgress = () => useJS2VideoEventProperty("progress", 0);
 const useIsExporting = () => useJS2VideoEventProperty("isExporting", 0);
 const useIsPlaying = () => useJS2VideoEventProperty("isPlaying", false);
+const useRangeStart = () => useJS2VideoEventProperty("rangeStart", 0);
+const useRangeEnd = () => useJS2VideoEventProperty("rangeEnd", Infinity);
 
 const CurrentTime = () => {
   const currentTime = useCurrentTime();
@@ -30,31 +32,48 @@ const CurrentTime = () => {
 };
 
 const Scrubber = () => {
-  const resolution = 1000;
   const progress = useProgress();
+  const rangeStartTime = useRangeStart();
+  const rangeEndTime = useRangeEnd();
   const { isLoading, videoTemplate } = useJS2Video();
+  const rangeStartProgress = videoTemplate?.timeToProgress(rangeStartTime) || 0;
+  const rangeEndProgress = videoTemplate?.timeToProgress(rangeEndTime) || 1;
+
   const handleChange = (value) => {
     if (isLoading) {
       return;
     }
-    videoTemplate.scrub(value[0] / resolution);
+    const [rangeStartProgress, progress, rangeEndProgress] = value;
+    videoTemplate.scrub(progress);
+    videoTemplate.setRange(
+      videoTemplate.progressToTime(rangeStartProgress),
+      videoTemplate.progressToTime(rangeEndProgress)
+    );
   };
+
   const handleCommit = async (value) => {
     if (isLoading) {
       return;
     }
-    const progress = value[0] / resolution;
-    const time = videoTemplate.duration * progress;
-    await videoTemplate.seek(time);
+    const progress = value[1];
+    await videoTemplate.seek(videoTemplate.progressToTime(progress));
   };
+
+  // display placeholder until its loaded
+  if (!videoTemplate) {
+    return (
+      <div className="flex-1 h-[2px] rounded-full bg-[#222222] mx-4"></div>
+    );
+  }
+
   return (
     <div className="flex-1 px-4" onClick={(e) => e.stopPropagation()}>
       {/* https://www.radix-ui.com/primitives/docs/components/slider#api-reference */}
       <Slider.Root
         className="relative flex h-5 flex-1 touch-none select-none items-center"
-        value={[progress * resolution]}
-        max={resolution}
-        step={1}
+        value={[rangeStartProgress, progress, rangeEndProgress]}
+        max={1}
+        step={0.001}
         onValueChange={handleChange}
         onValueCommit={handleCommit}
       >
@@ -62,7 +81,15 @@ const Scrubber = () => {
           <Slider.Range className="absolute h-full rounded-full bg-white" />
         </Slider.Track>
         <Slider.Thumb
+          className="block size-3 rounded-[10px] bg-white focus:outline-none"
+          aria-label="Position"
+        />
+        <Slider.Thumb
           className="block size-5 rounded-[10px] bg-white focus:outline-none"
+          aria-label="Position"
+        />
+        <Slider.Thumb
+          className="block size-3 rounded-[10px] bg-white focus:outline-none"
           aria-label="Position"
         />
       </Slider.Root>
