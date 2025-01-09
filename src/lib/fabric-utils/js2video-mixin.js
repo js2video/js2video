@@ -27,19 +27,10 @@ const JS2VideoMixin = (Base) =>
     }
 
     js2video_play() {
-      if (typeof super.js2video_play === "function") {
-        super.js2video_play();
-      }
+      return;
     }
 
     js2video_pause() {
-      if (typeof super.js2video_pause === "function") {
-        super.js2video_pause();
-      }
-    }
-
-    async js2video_seek(time) {
-      console.log("fallback seek for", super.type);
       return;
     }
 
@@ -47,18 +38,19 @@ const JS2VideoMixin = (Base) =>
       return;
     }
 
+    async js2video_seek(time) {
+      return;
+    }
+
     async js2video_startExport() {
-      console.log("fallback end export for", super.type);
       return;
     }
 
     async js2video_endExport() {
-      console.log("fallback end export for", super.type);
       return;
     }
 
     async js2video_dispose() {
-      console.log("fallback dispose for", super.type);
       return;
     }
 
