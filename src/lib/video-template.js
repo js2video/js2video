@@ -475,7 +475,7 @@ class VideoTemplate {
   }
 
   timeToProgress(time) {
-    return time / this.duration;
+    return Math.min(1, time / this.duration);
   }
 
   progressToTime(progress) {

@@ -1,6 +1,6 @@
 import { useJS2VideoEventProperty } from "./hooks/use-js2video-event-property";
 import { useJS2Video } from "./js2video-provider";
-import { canBrowserEncodeVideo, formatTime, cn } from "../utils";
+import { canBrowserEncodeVideo, formatTime, cn, invlerp } from "../utils";
 import {
   PlayIcon,
   PauseIcon,
@@ -38,6 +38,7 @@ const Scrubber = () => {
   const { isLoading, videoTemplate } = useJS2Video();
   const rangeStartProgress = videoTemplate?.timeToProgress(rangeStartTime) || 0;
   const rangeEndProgress = videoTemplate?.timeToProgress(rangeEndTime) || 1;
+  const rangeProgress = invlerp(rangeStartProgress, rangeEndProgress, progress);
 
   const handleChange = (value) => {
     if (isLoading) {
@@ -62,7 +63,7 @@ const Scrubber = () => {
   // display placeholder until its loaded
   if (!videoTemplate) {
     return (
-      <div className="flex-1 h-[2px] rounded-full bg-[#222222] mx-4"></div>
+      <div className="flex-1 h-[2px] rounded-full bg-[#111111] mx-4"></div>
     );
   }
 
@@ -78,7 +79,19 @@ const Scrubber = () => {
         onValueCommit={handleCommit}
       >
         <Slider.Track className="relative h-[2px] grow rounded-full bg-[#333333]">
-          <Slider.Range className="absolute h-full rounded-full bg-white" />
+          <Slider.Range
+            className="absolute h-full rounded-full bg-white"
+            asChild
+          >
+            <div
+              style={{
+                height: "2px",
+                background: `linear-gradient(to right, #fafafa ${
+                  rangeProgress * 100
+                }%, #555555 ${rangeProgress * 100}% 100%)`,
+              }}
+            ></div>
+          </Slider.Range>
         </Slider.Track>
         <Slider.Thumb
           className="block size-3 rounded-[10px] bg-white focus:outline-none"
