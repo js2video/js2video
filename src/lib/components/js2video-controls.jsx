@@ -19,7 +19,7 @@ const useProgress = () => useJS2VideoEventProperty("progress", 0);
 const useIsExporting = () => useJS2VideoEventProperty("isExporting", 0);
 const useIsPlaying = () => useJS2VideoEventProperty("isPlaying", false);
 const useRangeStart = () => useJS2VideoEventProperty("rangeStart", 0);
-const useRangeEnd = () => useJS2VideoEventProperty("rangeEnd", Infinity);
+const useRangeEnd = () => useJS2VideoEventProperty("rangeEnd", 1);
 
 const CurrentTime = () => {
   const currentTime = useCurrentTime();
@@ -32,32 +32,24 @@ const CurrentTime = () => {
 };
 
 const Scrubber = () => {
-  const progress = useProgress();
-  const rangeStartTime = useRangeStart();
-  const rangeEndTime = useRangeEnd();
   const { isLoading, videoTemplate } = useJS2Video();
-  const rangeStartProgress = videoTemplate?.timeToProgress(rangeStartTime) || 0;
-  const rangeEndProgress = videoTemplate?.timeToProgress(rangeEndTime) || 1;
-  const rangeProgress = invlerp(rangeStartProgress, rangeEndProgress, progress);
+  const progress = useProgress();
+  const rangeStart = useRangeStart();
+  const rangeEnd = useRangeEnd();
 
   const handleChange = (value) => {
     if (isLoading) {
       return;
     }
-    const [rangeStartProgress, progress, rangeEndProgress] = value;
-    videoTemplate.scrub(progress);
-    videoTemplate.setRange(
-      videoTemplate.progressToTime(rangeStartProgress),
-      videoTemplate.progressToTime(rangeEndProgress)
-    );
+    videoTemplate?.setRange(value[0], value[2]);
+    videoTemplate?.scrub(value[1]);
   };
 
   const handleCommit = async (value) => {
     if (isLoading) {
       return;
     }
-    const progress = value[1];
-    await videoTemplate.seek(videoTemplate.progressToTime(progress));
+    await videoTemplate?.seek({ progress: value[1] });
   };
 
   // display placeholder until its loaded
@@ -72,7 +64,7 @@ const Scrubber = () => {
       {/* https://www.radix-ui.com/primitives/docs/components/slider#api-reference */}
       <Slider.Root
         className="relative flex h-5 flex-1 touch-none select-none items-center"
-        value={[rangeStartProgress, progress, rangeEndProgress]}
+        value={[rangeStart, progress, rangeEnd]}
         max={1}
         step={0.001}
         onValueChange={handleChange}
@@ -86,23 +78,21 @@ const Scrubber = () => {
             <div
               style={{
                 height: "2px",
-                background: `linear-gradient(to right, #fafafa ${
-                  rangeProgress * 100
-                }%, #555555 ${rangeProgress * 100}% 100%)`,
+                background: `linear-gradient(to right, #fafafa 100%, #555555 100% 100%)`,
               }}
             ></div>
           </Slider.Range>
         </Slider.Track>
         <Slider.Thumb
-          className="block size-3 rounded-[10px] bg-white focus:outline-none"
+          className="block size-3 rounded-full bg-white focus:outline-none"
           aria-label="Position"
         />
         <Slider.Thumb
-          className="block size-5 rounded-[10px] bg-white focus:outline-none"
+          className="block size-5 rounded-full bg-white focus:outline-none"
           aria-label="Position"
         />
         <Slider.Thumb
-          className="block size-3 rounded-[10px] bg-white focus:outline-none"
+          className="block size-3 rounded-full bg-white focus:outline-none"
           aria-label="Position"
         />
       </Slider.Root>
@@ -125,6 +115,9 @@ const ControlButton = ({ children, ...rest }) => {
 
 const ExportServerButton = () => {
   const { videoTemplate } = useJS2Video();
+  const rangeStart = useRangeStart();
+  const rangeEnd = useRangeEnd();
+
   // @ts-ignore
   const apiUrl = import.meta.env.VITE_EXPORT_API_URL;
   if (!apiUrl) {
@@ -136,6 +129,9 @@ const ExportServerButton = () => {
       method: "POST",
       body: JSON.stringify({
         templateUrl: videoTemplate.templateUrl,
+        params: {
+          range: [rangeStart, rangeEnd],
+        },
       }),
     });
   };

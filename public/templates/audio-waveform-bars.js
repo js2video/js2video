@@ -50,7 +50,6 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
       originY: "center",
       originX: "center",
     },
-    offset: audio.js2video_offset,
     duration: audio.js2video_duration,
   });
   canvas.add(waveform);
@@ -59,11 +58,7 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
   canvas.centerObject(waveform);
 
   // create animation in the duration of the audio
-  timeline.to(
-    {},
-    { duration: audio.js2video_offset + audio.js2video_duration },
-    0
-  );
+  timeline.to({}, { duration: audio.js2video_duration }, 0);
 };
 
 export { template, defaultParams };

@@ -33,8 +33,6 @@ class JS2VideoWaveformBars extends JS2VideoMixin(FabricObject) {
    * @param {Orientation} orientation=Orientation.VERTICAL
    * @param {Anchor} anchor
    * @param {boolean} roundedCaps
-   * @param {number} offset
-   * @param {number} duration
    */
   constructor(
     audio,
@@ -43,9 +41,7 @@ class JS2VideoWaveformBars extends JS2VideoMixin(FabricObject) {
     paddingOuter,
     orientation,
     anchor,
-    roundedCaps,
-    offset,
-    duration
+    roundedCaps
   ) {
     super(options);
     super.set({
@@ -64,8 +60,6 @@ class JS2VideoWaveformBars extends JS2VideoMixin(FabricObject) {
         orientation === Orientation.VERTICAL ? this.width : this.height,
       ]);
     this.js2video_barThickness = this.js2video_barSize.bandwidth();
-    this.js2video_offset = offset;
-    this.js2video_duration = duration;
   }
 
   _render(ctx) {
@@ -73,14 +67,9 @@ class JS2VideoWaveformBars extends JS2VideoMixin(FabricObject) {
       return;
     }
 
-    const currentTime = this.js2video_timeline.time();
-    const offsetTime = currentTime + this.js2video_offset * -1;
-
-    if (offsetTime < 0 || offsetTime > this.js2video_duration) {
-      return;
-    }
-
-    const currentFrame = Math.round(offsetTime * this.js2video_params.fps);
+    const currentFrame = Math.round(
+      this.js2video_timeline.time() * this.js2video_params.fps
+    );
 
     if (currentFrame >= this.js2video_audio.bins.length) {
       return;
@@ -153,12 +142,7 @@ async function loadWaveformBars({
   anchor = Anchor.BOTTOM,
   options = {},
   roundedCaps = false,
-  offset = 0,
-  duration = 1e6,
 }) {
-  if (offset + duration <= 0) {
-    throw "offset + duration must be larger than 0";
-  }
   const obj = new JS2VideoWaveformBars(
     audio,
     options,
@@ -166,9 +150,7 @@ async function loadWaveformBars({
     paddingOuter,
     orientation,
     anchor,
-    roundedCaps,
-    offset,
-    duration
+    roundedCaps
   );
   return obj;
 }

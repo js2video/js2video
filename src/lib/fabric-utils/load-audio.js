@@ -9,15 +9,11 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   /**
    * @param {AudioBuffer} audioBuffer
    * @param {Object} options
-   * @param {number} offset
-   * @param {number} [duration]
    */
-  constructor(audioBuffer, options, offset, duration) {
+  constructor(audioBuffer, options) {
     super(options);
     this.js2video_audioBuffer = audioBuffer;
-    this.js2video_offset = offset;
-    this.js2video_duration =
-      duration !== undefined ? duration : audioBuffer.duration;
+    this.js2video_duration = audioBuffer.duration;
     this.js2video_isAudioPlaying = false;
   }
 
@@ -31,7 +27,7 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
 
   play() {
     const currentTime = this.js2video_timeline.time();
-    const delay = this.js2video_offset - currentTime;
+    const delay = -currentTime;
     const duration = this.js2video_duration + Math.min(0, delay);
     if (duration <= 0) {
       return;
@@ -70,20 +66,9 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   }
 }
 
-const loadAudio = async ({
-  url,
-  video,
-  offset = 0,
-  duration,
-  options = {},
-}) => {
+const loadAudio = async ({ url, video, options = {} }) => {
   if (video) {
     url = video.js2video_video.src;
-    duration = video.js2video_duration;
-  }
-
-  if (duration !== undefined && offset + duration <= 0) {
-    throw "offset + duration must be larger than 0";
   }
 
   const cacheKey = ["load-audio", url].join(",");
@@ -97,7 +82,7 @@ const loadAudio = async ({
     await cache.set(cacheKey, audioBuffer);
   }
 
-  const obj = new JS2VideoAudio(audioBuffer, options, offset, duration);
+  const obj = new JS2VideoAudio(audioBuffer, options);
   return obj;
 };
 

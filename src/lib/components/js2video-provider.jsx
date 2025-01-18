@@ -81,7 +81,6 @@ const JS2VideoProvider = ({
   const [videoTemplate, setVideoTemplate] = useState(null);
   const [templateError, setTemplateError] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
-
   const vtRef = useRef(null);
   const previewRef = useRef(null);
 
@@ -95,6 +94,9 @@ const JS2VideoProvider = ({
 
   useEffect(() => {
     async function load() {
+      // keep previous range + progress when template changes
+      let range = vtRef.current?.range ?? [0, 1];
+      let progress = vtRef.current?.progress ?? 0;
       setIsLoading(true);
       setTemplateError(null);
       try {
@@ -113,6 +115,9 @@ const JS2VideoProvider = ({
       });
       try {
         await vtRef.current.load();
+        // set previous range and progress
+        vtRef.current.setRange(range[0], range[1]);
+        await vtRef.current.seek({ progress });
         setVideoTemplate(vtRef.current);
       } catch (err) {
         await vtRef.current.dispose();

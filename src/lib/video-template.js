@@ -19,10 +19,7 @@ const globalParams = {
     width: 1920,
     height: 1080,
   },
-  range: {
-    start: 0,
-    end: Infinity,
-  },
+  range: [0, 1],
 };
 
 /**
@@ -67,7 +64,7 @@ function isJS2VideoObject(obj) {
  * A JS2Video class
  */
 class VideoTemplate {
-  #range = [0, Infinity];
+  #range = [0, 1];
   #params;
   #timeline = gsap.timeline({ paused: true, repeat: -1 });
   #canvasElement = document.createElement("canvas");
@@ -137,7 +134,7 @@ class VideoTemplate {
     this.#timeline.eventCallback("onUpdate", async () => {
       this.#renderAll();
       this.#sendEvent();
-      if (this.#isPlaying && this.currentTime > this.#range[1]) {
+      if (this.#isPlaying && this.currentTime > this.rangeEndTime) {
         await this.rewind();
       }
     });
@@ -157,7 +154,7 @@ class VideoTemplate {
     validateParams(this.#params);
 
     // update range from params
-    this.setRange(this.#params.range.start, this.#params.range.end);
+    this.setRange(this.#params.range[0], this.#params.range[1]);
 
     // set gsap fps
     gsap.ticker.fps(this.#params.fps);
@@ -203,8 +200,8 @@ class VideoTemplate {
     addEventListener("resize", this.#resizeHandler.bind(this));
 
     // hack: forces rendering first video frame on all video objects
-    await this.seek(this.#range[0] + 0.001);
-    await this.seek(this.#range[0]);
+    await this.seek({ time: this.rangeStartTime + 0.001 });
+    await this.seek({ time: this.rangeStartTime });
 
     if (this.#autoPlay) {
       this.play();
@@ -224,8 +221,10 @@ class VideoTemplate {
       progress: this.progress,
       isPlaying: this.#isPlaying,
       isExporting: this.#isExporting,
-      rangeStart: this.#range[0],
-      rangeEnd: this.#range[1],
+      rangeStart: this.rangeStart,
+      rangeEnd: this.rangeEnd,
+      rangeStartTime: this.rangeStartTime,
+      rangeEndTime: this.rangeEndTime,
     };
     const ev = new CustomEvent("js2video", {
       detail: message,
@@ -276,11 +275,11 @@ class VideoTemplate {
       })
     );
 
-    // slice the audio to match the range / duration of the video
-    const rangeStart = this.#range[0];
-    const rangeEnd = Math.min(this.#range[1], this.duration);
-
-    mergedBuffer = crunker.sliceAudio(mergedBuffer, rangeStart, rangeEnd);
+    mergedBuffer = crunker.sliceAudio(
+      mergedBuffer,
+      this.rangeStartTime,
+      this.rangeEndTime
+    );
 
     crunker.close();
 
@@ -350,10 +349,16 @@ class VideoTemplate {
 
   /**
    * Seeks to a specific time in the video
-   * @param {number} time - Time to seek to
+   * @param {Object} options
+   * @param {number} [options.time] - Time to seek to
+   * @param {number} [options.progress]- Progress to seek to
    * @returns {Promise<void>}
    */
-  async seek(time) {
+  async seek({ time, progress }) {
+    if (typeof progress !== "undefined") {
+      time = this.duration * progress;
+    }
+    time = time ?? 0;
     console.log("seek time:", time);
     this.#timeline.time(time);
     // seek in all objects
@@ -385,7 +390,7 @@ class VideoTemplate {
    */
   async rewind() {
     console.log("rewind");
-    return this.seek(this.#range[0]);
+    return this.seek({ time: this.rangeStartTime });
   }
 
   async cleanupExport() {
@@ -411,7 +416,7 @@ class VideoTemplate {
       this.#sendEvent();
 
       await Promise.all(this.#objects.map((obj) => obj.js2video_startExport()));
-      await this.seek(0);
+      await this.seek({ time: 0 });
       this.pause();
       this.#sendEvent();
 
@@ -424,11 +429,11 @@ class VideoTemplate {
         height: this.#params.size.height,
         canvasElement: this.#canvasElement,
         seek: async (/** @type {number} */ time) => {
-          await this.seek(time);
+          await this.seek({ time });
         },
         fps: this.#params.fps,
-        rangeStart: this.#range[0],
-        rangeEnd: this.#range[1],
+        rangeStart: this.rangeStartTime,
+        rangeEnd: this.rangeEndTime,
         timeline: this.#timeline,
         progressHandler: () => this.#sendEvent(),
         signal,
@@ -469,17 +474,13 @@ class VideoTemplate {
     }
   }
 
-  setRange(startTime, endTime) {
-    this.#range = [startTime, endTime];
+  setRange(start, end) {
+    this.#range = [start, end];
     this.#sendEvent();
   }
 
-  timeToProgress(time) {
-    return Math.min(1, time / this.duration);
-  }
-
-  progressToTime(progress) {
-    return progress * this.duration;
+  get range() {
+    return this.#range;
   }
 
   get duration() {
@@ -492,6 +493,22 @@ class VideoTemplate {
 
   get progress() {
     return this.#timeline.progress();
+  }
+
+  get rangeStart() {
+    return this.#range[0];
+  }
+
+  get rangeEnd() {
+    return this.#range[1];
+  }
+
+  get rangeStartTime() {
+    return this.#range[0] * this.duration;
+  }
+
+  get rangeEndTime() {
+    return this.#range[1] * this.duration;
   }
 }
 
