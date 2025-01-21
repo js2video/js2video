@@ -133,7 +133,7 @@ class VideoTemplate {
 
     this.#timeline.eventCallback("onUpdate", async () => {
       this.#renderAll();
-      this.#sendEvent();
+      this.#sendEvent("onUpdate");
       if (this.#isPlaying && this.currentTime > this.rangeEndTime) {
         await this.rewind();
       }
@@ -141,7 +141,7 @@ class VideoTemplate {
 
     this.#timeline.eventCallback("onRepeat", async () => {
       await this.rewind();
-      this.#sendEvent();
+      this.#sendEvent("onRepeat");
     });
 
     // import video template from url/path
@@ -214,8 +214,9 @@ class VideoTemplate {
     this.scaleToFit();
   }
 
-  #sendEvent() {
+  #sendEvent(type = "none") {
     const message = {
+      type,
       currentTime: this.currentTime,
       duration: this.duration,
       progress: this.progress,
@@ -233,8 +234,8 @@ class VideoTemplate {
     window.dispatchEvent(ev);
   }
 
-  triggerEvent() {
-    this.#sendEvent();
+  triggerEvent(type) {
+    this.#sendEvent(type);
   }
 
   #renderAll() {
@@ -321,7 +322,7 @@ class VideoTemplate {
     this.#objects.map((obj) => {
       obj.js2video_play();
     });
-    this.#sendEvent();
+    this.#sendEvent("play");
   }
 
   /**
@@ -334,7 +335,7 @@ class VideoTemplate {
     this.#objects.map((obj) => {
       obj.js2video_pause();
     });
-    this.#sendEvent();
+    this.#sendEvent("pause");
   }
 
   /**
@@ -398,7 +399,7 @@ class VideoTemplate {
     this.#isExporting = false;
     await this.rewind();
     await Promise.all(this.#objects.map((obj) => obj.js2video_endExport()));
-    this.#sendEvent();
+    this.#sendEvent("cleanupExport");
     console.log("export ended");
   }
 
@@ -414,12 +415,12 @@ class VideoTemplate {
     try {
       console.log("startExport");
       this.#isExporting = true;
-      this.#sendEvent();
+      this.#sendEvent("startExport");
 
       await Promise.all(this.#objects.map((obj) => obj.js2video_startExport()));
       await this.seek({ time: 0 });
       this.pause();
-      this.#sendEvent();
+      this.#sendEvent("startExportPause");
 
       const audioBuffer = await this.#mergeAudio();
 
@@ -436,7 +437,7 @@ class VideoTemplate {
         rangeStart: this.rangeStartTime,
         rangeEnd: this.rangeEndTime,
         timeline: this.#timeline,
-        progressHandler: () => this.#sendEvent(),
+        progressHandler: () => this.#sendEvent("exportProgress"),
         signal,
         fileStream,
       });
@@ -477,7 +478,7 @@ class VideoTemplate {
 
   setRange(start, end) {
     this.#range = [start, end];
-    this.#sendEvent();
+    this.#sendEvent("setRange");
   }
 
   get range() {
