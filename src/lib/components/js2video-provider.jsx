@@ -117,7 +117,9 @@ const JS2VideoProvider = ({
         await vtRef.current.load();
         // set previous range and progress
         vtRef.current.setRange(range[0], range[1]);
-        await vtRef.current.seek({ progress });
+        if (progress !== vtRef.current.progress) {
+          await vtRef.current.seek({ progress });
+        }
         setVideoTemplate(vtRef.current);
       } catch (err) {
         await vtRef.current.dispose();
