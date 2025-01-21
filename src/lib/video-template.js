@@ -225,6 +225,7 @@ class VideoTemplate {
       rangeEnd: this.rangeEnd,
       rangeStartTime: this.rangeStartTime,
       rangeEndTime: this.rangeEndTime,
+      videoTemplate: this,
     };
     const ev = new CustomEvent("js2video", {
       detail: message,
