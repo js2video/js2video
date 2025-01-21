@@ -93,18 +93,23 @@ const JS2VideoProvider = ({
   }, [defaultParams]);
 
   useEffect(() => {
+    vtRef.current = videoTemplate;
+  }, [videoTemplate]);
+
+  useEffect(() => {
     async function load() {
+      setIsLoading(true);
+      setTemplateError(null);
       // keep previous range + progress when template changes
       let range = vtRef.current?.range ?? [0, 1];
       let progress = vtRef.current?.progress ?? 0;
-      setIsLoading(true);
-      setTemplateError(null);
+      // dispose old template
       try {
         await vtRef.current?.dispose();
       } catch (err) {
         console.error(err);
       }
-      vtRef.current = new VideoTemplate({
+      const vt = new VideoTemplate({
         templateUrl,
         enableUnsecureMode,
         parentElement: previewRef.current,
@@ -114,15 +119,20 @@ const JS2VideoProvider = ({
         videoFilePrefix,
       });
       try {
-        await vtRef.current.load();
+        await vt.load();
         // set previous range and progress
-        vtRef.current.setRange(range[0], range[1]);
-        if (progress !== vtRef.current.progress) {
-          await vtRef.current.seek({ progress });
+        vt.setRange(range[0], range[1]);
+        if (progress !== vt.progress) {
+          await vt.seek({ progress });
         }
-        setVideoTemplate(vtRef.current);
+        setVideoTemplate(vt);
+        vt.triggerEvent("loaded");
       } catch (err) {
-        await vtRef.current.dispose();
+        try {
+          await vt.dispose();
+        } catch (err) {
+          console.error(err);
+        }
         setTemplateError(err);
       } finally {
         setIsLoading(false);
