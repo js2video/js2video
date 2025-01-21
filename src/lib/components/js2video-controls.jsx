@@ -304,8 +304,6 @@ const JS2VideoControls = () => {
   const elementRef = useRef(null);
   const isPlaying = useIsPlaying();
 
-  console.log("render");
-
   const handleMouseMove = useCallback(() => {
     if (timerRef.current) {
       clearTimeout(timerRef.current);
@@ -315,12 +313,6 @@ const JS2VideoControls = () => {
       setIsMouseActive(false);
     }, 2000);
   }, []);
-
-  useEffect(() => {
-    if (videoTemplate) {
-      videoTemplate.triggerEvent();
-    }
-  }, [videoTemplate]);
 
   useEffect(() => {
     document.addEventListener("mousemove", handleMouseMove);
