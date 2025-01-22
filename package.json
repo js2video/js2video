@@ -90,6 +90,7 @@
     "@radix-ui/react-slider": "1.2.1",
     "@uiw/codemirror-theme-dracula": "4.23.6",
     "@uiw/react-codemirror": "4.23.6",
+    "@xzdarcy/react-timeline-editor": "0.1.9",
     "canvas-confetti": "1.9.3",
     "clsx": "2.1.1",
     "crunker": "2.4.0",

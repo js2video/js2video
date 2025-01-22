@@ -7,7 +7,7 @@ import { useJS2Video } from "./js2video-provider";
 const JS2VideoPreview = () => {
   const { previewRef, templateError } = useJS2Video();
   return (
-    <>
+    <div className="flex-1 flex relative">
       <div
         className="absolute inset-[2%] overflow-hidden flex items-center justify-center"
         ref={previewRef}
@@ -17,7 +17,7 @@ const JS2VideoPreview = () => {
           {`Template Error: ${templateError}`}
         </div>
       )}
-    </>
+    </div>
   );
 };
 

@@ -1,17 +1,18 @@
 import { useJS2VideoEventProperty } from "./hooks/use-js2video-event-property";
 import { useJS2Video } from "./js2video-provider";
-import { canBrowserEncodeVideo, formatTime, cn, invlerp } from "../utils";
+import { canBrowserEncodeVideo, formatTime, cn } from "../utils";
 import {
   PlayIcon,
   PauseIcon,
   RewindIcon,
   ArrowDownToLineIcon,
   SquareArrowDownIcon,
-  Loader2Icon,
+  ZoomInIcon,
+  ZoomOutIcon,
 } from "lucide-react";
-import { useEffect, useState, useRef, useCallback } from "react";
-import * as Slider from "@radix-ui/react-slider";
+import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
+import { Timeline } from "@xzdarcy/react-timeline-editor";
 
 const useDuration = () => useJS2VideoEventProperty("duration", 0);
 const useCurrentTime = () => useJS2VideoEventProperty("currentTime", 0);
@@ -25,77 +26,109 @@ const CurrentTime = () => {
   const currentTime = useCurrentTime();
   const duration = useDuration();
   return (
-    <div className="tabular-nums px-2 text-white text-sm opacity-70 font-mono">
+    <div className="px-2 text-sm opacity-70 font-mono whitespace-nowrap">
       {formatTime(currentTime)} / {formatTime(duration)}
     </div>
   );
 };
 
-const Scrubber = () => {
-  const { isLoading, videoTemplate } = useJS2Video();
-  const progress = useProgress();
-  const rangeStart = useRangeStart();
-  const rangeEnd = useRangeEnd();
+const CustomScale = ({ scale }) => {
+  return <>{scale}</>;
+};
 
-  const handleChange = (value) => {
-    if (isLoading) {
+const Scrubber = ({ scale, scaleWidth }) => {
+  const { videoTemplate } = useJS2Video();
+  const timelineRef = useRef();
+  const [data, setData] = useState([]);
+  const startLeft = 20;
+  const scrollWhilePlaying = false;
+  const autoScrollFrom = 500;
+
+  useEffect(() => {
+    const listener = (e) => {
+      if (!timelineRef.current) {
+        return;
+      }
+      const { currentTime, isPlaying } = e.detail;
+      // @ts-ignore
+      timelineRef.current.setTime(currentTime);
+      // auto scroll while playing
+      if (scrollWhilePlaying && isPlaying) {
+        const left =
+          currentTime * (scaleWidth / scale) + startLeft - autoScrollFrom;
+        // @ts-ignore
+        timelineRef.current.setScrollLeft(left);
+      }
+    };
+    window.addEventListener("js2video", listener);
+    return () => window.removeEventListener("js2video", listener);
+  }, []);
+
+  useEffect(() => {
+    if (!videoTemplate) {
       return;
     }
-    videoTemplate?.setRange(value[0], value[2]);
-    videoTemplate?.scrub(value[1]);
-  };
-
-  const handleCommit = async (value) => {
-    if (isLoading) {
-      return;
-    }
-    await videoTemplate?.seek({ progress: value[1] });
-  };
-
-  // display placeholder until its loaded
-  if (!videoTemplate) {
-    return (
-      <div className="flex-1 h-[2px] rounded-full bg-[#111111] mx-4"></div>
-    );
-  }
+    setData([
+      {
+        id: "0",
+        actions: [
+          {
+            id: "action0",
+            start: videoTemplate.rangeStartTime,
+            end: videoTemplate.rangeEndTime,
+            maxEnd: videoTemplate.duration,
+          },
+        ],
+      },
+    ]);
+  }, [videoTemplate]);
 
   return (
-    <div className="flex-1 px-4" onClick={(e) => e.stopPropagation()}>
-      {/* https://www.radix-ui.com/primitives/docs/components/slider#api-reference */}
-      <Slider.Root
-        className="relative flex h-5 flex-1 touch-none select-none items-center"
-        value={[rangeStart, progress, rangeEnd]}
-        max={1}
-        step={0.001}
-        onValueChange={handleChange}
-        onValueCommit={handleCommit}
-      >
-        <Slider.Track className="relative h-[2px] grow rounded-full bg-[#333333]">
-          <Slider.Range
-            className="absolute h-full rounded-full bg-white"
-            asChild
-          >
+    <div className="flex-1">
+      <Timeline
+        ref={timelineRef}
+        scale={scale}
+        scaleWidth={scaleWidth}
+        startLeft={startLeft}
+        scaleSplitCount={10}
+        onChange={(data) => setData(data)}
+        editorData={data}
+        effects={{}}
+        style={{
+          width: "100%",
+          height: "70px",
+          backgroundColor: "transparent",
+        }}
+        rowHeight={20}
+        autoScroll={true}
+        onScroll={(e) => {}}
+        onClickTimeArea={(time) => {
+          videoTemplate?.scrub({ time });
+          return true;
+        }}
+        onCursorDrag={(time) => {
+          videoTemplate?.scrub({ time });
+        }}
+        onCursorDragEnd={async (time) => {
+          await videoTemplate?.seek({ time });
+        }}
+        onActionResizeEnd={(e) => {
+          const { start, end } = e;
+          videoTemplate?.setTimeRange(start, end);
+        }}
+        onActionMoveEnd={(e) => {
+          const { start, end } = e;
+          videoTemplate?.setTimeRange(start, end);
+        }}
+        getActionRender={(action) => {
+          return (
             <div
-              style={{
-                height: "2px",
-                background: `linear-gradient(to right, #fafafa 100%, #555555 100% 100%)`,
-              }}
+              className={`h-full justify-center items-center bg-blue-700 flex text-blue-400`}
             ></div>
-          </Slider.Range>
-        </Slider.Track>
-        <Slider.Thumb
-          className="block size-3 rounded-full bg-white focus:outline-none"
-          aria-label="Position"
-        />
-        <Slider.Thumb
-          className="block size-5 rounded-full bg-white focus:outline-none"
-          aria-label="Position"
-        />
-        <Slider.Thumb
-          className="block size-3 rounded-full bg-white focus:outline-none"
-          aria-label="Position"
-        />
-      </Slider.Root>
+          );
+        }}
+        getScaleRender={(scale) => <CustomScale scale={scale} />}
+      />
     </div>
   );
 };
@@ -106,7 +139,7 @@ const ControlButton = ({ children, ...rest }) => {
     <button
       {...rest}
       disabled={isLoading}
-      className={cn("text-white p-2", { "text-white/60": isLoading })}
+      className={cn("p-2", { "opacity-60": isLoading })}
     >
       {children}
     </button>
@@ -120,9 +153,11 @@ const ExportServerButton = () => {
 
   // @ts-ignore
   const apiUrl = import.meta.env.VITE_EXPORT_API_URL;
+
   if (!apiUrl) {
     return;
   }
+
   const handleClick = async (e) => {
     e.stopPropagation();
     await fetch(apiUrl, {
@@ -171,7 +206,6 @@ const ExportButton = () => {
 
   const handleClick = async (e) => {
     console.log(videoTemplate.templateUrl);
-    e.stopPropagation();
     if (!canBrowserEncodeVideo()) {
       return alert(
         "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
@@ -207,12 +241,10 @@ const ExportButton = () => {
       {!!isExporting && (
         <div className="absolute inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
           <div className="flex items-center flex-col gap-4">
-            <div className="text-white">
-              Exporting MP4 to disk... {Math.round(progress * 100)}%
-            </div>
+            <div>Exporting MP4 to disk... {Math.round(progress * 100)}%</div>
             <button
               onClick={handleAbort}
-              className="bg-black px-4 py-2 rounded text-white text-sm"
+              className="bg-black px-4 py-2 rounded text-sm"
             >
               Abort
             </button>
@@ -228,12 +260,11 @@ const ExportButton = () => {
 };
 
 const TogglePlayButton = () => {
-  const { isLoading, videoTemplate } = useJS2Video();
+  const { videoTemplate } = useJS2Video();
   const isPlaying = useIsPlaying();
   return (
     <ControlButton
       onClick={(e) => {
-        e.stopPropagation();
         videoTemplate.togglePlay();
       }}
     >
@@ -247,7 +278,6 @@ const RewindButton = () => {
   return (
     <ControlButton
       onClick={async (e) => {
-        e.stopPropagation();
         await videoTemplate.rewind();
       }}
     >
@@ -256,97 +286,49 @@ const RewindButton = () => {
   );
 };
 
-const PlayButton = () => {
-  const { isLoading, videoTemplate } = useJS2Video();
-  const isPlaying = useIsPlaying();
-
-  if (isPlaying) {
-    return;
-  }
-
-  if (isLoading) {
-    return (
-      <div className="text-white">
-        <Loader2Icon className="animate-spin" />
-      </div>
-    );
-  }
-
-  return (
-    <button
-      className="bg-black size-[66px] rounded-full flex items-center justify-center"
-      onClick={(e) => {
-        e.stopPropagation();
-        videoTemplate.togglePlay();
-      }}
-    >
-      <div
-        style={{
-          borderLeft: "24px solid white",
-          borderTop: "15px solid transparent",
-          borderBottom: "15px solid transparent",
-          marginLeft: "6px",
-        }}
-      />
-    </button>
-  );
-};
-
 /**
  * Simple playback controls
  * @returns {JSX.Element}
  */
 const JS2VideoControls = () => {
-  const { isLoading, videoTemplate } = useJS2Video();
-  const [isMouseActive, setIsMouseActive] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-  const timerRef = useRef(null);
-  const elementRef = useRef(null);
-  const isPlaying = useIsPlaying();
-
-  const handleMouseMove = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-    }
-    setIsMouseActive(true);
-    timerRef.current = setTimeout(() => {
-      setIsMouseActive(false);
-    }, 2000);
-  }, []);
-
-  useEffect(() => {
-    document.addEventListener("mousemove", handleMouseMove);
-    return () => {
-      document.removeEventListener("mousemove", handleMouseMove);
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, [isPlaying]);
-
-  const isVisible = isHovered || !isPlaying || isMouseActive;
+  const [scale, setScale] = useState(2);
+  const [scaleWidth, setScaleWidth] = useState(160);
+  const scaleFactor = 0.5;
 
   return (
-    <div
-      ref={elementRef}
-      className="absolute inset-0 flex flex-col"
-      onClick={(e) => (isLoading ? null : videoTemplate.togglePlay())}
-      style={{ transition: "opacity 0.5s ease", opacity: isVisible ? 1 : 0 }}
-    >
-      <div className="flex flex-1 flex-col items-center justify-center">
-        <PlayButton />
+    <div className="flex flex-col">
+      <div className="flex items-center px-2">
+        <div className="flex-1 flex gap-4">
+          <div className="flex">
+            <RewindButton />
+            <TogglePlayButton />
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={(e) => setScale(scale * scaleFactor)}
+              className="opacity-60"
+            >
+              <ZoomInIcon />
+            </button>
+            <button
+              onClick={(e) => setScale(scale * (1 / scaleFactor))}
+              className="opacity-60"
+            >
+              <ZoomOutIcon />
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 flex justify-center">
+          <CurrentTime />
+        </div>
+        <div className="flex-1 flex justify-end">
+          <ExportButton />
+          <ExportServerButton />
+          {/* <CurrentTime /> */}
+        </div>
       </div>
-      <div
-        onMouseEnter={(e) => setIsHovered(true)}
-        onMouseLeave={(e) => setIsHovered(false)}
-        className="flex items-center bg-black bg-opacity-50 px-2"
-      >
-        <RewindButton />
-        <TogglePlayButton />
-        <Scrubber />
-        <CurrentTime />
-        <ExportButton />
-        <ExportServerButton />
+      <div>
+        <Scrubber scale={scale} scaleWidth={scaleWidth} />
       </div>
     </div>
   );

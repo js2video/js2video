@@ -34,7 +34,7 @@ const JS2VideoLayout = ({ children }) => {
 
   if (!editor) {
     return (
-      <div className="flex-1 bg-black relative">
+      <div className="flex-1 flex flex-col">
         {preview && preview}
         {controls && controls}
       </div>
@@ -48,7 +48,7 @@ const JS2VideoLayout = ({ children }) => {
       </Panel>
       <PanelResizeHandle />
       <Panel
-        className="relative bg-black"
+        className="flex flex-col"
         onResize={(e) => videoTemplate?.scaleToFit()}
       >
         {preview && preview}

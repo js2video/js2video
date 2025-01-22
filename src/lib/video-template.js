@@ -357,11 +357,9 @@ class VideoTemplate {
    * @returns {Promise<void>}
    */
   async seek({ time, progress }) {
-    if (typeof progress !== "undefined") {
-      time = this.duration * progress;
+    if (progress) {
+      time = this.progressToTime(progress);
     }
-    time = time ?? 0;
-    console.log("seek time:", time);
     this.#timeline.time(time);
     // seek in all objects
     await Promise.all(
@@ -377,9 +375,14 @@ class VideoTemplate {
    * This method calls the `progress()` method of the associated `timeline`
    * with the given progress value to update the video's current position.
    *
-   * @param {number} progress - The progress value,  between 0 and 1, representing the current position in the video timeline.
+   * @param {object} options
+   * @param {number} [options.progress]
+   * @param {number} [options.time]
    */
-  scrub(progress) {
+  scrub({ progress, time }) {
+    if (time) {
+      progress = this.timeToProgress(time);
+    }
     this.#timeline.progress(progress);
     this.#objects.map((obj) => {
       return obj.js2video_scrub(progress);
@@ -479,6 +482,21 @@ class VideoTemplate {
   setRange(start, end) {
     this.#range = [start, end];
     this.#sendEvent("setRange");
+  }
+
+  setTimeRange(startTime, endTime) {
+    this.setRange(this.timeToProgress(startTime), this.timeToProgress(endTime));
+  }
+
+  progressToTime(progress) {
+    return this.duration * progress;
+  }
+
+  timeToProgress(time) {
+    if (!this.duration) {
+      return 0;
+    }
+    return time / this.duration;
   }
 
   get range() {
