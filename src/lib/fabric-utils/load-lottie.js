@@ -41,7 +41,7 @@ class JS2VideoLottie extends JS2VideoMixin(FabricObject) {
       return;
     }
     const progress = (time / this.js2video_lottie.duration) % 1;
-    this.js2video_scrub({ progress });
+    this.js2video_scrub(progress);
   }
 
   js2video_scrub(progress) {

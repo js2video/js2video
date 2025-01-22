@@ -489,14 +489,14 @@ class VideoTemplate {
   }
 
   progressToTime(progress) {
-    return this.duration * progress;
+    return Math.min(progress * this.duration, this.duration);
   }
 
   timeToProgress(time) {
     if (!this.duration) {
       return 0;
     }
-    return time / this.duration;
+    return Math.min(time / this.duration, 1);
   }
 
   get range() {
