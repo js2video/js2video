@@ -4,7 +4,7 @@ Background video with text overlay
 
 const defaultParams = {
   videoUrl: "https://js2video.com/video/bbb.mp4",
-  fps: 15,
+  fps: 30,
   size: {
     width: 1080,
     height: 1080,
