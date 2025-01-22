@@ -103,7 +103,7 @@ const Scrubber = ({ scale, scaleWidth }) => {
         autoScroll={true}
         onScroll={(e) => {}}
         onClickTimeArea={(time) => {
-          videoTemplate?.scrub({ time });
+          videoTemplate?.seek({ time });
           return true;
         }}
         onCursorDrag={(time) => {
@@ -324,7 +324,6 @@ const JS2VideoControls = () => {
         <div className="flex-1 flex justify-end">
           <ExportButton />
           <ExportServerButton />
-          {/* <CurrentTime /> */}
         </div>
       </div>
       <div>
