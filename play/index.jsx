@@ -92,16 +92,18 @@ const App = () => {
           </a>
         </div>
       </header>
-      <JS2Video
-        templateUrl={templateUrl + "?v=123"}
-        params={params}
-        EditorHeader={EditorHeader}
-        showEditor={true}
-        autoPlay={false}
-        loop={true}
-        enableUnsecureMode={true}
-        videoFilePrefix="js2video"
-      />
+      <div className="bg-[#222222] text-white flex-1 flex">
+        <JS2Video
+          templateUrl={templateUrl}
+          params={params}
+          EditorHeader={EditorHeader}
+          showEditor={true}
+          autoPlay={false}
+          loop={true}
+          enableUnsecureMode={true}
+          videoFilePrefix="js2video"
+        />
+      </div>
     </div>
   );
 };
