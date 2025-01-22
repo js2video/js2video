@@ -26,6 +26,10 @@
   padding: 0;
 }
 
+.timeline-editor-edit-row {
+  background-image: none!important;
+}
+
 html {
   /* https://github.com/github/mona-sans?tab=readme-ov-file#stylistic-sets */
   font-feature-settings: "ss05" off;
