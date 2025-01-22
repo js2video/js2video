@@ -78,6 +78,10 @@ const templates = [
     group: "SVG",
     items: [
       {
+        label: "SVG Confetti",
+        url: "/templates/confetti.js",
+      },
+      {
         label: "Load SVG from string",
         url: "/templates/svg-string.js",
       },

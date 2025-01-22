@@ -5,6 +5,7 @@ export {
   scaleToFit,
   scaleToCover,
   loadGoogleFont,
+  randomColor,
 } from "./utils";
 
 export { analyzeAudio } from "./analyze-audio";

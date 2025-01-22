@@ -290,6 +290,18 @@ async function waitFor(func, timeout) {
   });
 }
 
+function randomColor() {
+  const r = Math.floor(Math.random() * 256);
+  const g = Math.floor(Math.random() * 256);
+  const b = Math.floor(Math.random() * 256);
+  const max = Math.max(r, g, b);
+  const scale = 255 / max;
+  const brightR = Math.min(255, Math.floor(r * scale));
+  const brightG = Math.min(255, Math.floor(g * scale));
+  const brightB = Math.min(255, Math.floor(b * scale));
+  return `rgb(${brightR}, ${brightG}, ${brightB})`;
+}
+
 export {
   lerp,
   clamp,
@@ -310,4 +322,5 @@ export {
   getCrunker,
   isObjectUrl,
   waitFor,
+  randomColor,
 };

@@ -8,4 +8,5 @@ export * from "./load-chars";
 export * from "./load-waveform-bars";
 export * from "./load-svg";
 export * from "./load-lottie";
+export * from "./get-svg-path-length";
 export * from "./utils";
