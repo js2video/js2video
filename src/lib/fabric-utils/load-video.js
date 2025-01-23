@@ -92,28 +92,23 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
 
 async function loadVideo({ url, options = {} }) {
   console.log("loading video object", url);
-
-  const video = await new Promise((resolve, reject) => {
-    const video = document.createElement("video");
-    video.addEventListener(
-      "error",
-      (err) => {
-        console.log(err);
-        reject(err);
-      },
-      {
+  const video = await Promise.race([
+    new Promise((r) => setTimeout(r, 10000)),
+    new Promise((resolve, reject) => {
+      const video = document.createElement("video");
+      video.addEventListener("canplaythrough", () => resolve(video), {
         once: true,
-      }
-    );
-    video.addEventListener("canplaythrough", () => resolve(video), {
-      once: true,
-    });
-    video.muted = true;
-    video.loop = true;
-    video.crossOrigin = "anonymous";
-    video.src = url;
-    video.currentTime = 0;
-  });
+      });
+      video.muted = true;
+      video.loop = true;
+      video.crossOrigin = "anonymous";
+      video.src = url;
+      video.currentTime = 0;
+    }),
+  ]);
+  if (!video) {
+    throw "Could not load video";
+  }
   const obj = new JS2VideoVideo(video, options);
   return obj;
 }
