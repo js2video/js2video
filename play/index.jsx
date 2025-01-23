@@ -91,7 +91,7 @@ const App = () => {
           </a>
         </div>
       </header>
-      <div className="bg-[#222222] text-white flex-1 flex">
+      <div className="bg-[#2a2a36] text-white flex-1 flex">
         <JS2Video
           templateUrl={templateUrl}
           params={params}

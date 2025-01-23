@@ -13,7 +13,7 @@ const JS2VideoPreview = () => {
         ref={previewRef}
       ></div>
       {!!templateError && (
-        <div className="absoluet inset-0 bg-red-500 text-white p-4">
+        <div className="absolute inset-0 bg-red-500 text-white p-4">
           {`Template Error: ${templateError}`}
         </div>
       )}

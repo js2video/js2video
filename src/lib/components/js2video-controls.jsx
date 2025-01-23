@@ -296,7 +296,7 @@ const JS2VideoControls = () => {
   const scaleFactor = 0.5;
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col bg-black">
       <div className="flex items-center px-2">
         <div className="flex-1 flex gap-4">
           <div className="flex">
