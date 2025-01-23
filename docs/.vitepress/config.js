@@ -6,8 +6,8 @@ const isDev = process.env.NODE_ENV === "development";
 export default defineConfig({
   base: "/docs/",
   outDir: "../dist/docs",
-  title: "JS2Video",
-  description: "Documentation",
+  title: "JS2Video Docs",
+  description: "Documentation for JS2Video",
   tagline: "",
   themeConfig: {
     // https://vitepress.dev/reference/default-theme-config
@@ -19,21 +19,27 @@ export default defineConfig({
           : "https://js2video.com/play/",
         target: "_self",
       },
-      {
-        text: "Docs",
-        link: "/",
-      },
     ],
 
     sidebar: [
       {
-        text: "Get started",
-        items: [{ text: "What is JS2Video?", link: "/" }],
+        text: "Library / SDK",
+        items: [
+          { text: "About", link: "/" },
+          { text: "Get started", link: "/get-started" },
+          { text: "React", link: "/react" },
+          { text: "Vanilla JS", link: "/vanilla-js" },
+          { text: "Node.js", link: "/node" },
+        ],
+      },
+      {
+        text: "Reference",
+        items: [{ text: "Typedocs", link: "https://js2video.com/typedocs" }],
       },
     ],
 
     socialLinks: [
-      { icon: "github", link: "https://github.com/vuejs/vitepress" },
+      { icon: "github", link: "https://github.com/js2video/js2video" },
     ],
   },
 });

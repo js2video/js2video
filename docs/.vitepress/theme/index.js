@@ -1,2 +1,9 @@
 import DefaultTheme from "vitepress/theme";
-export default DefaultTheme;
+import MyLayout from "./layout.vue";
+
+export default {
+  extends: DefaultTheme,
+  // override the Layout with a wrapper component that
+  // injects the slots
+  Layout: MyLayout,
+};

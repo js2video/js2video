@@ -81,12 +81,11 @@ const App = () => {
           />
         </div>
         <div className="flex gap-6 items-center text-sm font-medium">
-          {/* <a href="/play/">Playground</a>
-          <a href="/docs/">Docs</a> */}
+          <a href="/docs/">Docs</a>
           <a href="https://github.com/js2video/js2video" target="_blank">
             <img
               className="invert"
-              style={{ height: "32px" }}
+              style={{ height: "28px" }}
               src="/images/github-mark.png"
             />
           </a>
