@@ -49,7 +49,8 @@ const Scrubber = ({ scale, scaleWidth }) => {
       if (!timelineRef.current) {
         return;
       }
-      const { currentTime, isPlaying } = e.detail;
+      const { type, videoTemplate } = e.detail;
+      const { isPlaying, currentTime } = videoTemplate;
       // @ts-ignore
       timelineRef.current.setTime(currentTime);
       // auto scroll while playing

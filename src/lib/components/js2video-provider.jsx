@@ -1,6 +1,16 @@
 import { createContext, useContext, useEffect, useState, useRef } from "react";
 import { VideoTemplate } from "../video-template";
 
+class AsyncQueue {
+  constructor() {
+    this.queue = Promise.resolve();
+  }
+  enqueue(fn) {
+    this.queue = this.queue.then(fn);
+    return this.queue;
+  }
+}
+
 /**
  * @typedef {object} ContextType
  * @property {VideoTemplate | null} videoTemplate - An instance of the VideoTemplate class.
@@ -83,6 +93,7 @@ const JS2VideoProvider = ({
   const [isLoading, setIsLoading] = useState(true);
   const vtRef = useRef(null);
   const previewRef = useRef(null);
+  const queueRef = useRef(new AsyncQueue());
 
   useEffect(() => {
     setTemplateUrl(defaultTemplateUrl);
@@ -98,45 +109,43 @@ const JS2VideoProvider = ({
 
   useEffect(() => {
     async function load() {
-      setIsLoading(true);
-      setTemplateError(null);
-      // keep previous range + progress when template changes
-      let range = vtRef.current?.range ?? [0, 1];
-      let progress = vtRef.current?.progress ?? 0;
-      // dispose old template
-      try {
-        await vtRef.current?.dispose();
-      } catch (err) {
-        console.error(err);
-      }
-      const vt = new VideoTemplate({
-        templateUrl,
-        enableUnsecureMode,
-        parentElement: previewRef.current,
-        autoPlay,
-        loop,
-        params,
-        videoFilePrefix,
-      });
-      try {
-        await vt.load();
-        // set previous range and progress
-        vt.setRange(range[0], range[1]);
-        if (progress !== vt.progress) {
-          await vt.seek({ progress });
+      await queueRef.current.enqueue(async () => {
+        setIsLoading(true);
+        setTemplateError(null);
+        // dispose previous loaded template instance
+        if (vtRef.current) {
+          try {
+            await vtRef.current.dispose();
+          } catch (err) {
+            console.log("error disposing template", err);
+          }
+          vtRef.current = null;
         }
-        setVideoTemplate(vt);
-        vt.triggerEvent("loaded");
-      } catch (err) {
+        // load new template instance
+        const vt = new VideoTemplate({
+          templateUrl,
+          enableUnsecureMode,
+          parentElement: previewRef.current,
+          autoPlay,
+          loop,
+          params,
+          videoFilePrefix,
+        });
         try {
-          await vt.dispose();
+          await vt.load();
+          vtRef.current = vt;
+          setVideoTemplate(vt);
         } catch (err) {
-          console.error(err);
+          setTemplateError(err);
+          try {
+            await vt.dispose();
+          } catch (err) {
+            console.warn("dispose on error problem:", err);
+          }
+        } finally {
+          setIsLoading(false);
         }
-        setTemplateError(err);
-      } finally {
-        setIsLoading(false);
-      }
+      });
     }
     load();
   }, [templateUrl, params]);

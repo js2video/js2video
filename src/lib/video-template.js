@@ -64,24 +64,6 @@ function isJS2VideoObject(obj) {
  * A JS2Video class
  */
 class VideoTemplate {
-  #range = [0, 1];
-  #params;
-  #timeline = gsap.timeline({ paused: true, repeat: -1 });
-  #canvasElement = document.createElement("canvas");
-  #canvas = new Fabric.StaticCanvas(this.#canvasElement, {
-    enableRetinaScaling: true,
-  });
-  #parentElement;
-  #autoPlay;
-  #loop;
-  #enableUnsecureMode;
-  #isExporting = false;
-  #isLoaded = false;
-  /** @type {Array<IJS2VideoObject>} */
-  #objects = [];
-  #isPlaying = false;
-  videoFilePrefix = "js2video";
-
   /**
    * Creates an instance of the JS2Video class
    * @param {Object} options
@@ -103,12 +85,25 @@ class VideoTemplate {
     videoFilePrefix = "js2video",
   }) {
     this.templateUrl = templateUrl;
-    this.#params = params;
-    this.#parentElement = parentElement;
-    this.#autoPlay = autoPlay;
-    this.#loop = loop;
-    this.#enableUnsecureMode = enableUnsecureMode;
+    this.params = params;
+    this.parentElement = parentElement;
+    this.autoPlay = autoPlay;
+    this.loop = loop;
+    this.enableUnsecureMode = enableUnsecureMode;
     this.videoFilePrefix = videoFilePrefix;
+    /** @type {Array<IJS2VideoObject>} */
+    this.objects = [];
+    this.videoFilePrefix = "js2video";
+    this.isExporting = false;
+    this.isLoaded = false;
+    this.isDisposed = false;
+    this.isPlaying = false;
+    this.range = [0, 1];
+    this.timeline = gsap.timeline({ paused: true, repeat: -1 });
+    this.canvasElement = document.createElement("canvas");
+    this.canvas = new Fabric.StaticCanvas(this.canvasElement, {
+      enableRetinaScaling: true,
+    });
   }
 
   /**
@@ -117,31 +112,32 @@ class VideoTemplate {
    * @returns {Promise<void>}
    */
   async load() {
-    if (this.#isLoaded) {
-      throw "Video Template instance was alreadey loaded";
+    if (this.isLoaded) {
+      console.warn("This Video Template instance is already loaded");
+      return;
     }
 
-    this.#isLoaded = true;
+    this.isLoaded = true;
 
     // Throw if !enableUnsecureMode and template is loaded outside iframe
-    if (!this.#enableUnsecureMode && window.self === window.top) {
+    if (!this.enableUnsecureMode && window.self === window.top) {
       console.error(
         "Error: The video template must be loaded from inside an iframe to avoid code execution on this page from the template. If you trust the content of this template or want it to execute anyway, set the option 'enableUnsecureMode' to true in the 'load' function."
       );
       return;
     }
 
-    this.#timeline.eventCallback("onUpdate", async () => {
-      this.#renderAll();
-      this.#sendEvent("onUpdate");
-      if (this.#isPlaying && this.currentTime > this.rangeEndTime) {
+    this.timeline.eventCallback("onUpdate", async () => {
+      this.renderAll();
+      this.sendEvent("onUpdate");
+      if (this.isPlaying && this.currentTime > this.rangeEndTime) {
         await this.rewind();
       }
     });
 
-    this.#timeline.eventCallback("onRepeat", async () => {
+    this.timeline.eventCallback("onRepeat", async () => {
       await this.rewind();
-      this.#sendEvent("onRepeat");
+      this.sendEvent("onRepeat");
     });
 
     // import video template from url/path
@@ -149,25 +145,25 @@ class VideoTemplate {
       /* @vite-ignore */ this.templateUrl
     );
 
-    this.#params = { ...globalParams, ...defaultParams, ...this.#params };
+    this.params = { ...globalParams, ...defaultParams, ...this.params };
 
-    validateParams(this.#params);
+    validateParams(this.params);
 
     // update range from params
-    this.setRange(this.#params.range[0], this.#params.range[1]);
+    this.setRange(this.params.range[0], this.params.range[1]);
 
     // set gsap fps
-    gsap.ticker.fps(this.#params.fps);
+    gsap.ticker.fps(this.params.fps);
 
     // resize canvas
-    this.#canvas.setDimensions(this.#params.size);
+    this.canvas.setDimensions(this.params.size);
 
     // execute template function
     await template({
-      timeline: this.#timeline,
-      canvas: this.#canvas,
-      canvasElement: this.#canvasElement,
-      params: this.#params,
+      timeline: this.timeline,
+      canvas: this.canvas,
+      canvasElement: this.canvasElement,
+      params: this.params,
       Fabric,
       Pixi,
       PixiFilters,
@@ -180,52 +176,45 @@ class VideoTemplate {
     }
 
     // store all custom objects
-    this.#objects = this.#canvas
+    this.objects = this.canvas
       .getObjects()
       .filter((obj) => isJS2VideoObject(obj));
 
     // attach timeline and params to all custom objects
-    this.#objects.map((obj) => {
-      obj.js2video_timeline = this.#timeline;
-      obj.js2video_params = this.#params;
+    this.objects.map((obj) => {
+      obj.js2video_timeline = this.timeline;
+      obj.js2video_params = this.params;
     });
 
     // add canvas to DOM
-    this.#parentElement.appendChild(this.#canvasElement);
+    this.parentElement.appendChild(this.canvasElement);
 
     // scale canvas to fit parent
     this.scaleToFit();
 
     // attach resize handler
-    addEventListener("resize", this.#resizeHandler.bind(this));
+    addEventListener("resize", this.resizeHandler.bind(this));
 
     // hack: forces rendering first video frame on all video objects
     await this.seek({ time: this.rangeStartTime + 0.001 });
     await this.seek({ time: this.rangeStartTime });
 
-    if (this.#autoPlay) {
+    if (this.autoPlay) {
       this.play();
     }
+
+    this.sendEvent("loaded");
 
     return;
   }
 
-  #resizeHandler() {
+  resizeHandler() {
     this.scaleToFit();
   }
 
-  #sendEvent(type = "none") {
+  sendEvent(type = "none") {
     const message = {
       type,
-      currentTime: this.currentTime,
-      duration: this.duration,
-      progress: this.progress,
-      isPlaying: this.#isPlaying,
-      isExporting: this.#isExporting,
-      rangeStart: this.rangeStart,
-      rangeEnd: this.rangeEnd,
-      rangeStartTime: this.rangeStartTime,
-      rangeEndTime: this.rangeEndTime,
       videoTemplate: this,
     };
     const ev = new CustomEvent("js2video", {
@@ -235,15 +224,15 @@ class VideoTemplate {
   }
 
   triggerEvent(type) {
-    this.#sendEvent(type);
+    this.sendEvent(type);
   }
 
-  #renderAll() {
-    this.#canvas.renderAll();
+  renderAll() {
+    this.canvas.renderAll();
   }
 
-  async #mergeAudio() {
-    const audioInputs = this.#objects.filter(
+  async mergeAudio() {
+    const audioInputs = this.objects.filter(
       (obj) => obj.type === "js2video_audio"
     );
 
@@ -293,20 +282,20 @@ class VideoTemplate {
    * @returns {void}
    */
   scaleToFit() {
-    if (!this.#parentElement) {
+    if (!this.parentElement) {
       return;
     }
-    const rect = this.#parentElement.getBoundingClientRect();
+    const rect = this.parentElement.getBoundingClientRect();
     const scale = utils.scaleToFit(
-      this.#params.size.width,
-      this.#params.size.height,
+      this.params.size.width,
+      this.params.size.height,
       rect.width,
       rect.height,
       0,
       1
     );
-    this.#canvasElement.style.width = this.#params.size.width * scale + "px";
-    this.#canvasElement.style.height = this.#params.size.height * scale + "px";
+    this.canvasElement.style.width = this.params.size.width * scale + "px";
+    this.canvasElement.style.height = this.params.size.height * scale + "px";
   }
 
   /**
@@ -314,15 +303,15 @@ class VideoTemplate {
    * @returns {void}
    */
   play() {
-    if (this.#isExporting) {
+    if (this.isExporting) {
       return;
     }
-    this.#isPlaying = true;
-    this.#timeline.play();
-    this.#objects.map((obj) => {
+    this.isPlaying = true;
+    this.timeline.play();
+    this.objects.map((obj) => {
       obj.js2video_play();
     });
-    this.#sendEvent("play");
+    this.sendEvent("play");
   }
 
   /**
@@ -330,12 +319,12 @@ class VideoTemplate {
    * @returns {void}
    */
   pause() {
-    this.#isPlaying = false;
-    this.#timeline.pause();
-    this.#objects.map((obj) => {
+    this.isPlaying = false;
+    this.timeline.pause();
+    this.objects.map((obj) => {
       obj.js2video_pause();
     });
-    this.#sendEvent("pause");
+    this.sendEvent("pause");
   }
 
   /**
@@ -343,10 +332,10 @@ class VideoTemplate {
    * @returns {void}
    */
   togglePlay() {
-    if (this.#isExporting) {
+    if (this.isExporting) {
       return;
     }
-    this.#isPlaying ? this.pause() : this.play();
+    this.isPlaying ? this.pause() : this.play();
   }
 
   /**
@@ -360,11 +349,11 @@ class VideoTemplate {
     if (progress) {
       time = this.progressToTime(progress);
     }
-    this.#timeline.time(time);
+    this.timeline.time(time);
     // seek in all objects
     await Promise.all(
-      this.#objects.map((obj) => {
-        return obj.js2video_seek(time, this.#isExporting);
+      this.objects.map((obj) => {
+        return obj.js2video_seek(time, this.isExporting);
       })
     );
   }
@@ -383,8 +372,8 @@ class VideoTemplate {
     if (time) {
       progress = this.timeToProgress(time);
     }
-    this.#timeline.progress(progress);
-    this.#objects.map((obj) => {
+    this.timeline.progress(progress);
+    this.objects.map((obj) => {
       return obj.js2video_scrub(progress);
     });
   }
@@ -394,15 +383,14 @@ class VideoTemplate {
    * @returns {Promise<void>}
    */
   async rewind() {
-    console.log("rewind");
     return this.seek({ time: this.rangeStartTime });
   }
 
   async cleanupExport() {
-    this.#isExporting = false;
+    this.isExporting = false;
     await this.rewind();
-    await Promise.all(this.#objects.map((obj) => obj.js2video_endExport()));
-    this.#sendEvent("cleanupExport");
+    await Promise.all(this.objects.map((obj) => obj.js2video_endExport()));
+    this.sendEvent("cleanupExport");
     console.log("export ended");
   }
 
@@ -417,30 +405,30 @@ class VideoTemplate {
   async export({ signal, fileStream } = {}) {
     try {
       console.log("startExport");
-      this.#isExporting = true;
-      this.#sendEvent("startExport");
+      this.isExporting = true;
+      this.sendEvent("startExport");
 
-      await Promise.all(this.#objects.map((obj) => obj.js2video_startExport()));
+      await Promise.all(this.objects.map((obj) => obj.js2video_startExport()));
       await this.seek({ time: 0 });
       this.pause();
-      this.#sendEvent("startExportPause");
+      this.sendEvent("startExportPause");
 
-      const audioBuffer = await this.#mergeAudio();
+      const audioBuffer = await this.mergeAudio();
 
       await encodeVideo({
         audioBuffer,
-        bitrate: this.#params.bitrate,
-        width: this.#params.size.width,
-        height: this.#params.size.height,
-        canvasElement: this.#canvasElement,
+        bitrate: this.params.bitrate,
+        width: this.params.size.width,
+        height: this.params.size.height,
+        canvasElement: this.canvasElement,
         seek: async (/** @type {number} */ time) => {
           await this.seek({ time });
         },
-        fps: this.#params.fps,
+        fps: this.params.fps,
         rangeStart: this.rangeStartTime,
         rangeEnd: this.rangeEndTime,
-        timeline: this.#timeline,
-        progressHandler: () => this.#sendEvent("exportProgress"),
+        timeline: this.timeline,
+        progressHandler: () => this.sendEvent("exportProgress"),
         signal,
         fileStream,
       });
@@ -451,8 +439,8 @@ class VideoTemplate {
       throw err;
     }
     const result = {
-      videoBitrate: this.#params.bitrate,
-      videoSize: this.#params.size,
+      videoBitrate: this.params.bitrate,
+      videoSize: this.params.size,
       videoDuration: this.duration * 1000,
     };
     return result;
@@ -464,24 +452,32 @@ class VideoTemplate {
    */
   async dispose() {
     console.log("dispose video template");
+
+    if (this.isDisposed) {
+      console.warn("This Video Template instance is already disposed");
+      return;
+    }
+
+    this.isDisposed = true;
+
     try {
-      window.removeEventListener("resize", this.#resizeHandler);
+      window.removeEventListener("resize", this.resizeHandler);
       this.pause();
-      this.#timeline.clear();
-      await Promise.all(this.#objects.map((obj) => obj.js2video_dispose()));
-      this.#canvas.clear();
-      await this.#canvas.dispose();
+      this.timeline.clear();
+      await Promise.all(this.objects.map((obj) => obj.js2video_dispose()));
+      this.canvas.clear();
+      await this.canvas.dispose();
       console.log("disposed video template");
     } catch (e) {
       console.error("error disposing", e.message);
     } finally {
-      this.#canvasElement.remove();
+      this.canvasElement.remove();
     }
   }
 
   setRange(start, end) {
-    this.#range = [start, end];
-    this.#sendEvent("setRange");
+    this.range = [start, end];
+    this.sendEvent("setRange");
   }
 
   setTimeRange(startTime, endTime) {
@@ -499,36 +495,32 @@ class VideoTemplate {
     return Math.min(time / this.duration, 1);
   }
 
-  get range() {
-    return this.#range;
-  }
-
   get duration() {
-    return this.#timeline.duration();
+    return this.timeline.duration();
   }
 
   get currentTime() {
-    return this.#timeline.time();
+    return this.timeline.time();
   }
 
   get progress() {
-    return this.#timeline.progress();
+    return this.timeline.progress();
   }
 
   get rangeStart() {
-    return this.#range[0];
+    return this.range[0];
   }
 
   get rangeEnd() {
-    return this.#range[1];
+    return this.range[1];
   }
 
   get rangeStartTime() {
-    return this.#range[0] * this.duration;
+    return this.range[0] * this.duration;
   }
 
   get rangeEndTime() {
-    return this.#range[1] * this.duration;
+    return this.range[1] * this.duration;
   }
 }
 
