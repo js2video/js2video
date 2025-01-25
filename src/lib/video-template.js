@@ -196,8 +196,14 @@ class VideoTemplate {
     addEventListener("resize", this.resizeHandler.bind(this));
 
     // hack: forces rendering first video frame on all video objects
-    await this.seek({ time: this.rangeStartTime + 0.001 });
-    await this.seek({ time: this.rangeStartTime });
+    await Promise.all(
+      this.objects.map((obj) => {
+        return obj.js2video_seek(this.rangeStartTime, this.isExporting);
+      })
+    );
+
+    // render canvas
+    this.renderAll();
 
     if (this.autoPlay) {
       this.play();
