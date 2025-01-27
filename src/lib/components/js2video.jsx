@@ -18,6 +18,7 @@ import { JS2VideoLayout } from "./js2video-layout";
  * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
  * @param {boolean} [props.showEditor] - Show the video template code editor. Default: true.
  * @param {OnLoadingFunction | undefined} [props.onLoading] - OnLoading callback function.
+ * @param {OnBeforeExportFunction | undefined} [props.onBeforeExport] - Called before export.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2Video = ({
@@ -30,6 +31,7 @@ const JS2Video = ({
   enableUnsecureMode = false,
   showEditor = true,
   onLoading,
+  onBeforeExport,
 }) => {
   return (
     <JS2VideoProvider
@@ -40,6 +42,7 @@ const JS2Video = ({
       loop={loop}
       enableUnsecureMode={enableUnsecureMode}
       onLoading={onLoading}
+      onBeforeExport={onBeforeExport}
     >
       <JS2VideoLayout>
         {showEditor && <JS2VideoEditor Header={EditorHeader} />}

@@ -148,19 +148,26 @@ const ControlButton = ({ children, ...rest }) => {
 };
 
 const ExportServerButton = () => {
-  const { videoTemplate } = useJS2Video();
+  const { videoTemplate, onBeforeExport } = useJS2Video();
   const rangeStart = useRangeStart();
   const rangeEnd = useRangeEnd();
 
   // @ts-ignore
   const apiUrl = import.meta.env.VITE_EXPORT_API_URL;
 
+  console.log({ apiUrl });
+
   if (!apiUrl) {
     return;
   }
 
   const handleClick = async (e) => {
-    e.stopPropagation();
+    if (onBeforeExport) {
+      if (!(await onBeforeExport())) {
+        return;
+      }
+    }
+
     await fetch(apiUrl, {
       method: "POST",
       body: JSON.stringify({
@@ -179,7 +186,7 @@ const ExportServerButton = () => {
 };
 
 const ExportButton = () => {
-  const { videoTemplate } = useJS2Video();
+  const { videoTemplate, onBeforeExport } = useJS2Video();
   const progress = useProgress();
   const isExporting = useIsExporting();
   const [abortController, setAbortController] = useState(null);
@@ -206,14 +213,22 @@ const ExportButton = () => {
   };
 
   const handleClick = async (e) => {
-    console.log(videoTemplate.templateUrl);
+    if (onBeforeExport) {
+      if (!(await onBeforeExport())) {
+        return;
+      }
+    }
+
     if (!canBrowserEncodeVideo()) {
       return alert(
         "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
       );
     }
-    const controller = new AbortController(); // Create a new controller
+
+    // Create a new abort controller
+    const controller = new AbortController();
     setAbortController(controller);
+
     try {
       const fileHandle = await window.showSaveFilePicker({
         suggestedName: `${videoTemplate.videoFilePrefix}-${Date.now()}.mp4`,
@@ -224,11 +239,14 @@ const ExportButton = () => {
           },
         ],
       });
+
       const fileStream = await fileHandle.createWritable();
+
       await videoTemplate.export({
         signal: controller.signal,
         fileStream,
       });
+
       setIsAborted(false);
       confetti();
     } catch (err) {

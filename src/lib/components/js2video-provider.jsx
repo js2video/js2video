@@ -19,6 +19,7 @@ class AsyncQueue {
  * @property {React.Dispatch<React.SetStateAction<string>> | null} setTemplateUrl - The setter function for updating the template URL state variable.
  * @property {React.Dispatch<React.SetStateAction<Object>> | null} setParams - The setter function for updating the template params state variable.
  * @property {boolean} isLoading - A flag to indicate whether the video template is loading.
+ * @property {OnBeforeExportFunction | null} onBeforeExport - A function that's called before the video is exported. Must return true for export to continue.
  */
 
 /**
@@ -27,29 +28,18 @@ class AsyncQueue {
  * @type {React.Context<ContextType>}
  */
 const Context = createContext({
-  /** @type {VideoTemplate | null} */
   videoTemplate: null,
-  /** @type {React.MutableRefObject<HTMLDivElement | null> | null} */
   previewRef: null,
-  /** @type {Error | null} */
   templateError: null,
-  /** @type {React.Dispatch<React.SetStateAction<string>>} */
-  setTemplateUrl: () => {},
-  /** @type {React.Dispatch<React.SetStateAction<Object>>} */
-  setParams: () => {},
-  /** @type {boolean} */
+  setTemplateUrl: null,
+  setParams: null,
+  onBeforeExport: null,
   isLoading: true,
 });
 
 /**
  * Custom hook for accessing the JS2Video context.
- * @returns {{
- * videoTemplate: VideoTemplate | null,
- * templateError: Error | null,
- * previewRef: React.MutableRefObject<HTMLDivElement | null> | null
- * setTemplateUrl: React.Dispatch<React.SetStateAction<string>>,
- * isLoading: boolean
- * }}
+ * @returns {ContextType} The context value
  * @throws {Error} If used outside of a JS2VideoProvider.
  */
 const useJS2Video = () => {
@@ -74,6 +64,7 @@ const useJS2Video = () => {
  * @param {boolean} [props.loop] - Loop the video? Default: false.
  * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
  * @param {OnLoadingFunction | undefined} [props.onLoading] - OnLoading callback function.
+ * @param {OnBeforeExportFunction | undefined} [props.onBeforeExport] - A function that's called before the video is exported. Must return true for export to continue.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2VideoProvider = ({
@@ -84,6 +75,7 @@ const JS2VideoProvider = ({
   loop = false,
   enableUnsecureMode = false,
   onLoading,
+  onBeforeExport,
   children,
 }) => {
   const [templateUrl, setTemplateUrl] = useState(defaultTemplateUrl);
@@ -165,6 +157,7 @@ const JS2VideoProvider = ({
         setTemplateUrl,
         setParams,
         isLoading,
+        onBeforeExport,
       }}
     >
       {children}
