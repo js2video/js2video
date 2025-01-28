@@ -97,7 +97,7 @@ const Scrubber = ({ scale, scaleWidth }) => {
         effects={{}}
         style={{
           width: "100%",
-          height: "70px",
+          height: "80px",
           backgroundColor: "transparent",
         }}
         rowHeight={20}
@@ -154,8 +154,6 @@ const ExportServerButton = () => {
 
   // @ts-ignore
   const apiUrl = import.meta.env.VITE_EXPORT_API_URL;
-
-  console.log({ apiUrl });
 
   if (!apiUrl) {
     return;
