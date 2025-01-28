@@ -6,7 +6,7 @@ import * as utils from "./template-utils";
 import * as canvasUtils from "./fabric-utils";
 import { encodeVideo } from "./encode-video";
 import { validateParams } from "./validate-params";
-import { getCrunker } from "./utils";
+import { getCrunker, debounceAsync } from "./utils";
 import { registerGsapEffects } from "./gsap-effects/register-gsap-effects";
 
 registerGsapEffects();
@@ -382,7 +382,11 @@ class VideoTemplate {
     this.objects.map((obj) => {
       return obj.js2video_scrub(progress);
     });
+    this.#debouncedSeek({ time: this.timeline.time() });
   }
+
+  // used in scrubber
+  #debouncedSeek = debounceAsync(this.seek.bind(this), 100);
 
   /**
    * Rewinds the video playback to its starting position

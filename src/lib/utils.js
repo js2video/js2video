@@ -302,6 +302,25 @@ function randomColor() {
   return `rgb(${brightR}, ${brightG}, ${brightB})`;
 }
 
+/**
+ * Debounces an asynchronous function, only executing it after the specified delay
+ * and for the last invocation within that delay period.
+ *
+ * @param {Function} func - The async function to debounce.
+ * @param {number} delay - The debounce delay in milliseconds.
+ * @returns {Function} The debounced version of the input function.
+ */
+function debounceAsync(func, delay) {
+  let debounceTimer = null;
+
+  return function (...args) {
+    clearTimeout(debounceTimer);
+    debounceTimer = setTimeout(async () => {
+      await func(...args);
+    }, delay);
+  };
+}
+
 export {
   lerp,
   clamp,
@@ -323,4 +342,5 @@ export {
   isObjectUrl,
   waitFor,
   randomColor,
+  debounceAsync,
 };
