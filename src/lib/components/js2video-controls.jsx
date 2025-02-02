@@ -33,14 +33,14 @@ const CurrentTime = () => {
 };
 
 const CustomScale = ({ scale }) => {
-  return <>{scale}</>;
+  return <>{formatTime(scale)}</>;
 };
 
 const Scrubber = ({ scale, scaleWidth }) => {
   const { videoTemplate } = useJS2Video();
   const timelineRef = useRef();
   const [data, setData] = useState([]);
-  const startLeft = 20;
+  const startLeft = 32;
   const scrollWhilePlaying = false;
   const autoScrollFrom = 500;
 
