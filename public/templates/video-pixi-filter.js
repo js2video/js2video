@@ -1,5 +1,6 @@
 /*
-Background video with text overlay
+Background video with old film filter
+https://pixijs.io/filters/docs/
 */
 
 const defaultParams = {
