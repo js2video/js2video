@@ -36,29 +36,21 @@ const CustomScale = ({ scale }) => {
   return <>{formatTime(scale)}</>;
 };
 
-const Scrubber = ({ scale, scaleWidth }) => {
+const Scrubber = ({ timelineRef, scale, scaleWidth }) => {
   const { videoTemplate } = useJS2Video();
-  const timelineRef = useRef();
   const [data, setData] = useState([]);
   const startLeft = 32;
-  const scrollWhilePlaying = false;
-  const autoScrollFrom = 500;
 
+  // use a listener to update react-timeline-editor time
   useEffect(() => {
     const listener = (e) => {
       if (!timelineRef.current) {
         return;
       }
       const { type, videoTemplate } = e.detail;
-      const { isPlaying, currentTime } = videoTemplate;
-      // @ts-ignore
-      timelineRef.current.setTime(currentTime);
-      // auto scroll while playing
-      if (scrollWhilePlaying && isPlaying) {
-        const left =
-          currentTime * (scaleWidth / scale) + startLeft - autoScrollFrom;
+      if (type === "timelineUpdate") {
         // @ts-ignore
-        timelineRef.current.setScrollLeft(left);
+        timelineRef.current.setTime(videoTemplate.currentTime);
       }
     };
     window.addEventListener("js2video", listener);
@@ -84,6 +76,18 @@ const Scrubber = ({ scale, scaleWidth }) => {
     ]);
   }, [videoTemplate]);
 
+  const actionRender = (action) => {
+    return (
+      <div
+        className={`h-full select-none text-xs overflow-hidden justify-center items-center bg-blue-700 flex text-blue-400`}
+      >
+        Range
+      </div>
+    );
+  };
+
+  const scaleRender = (scale) => <CustomScale scale={scale} />;
+
   return (
     <div className="flex-1">
       <Timeline
@@ -92,7 +96,6 @@ const Scrubber = ({ scale, scaleWidth }) => {
         scaleWidth={scaleWidth}
         startLeft={startLeft}
         scaleSplitCount={10}
-        onChange={(data) => setData(data)}
         editorData={data}
         effects={{}}
         style={{
@@ -102,6 +105,7 @@ const Scrubber = ({ scale, scaleWidth }) => {
         }}
         rowHeight={20}
         autoScroll={true}
+        onChange={(data) => {}}
         onScroll={(e) => {}}
         onClickTimeArea={(time) => {
           videoTemplate?.seek({ time });
@@ -113,6 +117,10 @@ const Scrubber = ({ scale, scaleWidth }) => {
         onCursorDragEnd={async (time) => {
           await videoTemplate?.seek({ time });
         }}
+        onActionResizing={(e) => {
+          const { start, end, dir } = e;
+          videoTemplate?.scrub({ time: dir === "left" ? start : end });
+        }}
         onActionResizeEnd={(e) => {
           const { start, end } = e;
           videoTemplate?.setTimeRange(start, end);
@@ -121,14 +129,8 @@ const Scrubber = ({ scale, scaleWidth }) => {
           const { start, end } = e;
           videoTemplate?.setTimeRange(start, end);
         }}
-        getActionRender={(action) => {
-          return (
-            <div
-              className={`h-full justify-center items-center bg-blue-700 flex text-blue-400`}
-            ></div>
-          );
-        }}
-        getScaleRender={(scale) => <CustomScale scale={scale} />}
+        getActionRender={actionRender}
+        getScaleRender={scaleRender}
       />
     </div>
   );
@@ -311,6 +313,30 @@ const JS2VideoControls = () => {
   const [scale, setScale] = useState(2);
   const [scaleWidth, setScaleWidth] = useState(160);
   const scaleFactor = 0.5;
+  const timelineRef = useRef();
+
+  const scrollTimeline = (newScale) => {
+    if (!timelineRef.current) {
+      return;
+    }
+    // @ts-ignore
+    const currentTime = timelineRef.current.getTime();
+    const left = currentTime * (scaleWidth / newScale) + 33;
+    // @ts-ignore
+    timelineRef.current.setScrollLeft(Math.max(0, left - 400));
+  };
+
+  const zoomIn = (e) => {
+    const newScale = scale * scaleFactor;
+    scrollTimeline(newScale);
+    setScale(newScale);
+  };
+
+  const zoomOut = (e) => {
+    const newScale = scale * (1 / scaleFactor);
+    scrollTimeline(newScale);
+    setScale(newScale);
+  };
 
   return (
     <div className="flex flex-col bg-black">
@@ -321,16 +347,10 @@ const JS2VideoControls = () => {
             <TogglePlayButton />
           </div>
           <div className="flex gap-2">
-            <button
-              onClick={(e) => setScale(scale * scaleFactor)}
-              className="opacity-60"
-            >
+            <button onClick={zoomIn} className="opacity-60 hover:opacity-80">
               <ZoomInIcon />
             </button>
-            <button
-              onClick={(e) => setScale(scale * (1 / scaleFactor))}
-              className="opacity-60"
-            >
+            <button onClick={zoomOut} className="opacity-60 hover:opacity-80">
               <ZoomOutIcon />
             </button>
           </div>
@@ -344,7 +364,11 @@ const JS2VideoControls = () => {
         </div>
       </div>
       <div>
-        <Scrubber scale={scale} scaleWidth={scaleWidth} />
+        <Scrubber
+          timelineRef={timelineRef}
+          scale={scale}
+          scaleWidth={scaleWidth}
+        />
       </div>
     </div>
   );
