@@ -81,7 +81,7 @@ const Scrubber = ({ timelineRef, scale, scaleWidth }) => {
       <div
         className={`h-full select-none text-xs overflow-hidden justify-center items-center bg-blue-700 flex text-blue-400`}
       >
-        Range
+        {formatTime(videoTemplate.rangeEndTime - videoTemplate.rangeStartTime)}
       </div>
     );
   };
