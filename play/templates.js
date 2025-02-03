@@ -60,8 +60,12 @@ const templates = [
         url: "/templates/video-overlay.js",
       },
       {
-        label: "Video with filter",
+        label: "Video with old film filter",
         url: "/templates/video-pixi-filter.js",
+      },
+      {
+        label: "Video with custom color matrix filter",
+        url: "/templates/video-colormatrix-filter.js",
       },
     ],
   },
