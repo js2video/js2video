@@ -6,7 +6,7 @@ const defaultParams = {
   videoUrl: "https://js2video.com/video/bbb.mp4",
   fps: 30,
   size: {
-    width: 1080,
+    width: 1920,
     height: 1080,
   },
 };
