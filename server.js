@@ -26,8 +26,6 @@ const server = http.createServer(async (req, res) => {
   res.setHeader("Access-Control-Allow-Methods", "OPTIONS, POST");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
 
-  console.log(req.method, req.url);
-
   if (req.method === "POST") {
     try {
       const options = await parseJsonBody(req);
