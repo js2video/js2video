@@ -45,6 +45,10 @@ const templates = [
   {
     group: "Text",
     items: [
+      {
+        label: "Text with glitch effect",
+        url: "/templates/text-glitch-filter.js",
+      },
       { label: "Typewriter effect", url: "/templates/typewriter.js" },
       { label: "Display a counter", url: "/templates/counter.js" },
       { label: "Animate separate characters", url: "/templates/chars.js" },
