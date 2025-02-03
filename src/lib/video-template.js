@@ -129,7 +129,7 @@ class VideoTemplate {
 
     this.timeline.eventCallback("onUpdate", async () => {
       this.renderAll();
-      this.sendEvent("onUpdate");
+      this.sendEvent("timelineUpdate");
       if (this.isPlaying && this.currentTime > this.rangeEndTime) {
         await this.rewind();
       }
@@ -137,7 +137,7 @@ class VideoTemplate {
 
     this.timeline.eventCallback("onRepeat", async () => {
       await this.rewind();
-      this.sendEvent("onRepeat");
+      this.sendEvent("timelineRepeat");
     });
 
     // import video template from url/path
@@ -209,7 +209,7 @@ class VideoTemplate {
       this.play();
     }
 
-    this.sendEvent("loaded");
+    this.sendEvent("templateLoaded");
 
     return;
   }
@@ -400,7 +400,6 @@ class VideoTemplate {
     this.isExporting = false;
     await this.rewind();
     await Promise.all(this.objects.map((obj) => obj.js2video_endExport()));
-    this.sendEvent("cleanupExport");
     console.log("export ended");
   }
 
@@ -416,12 +415,10 @@ class VideoTemplate {
     try {
       console.log("startExport");
       this.isExporting = true;
-      this.sendEvent("startExport");
 
       await Promise.all(this.objects.map((obj) => obj.js2video_startExport()));
       await this.seek({ time: 0 });
       this.pause();
-      this.sendEvent("startExportPause");
 
       const audioBuffer = await this.mergeAudio();
 
