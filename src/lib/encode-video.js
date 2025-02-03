@@ -4,7 +4,7 @@ import {
   FileSystemWritableFileStreamTarget,
 } from "mp4-muxer";
 import { AVC } from "media-codecs";
-import { getCrunker } from "./utils";
+import { getCrunker, invlerp } from "./utils";
 
 function audioBufferToAudioData(audioBuffer) {
   // Create a new Float32Array to hold the planar audio data
@@ -204,7 +204,9 @@ async function encodeVideo({
         if (currentFrame % Math.round(fps * 5) === 0) {
           await videoEncoder.flush();
         }
-        await progressHandler({ progress: timeline.progress() });
+        await progressHandler({
+          progress: invlerp(rangeStart, rangeEnd, time),
+        });
         currentFrame++;
       }
       frame++;
