@@ -250,37 +250,28 @@ class VideoTemplate {
 
     // merge buffers into one
     let mergedBuffer = crunker.mergeAudio(
-      audioInputs.map((obj) => {
-        let buffer = obj.js2video_audioBuffer;
-        if (obj.js2video_offset > 0) {
-          buffer = crunker.padAudio(buffer, 0, obj.js2video_offset);
-          buffer = crunker.sliceAudio(
-            buffer,
-            0,
-            obj.js2video_offset + obj.js2video_duration
-          );
-        } else if (obj.js2video_offset < 0) {
-          buffer = crunker.sliceAudio(
-            buffer,
-            -obj.js2video_offset,
-            obj.js2video_duration - obj.js2video_offset
-          );
-        } else {
-          buffer = crunker.sliceAudio(buffer, 0, obj.js2video_duration);
-        }
-        return buffer;
-      })
+      audioInputs.map((obj) => obj.js2video_audioBuffer)
     );
 
-    mergedBuffer = crunker.sliceAudio(
+    // no need to slice
+    if (
+      this.rangeStartTime <= 0 &&
+      this.rangeEndTime >= mergedBuffer.duration
+    ) {
+      console.log("no need to slice");
+      return mergedBuffer;
+    }
+
+    // slice to match output length
+    const outputBuffer = crunker.sliceAudio(
       mergedBuffer,
       this.rangeStartTime,
-      this.rangeEndTime
+      Math.min(mergedBuffer.duration, this.rangeEndTime)
     );
 
     crunker.close();
 
-    return mergedBuffer;
+    return outputBuffer;
   }
 
   /**

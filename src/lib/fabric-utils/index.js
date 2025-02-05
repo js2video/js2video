@@ -10,3 +10,4 @@ export * from "./load-svg";
 export * from "./load-lottie";
 export * from "./get-svg-path-length";
 export * from "./utils";
+export * from "./load-elevenlabs-speech";

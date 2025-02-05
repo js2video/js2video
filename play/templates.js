@@ -28,6 +28,10 @@ const templates = [
     group: "Audio",
     items: [
       {
+        label: "ElevenLabs TTS + subtitles",
+        url: "/templates/elevenlabs-tts-subtitles.js",
+      },
+      {
         label: "Audio with waveform bars",
         url: "/templates/audio-waveform-bars.js",
       },

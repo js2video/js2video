@@ -7,7 +7,7 @@ https://pixijs.io/filters/docs/KawaseBlurFilter.html
 const defaultParams = {
   text: "Balboa Beach San Diego 1984",
   fontFamily: "Liter", // Google Font
-  imageUrl: "/images/ai/beach.jpg", // AI-generated
+  imageUrl: "https://js2video.com/images/ai/beach.jpg", // AI-generated
   fps: 30,
   size: {
     width: 1080,
@@ -88,8 +88,23 @@ const template = async ({
   const blurFilter = new PixiFilters.KawaseBlurFilter();
   filters.push(blurFilter);
 
+  const crtFilter = new PixiFilters.CRTFilter({
+    vignettingAlpha: 0.3,
+    curvature: 1.4,
+    lineWidth: 3,
+  });
+  filters.push(crtFilter);
+
   const pixiFilters = await canvasUtils.loadPixiFilters({ canvas, filters });
   canvas.add(pixiFilters);
+
+  pixiFilters.set({
+    left: -20,
+    top: -20,
+    scaleX: 1.1,
+    scaleY: 1.1,
+    originX: "center",
+  });
 
   // scale up image a bit
   timeline.to(
@@ -111,9 +126,9 @@ const template = async ({
       onUpdate: () => {
         filters.map((f) => {
           f.slices = parseInt(random(18, 22));
-          f.offset = random2(f.offset, -20, 20, 5);
+          f.offset = random2(f.offset, -10, 10, 2);
           f.strength = random2(f.strength, 3, 6, 1);
-          f.green = { x: random(0, 12), y: random(0, 12) };
+          f.green = { x: random(0, 12), y: 0 };
         });
       },
     },

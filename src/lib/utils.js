@@ -321,6 +321,22 @@ function debounceAsync(func, delay) {
   };
 }
 
+/**
+ * Converts a base64-encoded string to a Buffer.
+ *
+ * @param {string} base64String - The base64 string to convert.
+ * @returns {Buffer} The resulting Buffer.
+ */
+const base64ToBuffer = (base64String) => Buffer.from(base64String, "base64");
+
+/**
+ * Converts a Buffer to a base64-encoded string.
+ *
+ * @param {Buffer} buffer - The Buffer to convert.
+ * @returns {string} The resulting base64 string.
+ */
+const bufferToBase64 = (buffer) => buffer.toString("base64");
+
 export {
   lerp,
   clamp,
@@ -343,4 +359,6 @@ export {
   waitFor,
   randomColor,
   debounceAsync,
+  base64ToBuffer,
+  bufferToBase64,
 };

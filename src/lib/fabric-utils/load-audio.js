@@ -2,6 +2,7 @@ import { FabricObject } from "fabric";
 import { JS2VideoMixin } from "./js2video-mixin";
 import { getAudioContext } from "../get-audio-context";
 import { cache } from "../cache";
+import { getCrunker } from "../utils";
 
 class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   static type = "js2video_audio";
@@ -66,7 +67,13 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   }
 }
 
-const loadAudio = async ({ url, video, options = {} }) => {
+const loadAudio = async ({
+  url,
+  video = null,
+  options = {
+    offset: null,
+  },
+}) => {
   if (video) {
     url = video.js2video_video.src;
   }
@@ -82,7 +89,26 @@ const loadAudio = async ({ url, video, options = {} }) => {
     await cache.set(cacheKey, audioBuffer);
   }
 
-  const obj = new JS2VideoAudio(audioBuffer, options);
+  let offsetBuffer;
+  console.log(audioBuffer);
+
+  if (options.offset > 0) {
+    const crunker = getCrunker();
+    offsetBuffer = crunker.padAudio(audioBuffer, 0, options.offset);
+    crunker.close();
+  } else if (options.offset < 0) {
+    const crunker = getCrunker();
+    offsetBuffer = crunker.sliceAudio(
+      audioBuffer,
+      -options.offset,
+      audioBuffer.duration - -options.offset
+    );
+    crunker.close();
+  } else {
+    offsetBuffer = audioBuffer;
+  }
+
+  const obj = new JS2VideoAudio(offsetBuffer, options);
   return obj;
 };
 

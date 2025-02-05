@@ -15,17 +15,6 @@
   --font-ui: "mona-sans";
 }
 
-.bg-img {
-  background-image: url("/images/bg.png");
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  height: 100vh;
-  width: 100%;
-  margin: 0;
-  padding: 0;
-}
-
 .timeline-editor-edit-row {
   background-image: none!important;
 }
