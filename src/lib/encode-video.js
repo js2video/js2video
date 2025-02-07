@@ -204,9 +204,7 @@ async function encodeVideo({
         if (currentFrame % Math.round(fps * 5) === 0) {
           await videoEncoder.flush();
         }
-        await progressHandler({
-          progress: invlerp(rangeStart, rangeEnd, time),
-        });
+        progressHandler();
         currentFrame++;
       }
       frame++;

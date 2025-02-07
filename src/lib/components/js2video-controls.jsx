@@ -1,6 +1,6 @@
 import { useJS2VideoEventProperty } from "./hooks/use-js2video-event-property";
 import { useJS2Video } from "./js2video-provider";
-import { canBrowserEncodeVideo, formatTime, cn } from "../utils";
+import { canBrowserEncodeVideo, formatTime, cn, lerp, invlerp } from "../utils";
 import {
   PlayIcon,
   PauseIcon,
@@ -188,6 +188,8 @@ const ExportServerButton = () => {
 const ExportButton = () => {
   const { videoTemplate, onBeforeExport } = useJS2Video();
   const progress = useProgress();
+  const rangeStart = useRangeStart();
+  const rangeEnd = useRangeEnd();
   const isExporting = useIsExporting();
   const [abortController, setAbortController] = useState(null);
   const [isAborted, setIsAborted] = useState(false);
@@ -260,7 +262,10 @@ const ExportButton = () => {
       {!!isExporting && (
         <div className="absolute inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
           <div className="flex items-center flex-col gap-4">
-            <div>Exporting MP4 to disk... {Math.round(progress * 100)}%</div>
+            <div>
+              Exporting MP4 to disk...{" "}
+              {Math.round(invlerp(rangeStart, rangeEnd, progress) * 100)}%
+            </div>
             <button
               onClick={handleAbort}
               className="bg-black px-4 py-2 rounded text-sm"
