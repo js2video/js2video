@@ -1,6 +1,6 @@
 import { useJS2VideoEventProperty } from "./hooks/use-js2video-event-property";
 import { useJS2Video } from "./js2video-provider";
-import { canBrowserEncodeVideo, formatTime, cn, lerp, invlerp } from "../utils";
+import { canBrowserEncodeVideo, formatTime, cn, invlerp } from "../utils";
 import {
   PlayIcon,
   PauseIcon,
@@ -9,6 +9,8 @@ import {
   SquareArrowDownIcon,
   ZoomInIcon,
   ZoomOutIcon,
+  UnfoldHorizontalIcon,
+  ScissorsLineDashedIcon,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
@@ -26,7 +28,7 @@ const CurrentTime = () => {
   const currentTime = useCurrentTime();
   const duration = useDuration();
   return (
-    <div className="px-2 text-sm opacity-70 font-mono whitespace-nowrap">
+    <div className="px-2 font-mono text-sm opacity-70 whitespace-nowrap">
       {formatTime(currentTime)} / {formatTime(duration)}
     </div>
   );
@@ -36,26 +38,17 @@ const CustomScale = ({ scale }) => {
   return <>{formatTime(scale)}</>;
 };
 
-const Scrubber = ({ timelineRef, scale, scaleWidth }) => {
-  const { videoTemplate } = useJS2Video();
+const Scrubber = ({
+  videoTemplate,
+  rangeStart,
+  rangeEnd,
+  duration,
+  timelineRef,
+  scale,
+  scaleWidth,
+}) => {
   const [data, setData] = useState([]);
   const startLeft = 32;
-
-  // use a listener to update react-timeline-editor time
-  useEffect(() => {
-    const listener = (e) => {
-      if (!timelineRef.current) {
-        return;
-      }
-      const { type, videoTemplate } = e.detail;
-      if (type === "timelineUpdate") {
-        // @ts-ignore
-        timelineRef.current.setTime(videoTemplate.currentTime);
-      }
-    };
-    window.addEventListener("js2video", listener);
-    return () => window.removeEventListener("js2video", listener);
-  }, []);
 
   useEffect(() => {
     if (!videoTemplate) {
@@ -67,26 +60,28 @@ const Scrubber = ({ timelineRef, scale, scaleWidth }) => {
         actions: [
           {
             id: "action0",
-            start: videoTemplate.rangeStartTime,
-            end: videoTemplate.rangeEndTime,
-            maxEnd: videoTemplate.duration,
+            start: rangeStart,
+            end: rangeEnd,
+            maxEnd: duration,
           },
         ],
       },
     ]);
-  }, [videoTemplate]);
+  }, [rangeStart, rangeEnd, duration]);
 
   const actionRender = (action) => {
     return (
       <div
         className={`h-full select-none text-xs overflow-hidden justify-center items-center bg-blue-700 flex text-blue-400`}
       >
-        {formatTime(videoTemplate.rangeEndTime - videoTemplate.rangeStartTime)}
+        {formatTime(rangeEnd - rangeStart)}
       </div>
     );
   };
 
   const scaleRender = (scale) => <CustomScale scale={scale} />;
+
+  console.log({ rangeStart, rangeEnd });
 
   return (
     <div className="flex-1">
@@ -118,10 +113,6 @@ const Scrubber = ({ timelineRef, scale, scaleWidth }) => {
           await videoTemplate?.seek({ time });
         }}
         onActionResizing={(e) => {
-          const { start, end, dir } = e;
-          videoTemplate?.scrub({ time: dir === "left" ? start : end });
-        }}
-        onActionResizeEnd={(e) => {
           const { start, end } = e;
           videoTemplate?.setTimeRange(start, end);
         }}
@@ -260,15 +251,15 @@ const ExportButton = () => {
   return (
     <>
       {!!isExporting && (
-        <div className="absolute inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
-          <div className="flex items-center flex-col gap-4">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+          <div className="flex flex-col items-center gap-4">
             <div>
               Exporting MP4 to disk...{" "}
               {Math.round(invlerp(rangeStart, rangeEnd, progress) * 100)}%
             </div>
             <button
               onClick={handleAbort}
-              className="bg-black px-4 py-2 rounded text-sm"
+              className="px-4 py-2 text-sm bg-black rounded"
             >
               Abort
             </button>
@@ -288,6 +279,7 @@ const TogglePlayButton = () => {
   const isPlaying = useIsPlaying();
   return (
     <ControlButton
+      title="Play/Pause"
       onClick={(e) => {
         videoTemplate.togglePlay();
       }}
@@ -301,6 +293,7 @@ const RewindButton = () => {
   const { videoTemplate } = useJS2Video();
   return (
     <ControlButton
+      title="Rewind"
       onClick={async (e) => {
         await videoTemplate.rewind();
       }}
@@ -315,10 +308,33 @@ const RewindButton = () => {
  * @returns {JSX.Element}
  */
 const JS2VideoControls = () => {
+  const { videoTemplate } = useJS2Video();
   const [scale, setScale] = useState(2);
   const [scaleWidth, setScaleWidth] = useState(160);
+  const [duration, setDuration] = useState(0);
+  const [rangeStart, setRangeStart] = useState(0);
+  const [rangeEnd, setRangeEnd] = useState(0);
   const scaleFactor = 0.5;
   const timelineRef = useRef();
+
+  // use a listener to update react-timeline-editor time
+  useEffect(() => {
+    const listener = (e) => {
+      if (!timelineRef.current) {
+        return;
+      }
+      const { videoTemplate: vt } = e.detail;
+      if (vt) {
+        setRangeStart(vt.rangeStartTime);
+        setRangeEnd(vt.rangeEndTime);
+        setDuration(vt.duration);
+        // @ts-ignore
+        timelineRef.current?.setTime(vt.currentTime);
+      }
+    };
+    window.addEventListener("js2video", listener);
+    return () => window.removeEventListener("js2video", listener);
+  }, []);
 
   const scrollTimeline = (newScale) => {
     if (!timelineRef.current) {
@@ -343,33 +359,80 @@ const JS2VideoControls = () => {
     setScale(newScale);
   };
 
+  const setRangeStartToCurrentTime = (e) => {
+    videoTemplate.setTimeRange(videoTemplate.currentTime, rangeEnd);
+  };
+
+  const setRangeEndToCurrentTime = (e) => {
+    videoTemplate.setTimeRange(rangeStart, videoTemplate.currentTime);
+  };
+
+  const resetRange = (e) => {
+    videoTemplate.setTimeRange(0, videoTemplate.duration);
+  };
+
   return (
     <div className="flex flex-col bg-black">
       <div className="flex items-center px-2">
-        <div className="flex-1 flex gap-4">
+        <div className="flex flex-1 gap-6">
           <div className="flex">
             <RewindButton />
             <TogglePlayButton />
           </div>
           <div className="flex gap-2">
-            <button onClick={zoomIn} className="opacity-60 hover:opacity-80">
+            <button
+              title="Zoom in timeline"
+              onClick={zoomIn}
+              className="opacity-60 hover:opacity-80"
+            >
               <ZoomInIcon />
             </button>
-            <button onClick={zoomOut} className="opacity-60 hover:opacity-80">
+            <button
+              title="Zoom out timeline"
+              onClick={zoomOut}
+              className="opacity-60 hover:opacity-80"
+            >
               <ZoomOutIcon />
             </button>
           </div>
+          <div className="flex gap-2">
+            <button
+              title="Set range start to playhead position"
+              onClick={setRangeStartToCurrentTime}
+              className="opacity-60 hover:opacity-80"
+            >
+              <ScissorsLineDashedIcon />
+            </button>
+            <button
+              title="Set range end to playhead position"
+              onClick={setRangeEndToCurrentTime}
+              className="opacity-60 hover:opacity-80"
+            >
+              <ScissorsLineDashedIcon className="rotate-180" />
+            </button>
+          </div>
+          <button
+            title="Reset range"
+            onClick={resetRange}
+            className="opacity-60 hover:opacity-80"
+          >
+            <UnfoldHorizontalIcon />
+          </button>
         </div>
-        <div className="flex-1 flex justify-center">
+        <div className="flex justify-center flex-1">
           <CurrentTime />
         </div>
-        <div className="flex-1 flex justify-end">
+        <div className="flex justify-end flex-1">
           <ExportButton />
           <ExportServerButton />
         </div>
       </div>
       <div>
         <Scrubber
+          videoTemplate={videoTemplate}
+          rangeStart={rangeStart}
+          rangeEnd={rangeEnd}
+          duration={duration}
           timelineRef={timelineRef}
           scale={scale}
           scaleWidth={scaleWidth}
