@@ -479,6 +479,9 @@ class VideoTemplate {
   }
 
   setTimeRange(startTime, endTime) {
+    if (startTime >= endTime) {
+      return;
+    }
     this.setRange(this.timeToProgress(startTime), this.timeToProgress(endTime));
   }
 
