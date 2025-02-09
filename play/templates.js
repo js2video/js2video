@@ -75,6 +75,14 @@ const templates = [
         label: "Video with custom color matrix filter",
         url: "/templates/video-colormatrix-filter.js",
       },
+      {
+        label: "Video with adjustment filter",
+        url: "/templates/video-adjustment-filter.js",
+      },
+      {
+        label: "Video filter with animated mask",
+        url: "/templates/video-filtermask.js",
+      },
     ],
   },
   {

@@ -99,8 +99,8 @@ const template = async ({
   canvas.add(pixiFilters);
 
   pixiFilters.set({
-    left: -20,
-    top: -20,
+    left: params.size.width * 0.5,
+    top: 0,
     scaleX: 1.1,
     scaleY: 1.1,
     originX: "center",
