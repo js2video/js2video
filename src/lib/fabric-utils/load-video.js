@@ -35,16 +35,22 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
    * @return {Promise<void>}
    */
   async js2video_seek(time) {
+    console.log("seek video", time);
+    let success;
     if (this.js2video_frameDecoder) {
       await this.js2video_frameDecoder.decode(time);
     } else {
-      await new Promise((resolve) => {
-        this.js2video_video.requestVideoFrameCallback((now, metadata) => {
-          resolve();
-        });
-        this.js2video_video.currentTime = time + 0.001;
-      });
+      success = await Promise.race([
+        new Promise((r) => setTimeout(r, 500)),
+        new Promise((resolve) => {
+          this.js2video_video.requestVideoFrameCallback((now, metadata) => {
+            resolve(true);
+          });
+          this.js2video_video.currentTime = time;
+        }),
+      ]);
     }
+    console.log("seeked video", time, success);
     this.canvas.renderAll();
   }
 
@@ -109,6 +115,7 @@ async function loadVideo({ url, options = {} }) {
   if (!video) {
     throw "Could not load video";
   }
+  console.log("loaded video object", url);
   const obj = new JS2VideoVideo(video, options);
   return obj;
 }
