@@ -23,6 +23,7 @@ class JS2VideoPixiFilter extends JS2VideoMixin(FabricObject) {
     container.addChild(sprite);
     container.filters = filters;
     this.js2video_app.stage.addChild(container);
+    this.set({ width: this.js2video_width, height: this.js2video_height });
   }
 
   async load() {
