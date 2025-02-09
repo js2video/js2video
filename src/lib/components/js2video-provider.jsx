@@ -128,6 +128,7 @@ const JS2VideoProvider = ({
           vtRef.current = vt;
           setVideoTemplate(vt);
         } catch (err) {
+          console.error(err);
           setTemplateError(err);
           try {
             await vt.dispose();
