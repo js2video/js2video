@@ -93,7 +93,6 @@ class VideoTemplate {
     this.videoFilePrefix = videoFilePrefix;
     /** @type {Array<IJS2VideoObject>} */
     this.objects = [];
-    this.videoFilePrefix = "js2video";
     this.isExporting = false;
     this.isLoaded = false;
     this.isDisposed = false;
