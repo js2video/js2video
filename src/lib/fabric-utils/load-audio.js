@@ -90,7 +90,6 @@ const loadAudio = async ({
   }
 
   let offsetBuffer;
-  console.log(audioBuffer);
 
   if (options.offset > 0) {
     const crunker = getCrunker();
