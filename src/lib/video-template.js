@@ -103,6 +103,7 @@ class VideoTemplate {
     this.canvas = new Fabric.StaticCanvas(this.canvasElement, {
       enableRetinaScaling: true,
     });
+    this.bitrate = 6e6;
   }
 
   /**
@@ -144,7 +145,11 @@ class VideoTemplate {
       /* @vite-ignore */ this.templateUrl
     );
 
+    // merge all params
     this.params = { ...globalParams, ...defaultParams, ...this.params };
+
+    // store directly on instance
+    this.bitrate = this.params.bitrate;
 
     validateParams(this.params);
 
@@ -414,7 +419,7 @@ class VideoTemplate {
 
       await encodeVideo({
         audioBuffer,
-        bitrate: this.params.bitrate,
+        bitrate: this.bitrate,
         width: this.params.size.width,
         height: this.params.size.height,
         canvasElement: this.canvasElement,
@@ -470,6 +475,11 @@ class VideoTemplate {
     } finally {
       this.canvasElement.remove();
     }
+  }
+
+  setBitrate(bitrate) {
+    this.bitrate = bitrate;
+    this.sendEvent("setBitrate");
   }
 
   setRange(start, end) {
