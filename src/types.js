@@ -1,6 +1,8 @@
 /**
  * @typedef {Function} OnLoadingFunction
- * @param {boolean} isLoading
+ * @param {Object} params
+ * @param {boolean} params.isLoading
+ * @param {any} params.videoTemplate
  * @returns {void}
  */
 

@@ -154,7 +154,7 @@ const JS2VideoProvider = ({
 
   useEffect(() => {
     if (onLoading) {
-      onLoading(isLoading);
+      onLoading({ isLoading, videoTemplate: vtRef.current });
     }
   }, [isLoading]);
 
