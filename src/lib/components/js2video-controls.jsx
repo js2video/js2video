@@ -11,6 +11,7 @@ import {
   ZoomOutIcon,
   UnfoldHorizontalIcon,
   ArrowDownToDotIcon,
+  ScissorsLineDashedIcon,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
@@ -321,8 +322,8 @@ const JS2VideoControls = () => {
       if (!timelineRef.current) {
         return;
       }
-      const { videoTemplate: vt } = e.detail;
-      if (vt) {
+      const { type, videoTemplate: vt } = e.detail;
+      if (vt && vt.rangeEndTime > 0) {
         setRangeStart(vt.rangeStartTime);
         setRangeEnd(vt.rangeEndTime);
         setDuration(vt.duration);
@@ -399,14 +400,14 @@ const JS2VideoControls = () => {
               onClick={setRangeStartToCurrentTime}
               className="opacity-60 hover:opacity-80"
             >
-              <ArrowDownToDotIcon className="rotate-90" />
+              <ScissorsLineDashedIcon />
             </button>
             <button
               title="Set range end to playhead position"
               onClick={setRangeEndToCurrentTime}
               className="opacity-60 hover:opacity-80"
             >
-              <ArrowDownToDotIcon className="-rotate-90" />
+              <ScissorsLineDashedIcon className="-rotate-180" />
             </button>
           </div>
           <button
