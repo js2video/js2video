@@ -81,8 +81,6 @@ const Scrubber = ({
 
   const scaleRender = (scale) => <CustomScale scale={scale} />;
 
-  console.log({ rangeStart, rangeEnd });
-
   return (
     <div className="flex-1">
       <Timeline
