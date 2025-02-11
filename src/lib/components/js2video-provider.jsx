@@ -104,8 +104,13 @@ const JS2VideoProvider = ({
       await queueRef.current.enqueue(async () => {
         setIsLoading(true);
         setTemplateError(null);
+        let updatedParams = { ...params };
+        let currentTime = 0;
         // dispose previous loaded template instance
         if (vtRef.current) {
+          // use same range in new vt
+          updatedParams = { ...updatedParams, range: vtRef.current.range };
+          currentTime = vtRef.current.currentTime;
           try {
             await vtRef.current.dispose();
           } catch (err) {
@@ -120,11 +125,15 @@ const JS2VideoProvider = ({
           parentElement: previewRef.current,
           autoPlay,
           loop,
-          params,
+          params: updatedParams,
           videoFilePrefix,
         });
         try {
           await vt.load();
+          // seek to prev currentTime
+          if (vt.currentTime !== currentTime) {
+            await vt.seek({ time: currentTime });
+          }
           vtRef.current = vt;
           setVideoTemplate(vt);
         } catch (err) {
