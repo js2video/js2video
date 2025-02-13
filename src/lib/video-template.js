@@ -412,7 +412,7 @@ class VideoTemplate {
       this.isExporting = true;
 
       await Promise.all(this.objects.map((obj) => obj.js2video_startExport()));
-      await this.seek({ time: 0 });
+      await this.seek({ time: this.rangeStartTime });
       this.pause();
 
       const audioBuffer = await this.mergeAudio();

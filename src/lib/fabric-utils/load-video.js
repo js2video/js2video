@@ -14,6 +14,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
     super(options);
     this.js2video_video = video;
     this.js2video_duration = video.duration;
+    this.js2video_frameDecoder = new FrameDecoder(video.src);
     super.set({
       objectCaching: false,
       width: video.videoWidth,
@@ -24,7 +25,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
   _render(ctx) {
     super.js2video_renderImage(
       ctx,
-      this.js2video_frameDecoder
+      this.js2video_isExporting
         ? this.js2video_frameDecoder.canvas
         : this.js2video_video
     );
@@ -37,7 +38,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
   async js2video_seek(time) {
     console.log("seek video", time);
     let success;
-    if (this.js2video_frameDecoder) {
+    if (this.js2video_isExporting) {
       await this.js2video_frameDecoder.decode(time);
     } else {
       success = await Promise.race([
@@ -64,34 +65,18 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
 
   async js2video_startExport() {
     this.js2video_isExporting = true;
-    if (this.js2video_frameDecoder) {
-      console.warn(
-        "had lingering framedecoder, destroying before creating new"
-      );
-      await this.js2video_frameDecoder.destroy();
-    }
-    this.js2video_frameDecoder = new FrameDecoder(this.js2video_video.src);
+    await this.js2video_frameDecoder.start();
     return;
   }
 
   async js2video_endExport() {
     this.js2video_isExporting = false;
-    if (this.js2video_frameDecoder) {
-      console.log("removing frame decoder");
-      try {
-        await this.js2video_frameDecoder.destroy();
-      } catch (err) {
-        console.warn(err);
-      }
-    }
-    this.js2video_frameDecoder = null;
+    await this.js2video_frameDecoder.end();
     return;
   }
 
   async js2video_dispose() {
-    if (this.js2video_frameDecoder) {
-      await this.js2video_frameDecoder.destroy();
-    }
+    await this.js2video_frameDecoder.destroy();
     console.log("disposed js2video_video obj");
   }
 }
