@@ -5,13 +5,12 @@ import {
   PlayIcon,
   PauseIcon,
   RewindIcon,
-  ArrowDownToLineIcon,
   SquareArrowDownIcon,
   ZoomInIcon,
   ZoomOutIcon,
   UnfoldHorizontalIcon,
-  ArrowDownToDotIcon,
   ScissorsLineDashedIcon,
+  DownloadIcon,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
@@ -267,7 +266,7 @@ const ExportButton = () => {
       )}
 
       <ControlButton onClick={handleClick}>
-        <ArrowDownToLineIcon size={26} />
+        <DownloadIcon size={26} />
       </ControlButton>
     </>
   );
@@ -373,7 +372,7 @@ const JS2VideoControls = () => {
   return (
     <div className="flex flex-col bg-black">
       <div className="flex items-center px-2">
-        <div className="flex flex-1 gap-6">
+        <div className="flex flex-1 gap-8">
           <div className="flex">
             <RewindButton />
             <TogglePlayButton />
@@ -394,7 +393,7 @@ const JS2VideoControls = () => {
               <ZoomOutIcon />
             </button>
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button
               title="Set range start to playhead position"
               onClick={setRangeStartToCurrentTime}
