@@ -1,11 +1,11 @@
-import { FrameDecoder } from "../frame-decoder";
+import { FrameSeeker } from "../frame-seeker";
 
 const JS2VideoMixin = (Base) =>
   class extends Base {
     static isJS2Video = true;
 
-    /** @type {FrameDecoder | undefined} */
-    js2video_frameDecoder;
+    /** @type {FrameSeeker | undefined} */
+    js2video_frameSeeker;
 
     /** @type {gsap.core.Timeline} */
     js2video_timeline;
