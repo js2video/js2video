@@ -175,8 +175,8 @@ class VideoTemplate {
       canvasUtils,
     });
 
-    if (this.duration > 3600) {
-      throw "Total video duration is too long. Max duration: 1 hour";
+    if (this.duration > 3600 * 3) {
+      throw "Total video duration is too long. Max duration: 3 hour";
     }
 
     // store all custom objects
