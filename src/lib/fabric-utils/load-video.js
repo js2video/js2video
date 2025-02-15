@@ -1,5 +1,5 @@
 import { FabricObject } from "fabric";
-import { FrameDecoder } from "../frame-decoder";
+import { FrameSeeker } from "../frame-seeker";
 import { JS2VideoMixin } from "./js2video-mixin";
 
 class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
@@ -14,7 +14,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
     super(options);
     this.js2video_video = video;
     this.js2video_duration = video.duration;
-    this.js2video_frameDecoder = new FrameDecoder(video.src);
+    this.js2video_frameSeeker = new FrameSeeker(video.src);
     super.set({
       objectCaching: false,
       width: video.videoWidth,
@@ -26,7 +26,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
     super.js2video_renderImage(
       ctx,
       this.js2video_isExporting
-        ? this.js2video_frameDecoder.canvas
+        ? this.js2video_frameSeeker.canvas
         : this.js2video_video
     );
   }
@@ -39,7 +39,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
     console.log("seek video", time);
     let success;
     if (this.js2video_isExporting) {
-      await this.js2video_frameDecoder.decode(time);
+      await this.js2video_frameSeeker.seek(time);
     } else {
       success = await Promise.race([
         new Promise((r) => setTimeout(r, 500)),
@@ -65,18 +65,17 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
 
   async js2video_startExport() {
     this.js2video_isExporting = true;
-    await this.js2video_frameDecoder.start();
     return;
   }
 
   async js2video_endExport() {
     this.js2video_isExporting = false;
-    await this.js2video_frameDecoder.end();
+    await this.js2video_frameSeeker.stop();
     return;
   }
 
   async js2video_dispose() {
-    await this.js2video_frameDecoder.destroy();
+    await this.js2video_frameSeeker.destroy();
     console.log("disposed js2video_video obj");
   }
 }
