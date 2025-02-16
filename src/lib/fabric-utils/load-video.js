@@ -65,6 +65,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
 
   async js2video_startExport() {
     this.js2video_isExporting = true;
+    await this.js2video_frameSeeker.start();
     return;
   }
 
