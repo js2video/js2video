@@ -28,14 +28,14 @@ const CurrentTime = () => {
   const currentTime = useCurrentTime();
   const duration = useDuration();
   return (
-    <div className="px-2 font-mono text-sm opacity-70 whitespace-nowrap">
+    <div className="px-2 select-none font-mono text-sm opacity-70 whitespace-nowrap">
       {formatTime(currentTime)} / {formatTime(duration)}
     </div>
   );
 };
 
 const CustomScale = ({ scale }) => {
-  return <>{formatTime(scale)}</>;
+  return <div className="select-none">{formatTime(scale)}</div>;
 };
 
 const Scrubber = ({
