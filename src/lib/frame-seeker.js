@@ -45,17 +45,17 @@ export class FrameSeeker {
   }
 
   async decodeSample(sample) {
-    console.log("decode sample", sample.number, sample.cts / sample.timescale);
+    // console.log("decode sample", sample.number, sample.cts / sample.timescale);
     const chunk = this.getChunk(sample);
     this.videoDecoder.decode(chunk);
     this.lastSampleEncoded = sample.number;
     // this.file.releaseUsedSamples(this.track.id, sample.number);
-    // a decode doesn't always output a frame. wait 100ms and move on
+    // a decode doesn't always output a frame. wait 200ms and move on
     try {
       await Promise.race([
         new Promise((r) => (this.frameReady = r)),
         new Promise((_, reject) =>
-          setTimeout(() => reject("no frame outputted in 100ms"))
+          setTimeout(() => reject("no frame outputted in 200ms"), 200)
         ),
       ]);
     } catch (err) {
@@ -69,12 +69,12 @@ export class FrameSeeker {
       this.file = createFile();
       this.file.onError = this.onError.bind(this);
       this.file.onSamples = (id, user, samples) => {
+        // console.log(samples[0].offset);
         console.log("all samples fetched", samples.length);
         this.samples = samples;
         resolve();
       };
       this.file.onReady = (info) => {
-        console.log(info);
         this.info = info;
         this.track = info.tracks.find((item) => item.type === "video");
         this.file.setExtractionOptions(this.track.id, null, {
@@ -146,7 +146,7 @@ export class FrameSeeker {
       await this.decodeSample(this.rap);
     }
 
-    console.log("last encoded", this.lastSampleEncoded);
+    // console.log("last encoded", this.lastSampleEncoded);
 
     // loop until we decode / find a frame in the buffer
     for (const sample of this.samples) {
@@ -159,7 +159,7 @@ export class FrameSeeker {
           await this.decodeSample(sample);
         } else {
           const frame = this.frameBuffer[frameIndex];
-          console.log("draw frame:", frame.timestamp / 1e6);
+          // console.log("draw frame:", frame.timestamp / 1e6);
           this.ctx.drawImage(frame, 0, 0);
           break;
         }
