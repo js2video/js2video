@@ -26,6 +26,7 @@ export class FrameSeeker {
     this.rap = null;
     this.frameReady = null;
     this.isActive = false;
+    this.firstSample = null;
   }
 
   onError(error) {
@@ -33,11 +34,12 @@ export class FrameSeeker {
   }
 
   getChunk(sample) {
-    const start = (1e6 * sample.cts) / sample.timescale;
+    const timestamp =
+      (1e6 * (sample.cts - this.firstSample.cts)) / sample.timescale;
     const duration = (1e6 * sample.duration) / sample.timescale;
     const chunk = new EncodedVideoChunk({
       type: sample.is_sync ? "key" : "delta",
-      timestamp: start,
+      timestamp: timestamp,
       duration: duration,
       data: sample.data,
     });
@@ -69,8 +71,7 @@ export class FrameSeeker {
       this.file = createFile();
       this.file.onError = this.onError.bind(this);
       this.file.onSamples = (id, user, samples) => {
-        // console.log(samples[0].offset);
-        console.log("all samples fetched", samples.length);
+        this.firstSample = samples[0];
         this.samples = samples;
         resolve();
       };
@@ -102,13 +103,13 @@ export class FrameSeeker {
     // load samples and init decoder
     if (!this.samples) {
       await this.loadSamples();
-      // create the video decoder
     }
 
+    // create the video decoder
     if (!this.videoDecoder) {
       this.videoDecoder = new VideoDecoder({
         output: (frame) => {
-          // console.log(`push frame to buffer: ${frame.timestamp / 1e6}`);
+          console.log(`push frame to buffer: ${frame.timestamp / 1e6}`);
           this.frameBuffer.push(frame);
           this.frameReady?.();
           this.frameReady = null;
@@ -137,7 +138,7 @@ export class FrameSeeker {
           (latest, obj) =>
             obj.is_sync && obj.cts / obj.timescale <= time ? obj : latest,
           null
-        ) || this.samples[0];
+        ) || this.firstSample;
       console.log(
         "FOUND RAP",
         this.rap.number,
@@ -187,10 +188,13 @@ export class FrameSeeker {
     this.rap = null;
     this.lastSampleEncoded = -1;
     this.clearFrameBuffer();
-    this.videoDecoder.flush();
+    await this.videoDecoder.flush();
+    this.videoDecoder.close();
+    this.videoDecoder = null;
   }
 
   async destroy() {
+    console.log("destroy frame seeker");
     await this.stop();
   }
 }
