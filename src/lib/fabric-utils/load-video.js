@@ -10,11 +10,16 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
    * @param {HTMLVideoElement} video
    * @param {Object} options
    */
-  constructor(video, options) {
+  constructor(video, options, onImageData) {
     super(options);
+    this.js2video_onImageData = onImageData;
     this.js2video_video = video;
     this.js2video_duration = video.duration;
     this.js2video_frameSeeker = new FrameSeeker(video.src);
+    this.js2video_canvas = document.createElement("canvas");
+    this.js2video_ctx = this.js2video_canvas.getContext("2d", {
+      willReadFrequently: true,
+    });
     super.set({
       objectCaching: false,
       width: video.videoWidth,
@@ -23,12 +28,26 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
   }
 
   _render(ctx) {
-    super.js2video_renderImage(
-      ctx,
-      this.js2video_isExporting
-        ? this.js2video_frameSeeker.canvas
-        : this.js2video_video
-    );
+    const image = this.js2video_isExporting
+      ? this.js2video_frameSeeker.canvas
+      : this.js2video_video;
+
+    if (this.js2video_onImageData) {
+      this.js2video_canvas.width = this.width;
+      this.js2video_canvas.height = this.height;
+      this.js2video_ctx.drawImage(image, 0, 0, this.width, this.height);
+      const imageData = this.js2video_ctx.getImageData(
+        0,
+        0,
+        this.width,
+        this.height
+      );
+      this.js2video_onImageData(imageData);
+      this.js2video_ctx.putImageData(imageData, 0, 0);
+      super.js2video_renderImage(ctx, this.js2video_canvas);
+    } else {
+      super.js2video_renderImage(ctx, image);
+    }
   }
 
   /**
@@ -81,7 +100,7 @@ class JS2VideoVideo extends JS2VideoMixin(FabricObject) {
   }
 }
 
-async function loadVideo({ url, options = {} }) {
+async function loadVideo({ url, options = {}, onImageData }) {
   console.log("loading video object", url);
   const video = await Promise.race([
     new Promise((r) => setTimeout(r, 10000)),
@@ -101,7 +120,7 @@ async function loadVideo({ url, options = {} }) {
     throw "Could not load video";
   }
   console.log("loaded video object", url);
-  const obj = new JS2VideoVideo(video, options);
+  const obj = new JS2VideoVideo(video, options, onImageData);
   return obj;
 }
 
