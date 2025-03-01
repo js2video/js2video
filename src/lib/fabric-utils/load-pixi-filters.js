@@ -38,6 +38,7 @@ class JS2VideoPixiFilter extends JS2VideoMixin(FabricObject) {
       height: this.js2video_height,
       clearBeforeRender: true,
     });
+    console.log(this.js2video_app.renderer.name);
   }
 
   _render(ctx) {
