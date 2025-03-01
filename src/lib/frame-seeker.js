@@ -24,7 +24,6 @@ export class FrameSeeker {
     this.lastSampleEncoded = -1;
     this.samples = null;
     this.rap = null;
-    this.frameReady = null;
     this.isActive = false;
     this.firstSample = null;
   }
@@ -47,15 +46,20 @@ export class FrameSeeker {
   }
 
   async decodeSample(sample) {
-    // console.log("decode sample", sample.number, sample.cts / sample.timescale);
-    const chunk = this.getChunk(sample);
-    this.videoDecoder.decode(chunk);
     this.lastSampleEncoded = sample.number;
-    // this.file.releaseUsedSamples(this.track.id, sample.number);
-    // a decode doesn't always output a frame. wait 200ms and move on
+    // wait 200ms on the decoder
     try {
       await Promise.race([
-        new Promise((r) => (this.frameReady = r)),
+        new Promise((resolve) => {
+          this.videoDecoder.addEventListener(
+            "dequeue",
+            (event) => {
+              resolve(event);
+            },
+            { once: true }
+          );
+          this.videoDecoder.decode(this.getChunk(sample));
+        }),
         new Promise((_, reject) =>
           setTimeout(() => reject("no frame outputted in 200ms"), 200)
         ),
@@ -63,6 +67,7 @@ export class FrameSeeker {
     } catch (err) {
       console.log(err);
     }
+    this.file.releaseUsedSamples(this.track.id, sample.number);
   }
 
   async loadSamples() {
@@ -111,8 +116,6 @@ export class FrameSeeker {
         output: (frame) => {
           console.log(`push frame to buffer: ${frame.timestamp / 1e6}`);
           this.frameBuffer.push(frame);
-          this.frameReady?.();
-          this.frameReady = null;
         },
         error: console.error,
       });
