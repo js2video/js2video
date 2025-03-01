@@ -5,13 +5,13 @@ https://pixijs.io/filters/docs/KawaseBlurFilter.html
 */
 
 const defaultParams = {
-  text: "Balboa Beach San Diego 1984",
+  text: "SAN DIEGO 1992",
   fontFamily: "Liter", // Google Font
   imageUrl: "https://js2video.com/images/ai/beach.jpg", // AI-generated
   fps: 30,
   size: {
-    width: 1080,
-    height: 1920,
+    width: 1280,
+    height: 960,
   },
 };
 
@@ -35,7 +35,7 @@ const template = async ({
   const random = (from, to) => utils.lerp(from, to, Math.random());
 
   // set background color
-  canvas.set({ backgroundColor: "#000000" });
+  canvas.set({ backgroundColor: "#000088" });
 
   // load Google font by name
   await utils.loadGoogleFont(params.fontFamily);
@@ -46,6 +46,7 @@ const template = async ({
     options: {
       originX: "center",
       originY: "center",
+      opacity: 0.4,
     },
   });
 
@@ -62,10 +63,10 @@ const template = async ({
   const text = await canvasUtils.loadTextbox({
     text: params.text,
     options: {
-      width: params.size.width,
-      fontSize: 280,
-      fontWeight: "bold",
+      width: params.size.width * 0.5,
+      fontSize: 60,
       fontFamily: params.fontFamily,
+      fontWeight: "bold",
       fill: "#ffffff",
       textAlign: "center",
     },
@@ -87,13 +88,6 @@ const template = async ({
 
   const blurFilter = new PixiFilters.KawaseBlurFilter();
   filters.push(blurFilter);
-
-  const crtFilter = new PixiFilters.CRTFilter({
-    vignettingAlpha: 0.3,
-    curvature: 1.4,
-    lineWidth: 3,
-  });
-  filters.push(crtFilter);
 
   const pixiFilters = await canvasUtils.loadPixiFilters({ canvas, filters });
   canvas.add(pixiFilters);
@@ -127,7 +121,7 @@ const template = async ({
         filters.map((f) => {
           f.slices = parseInt(random(18, 22));
           f.offset = random2(f.offset, -10, 10, 2);
-          f.strength = random2(f.strength, 3, 6, 1);
+          f.strength = random2(f.strength, 0, 1, 0.1);
           f.green = { x: random(0, 12), y: 0 };
         });
       },
