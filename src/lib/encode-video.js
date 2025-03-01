@@ -4,7 +4,6 @@ import {
   FileSystemWritableFileStreamTarget,
 } from "mp4-muxer";
 import { AVC } from "media-codecs";
-import { getCrunker, invlerp } from "./utils";
 
 function audioBufferToAudioData(audioBuffer) {
   // Create a new Float32Array to hold the planar audio data
