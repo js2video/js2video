@@ -8,6 +8,7 @@ export * from "./load-chars";
 export * from "./load-waveform-bars";
 export * from "./load-svg";
 export * from "./load-lottie";
+export * from "./load-three";
+export * from "./load-elevenlabs-speech";
 export * from "./get-svg-path-length";
 export * from "./utils";
-export * from "./load-elevenlabs-speech";
