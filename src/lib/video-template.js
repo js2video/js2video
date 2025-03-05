@@ -162,6 +162,10 @@ class VideoTemplate {
     // resize canvas
     this.canvas.setDimensions(this.params.size);
 
+    // add canvas to DOM, but hidden
+    this.parentElement.appendChild(this.canvasElement);
+    this.canvasElement.style.display = "none";
+
     // execute template function
     await template({
       timeline: this.timeline,
@@ -174,6 +178,8 @@ class VideoTemplate {
       utils,
       canvasUtils,
     });
+
+    this.canvasElement.style.display = "block";
 
     if (this.duration > 3600 * 3) {
       throw "Total video duration is too long. Max duration: 3 hour";
@@ -189,9 +195,6 @@ class VideoTemplate {
       obj.js2video_timeline = this.timeline;
       obj.js2video_params = this.params;
     });
-
-    // add canvas to DOM
-    this.parentElement.appendChild(this.canvasElement);
 
     // scale canvas to fit parent
     this.scaleToFit();
