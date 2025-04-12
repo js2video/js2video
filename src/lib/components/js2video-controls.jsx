@@ -305,7 +305,7 @@ const RewindButton = () => {
  * Simple playback controls
  * @returns {JSX.Element}
  */
-const JS2VideoControls = () => {
+const JS2VideoControls = ({ hideExportButton = false }) => {
   const { videoTemplate } = useJS2Video();
   const [scale, setScale] = useState(2);
   const [scaleWidth, setScaleWidth] = useState(160);
@@ -421,8 +421,8 @@ const JS2VideoControls = () => {
           <CurrentTime />
         </div>
         <div className="flex justify-end flex-1">
-          <ExportButton />
-          <ExportServerButton />
+          {!hideExportButton && <ExportButton />}
+          {!hideExportButton && <ExportServerButton />}
         </div>
       </div>
       <div>

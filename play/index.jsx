@@ -101,6 +101,7 @@ const App = () => {
           loop={true}
           enableUnsecureMode={true}
           videoFilePrefix="js2video"
+          hideExportButton={false}
         />
       </div>
     </div>

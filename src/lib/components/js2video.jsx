@@ -19,6 +19,7 @@ import { JS2VideoLayout } from "./js2video-layout";
  * @param {boolean} [props.showEditor] - Show the video template code editor. Default: true.
  * @param {OnLoadingFunction | undefined} [props.onLoading] - OnLoading callback function.
  * @param {OnBeforeExportFunction | undefined} [props.onBeforeExport] - Called before export.
+ * @param {boolean} [props.hideExportButton] - Hide the export buttons? Default: false.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2Video = ({
@@ -32,6 +33,7 @@ const JS2Video = ({
   showEditor = true,
   onLoading,
   onBeforeExport,
+  hideExportButton = false,
 }) => {
   return (
     <JS2VideoProvider
@@ -47,7 +49,7 @@ const JS2Video = ({
       <JS2VideoLayout>
         {showEditor && <JS2VideoEditor Header={EditorHeader} />}
         <JS2VideoPreview />
-        <JS2VideoControls />
+        <JS2VideoControls hideExportButton={hideExportButton} />
       </JS2VideoLayout>
     </JS2VideoProvider>
   );
