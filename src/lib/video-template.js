@@ -168,6 +168,7 @@ class VideoTemplate {
 
     // execute template function
     await template({
+      gsap,
       timeline: this.timeline,
       canvas: this.canvas,
       canvasElement: this.canvasElement,

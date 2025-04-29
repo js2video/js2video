@@ -22,6 +22,14 @@ const templates = [
         label: "Slide down - in/out",
         url: "/templates/transition-slide-down.js",
       },
+      {
+        label: "Scale down - in/out",
+        url: "/templates/transition-scale-down.js",
+      },
+      {
+        label: "Scale up - in/out",
+        url: "/templates/transition-scale-up.js",
+      },
     ],
   },
   {
