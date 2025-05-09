@@ -56,6 +56,7 @@ const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
     canvas,
     dataUrl: params.elevenLabsDataUrl,
     textObject,
+    modifyText: (text) => text.toUpperCase(),
     offset: 0.5,
     minDuration: 0.4,
     animateFrom: { opacity: 0, scaleX: 0.6, scaleY: 0.6 },
