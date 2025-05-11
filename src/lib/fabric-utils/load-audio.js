@@ -88,7 +88,7 @@ const loadAudio = async ({
   video = null,
   options = {
     offset: 0,
-    gain: 0,
+    gain: 1,
   },
 }) => {
   if (video) {
