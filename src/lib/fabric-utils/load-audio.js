@@ -16,6 +16,7 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
     this.js2video_audioBuffer = audioBuffer;
     this.js2video_duration = audioBuffer.duration;
     this.js2video_isAudioPlaying = false;
+    this.js2video_gain = options.gain ?? 1;
   }
 
   stop() {
@@ -36,7 +37,11 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
     const ctx = getAudioContext();
     this.source = ctx.createBufferSource();
     this.source.buffer = this.js2video_audioBuffer;
-    this.source.connect(ctx.destination);
+
+    const gainNode = ctx.createGain();
+    gainNode.gain.value = this.js2video_gain;
+    this.source.connect(gainNode).connect(ctx.destination);
+
     this.source.start(
       ctx.currentTime + Math.max(0, delay),
       Math.max(0, -delay),
@@ -67,11 +72,23 @@ class JS2VideoAudio extends JS2VideoMixin(FabricObject) {
   }
 }
 
+/**
+ * Loads an audio file and returns a JS2VideoAudio object with optional offset and volume level.
+ *
+ * @param {Object} params
+ * @param {string} params.url - URL of the audio file to load.
+ * @param {Object} [params.video=null] - Optional video object; if provided, uses its `src` as the audio URL.
+ * @param {Object} [params.options] - Options for audio manipulation.
+ * @param {number|null} [params.options.offset=0] - Offset (in seconds) to pad or trim the audio. Positive = delay, negative = trim.
+ * @param {number} [params.options.gain=1] - Volume level as linear gain (0 = silent, 1 = original volume, >1 = louder).
+ * @returns {Promise<JS2VideoAudio>} The loaded and configured audio object.
+ */
 const loadAudio = async ({
   url,
   video = null,
   options = {
-    offset: null,
+    offset: 0,
+    gain: 0,
   },
 }) => {
   if (video) {

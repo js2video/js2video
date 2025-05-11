@@ -7,6 +7,7 @@ const loadElevenLabsSpeech = async ({
   dataUrl,
   minDuration = 0.4,
   offset = 0,
+  gain = 1,
   animateFrom = { opacity: 0, scaleX: 0.6, scaleY: 0.6 },
   animateTo = { duration: 0.2, opacity: 1, scaleX: 1, scaleY: 1, ease: "back" },
   textObject,
@@ -17,7 +18,7 @@ const loadElevenLabsSpeech = async ({
   const audio = await loadAudio({
     url: audioUrl,
     video: null,
-    options: { offset },
+    options: { offset, gain },
   });
 
   canvas.add(audio);
