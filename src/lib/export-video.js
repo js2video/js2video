@@ -116,7 +116,7 @@ export const exportVideo = async ({ templateUrl = "", params = {} }) => {
       return await window.exportVideo(options);
     }, options);
   } catch (err) {
-    console.error("export error:", err?.message ?? err);
+    console.error(err?.message ?? err);
     // cleanup + rethrow
     await destroy();
     throw err;

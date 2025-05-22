@@ -62,8 +62,11 @@ async function encodeVideo({
   let muxer, audioEncoder, videoEncoder, target;
 
   async function close() {
+    console.log("closing encoders");
+
     if (audioEncoder) {
       try {
+        console.log("flushing audio encoder");
         await audioEncoder.flush();
         audioEncoder.close();
         console.log("closed audioEncoder");
@@ -73,6 +76,7 @@ async function encodeVideo({
     }
     if (videoEncoder) {
       try {
+        console.log("flushing video encoder");
         await videoEncoder.flush();
         videoEncoder.close();
         console.log("closed videoEncoder");
@@ -82,6 +86,7 @@ async function encodeVideo({
     }
     if (muxer) {
       try {
+        console.log("finalize muxer");
         muxer.finalize();
         console.log("finalized muxer");
       } catch (err) {
@@ -90,8 +95,9 @@ async function encodeVideo({
     }
     if (fileStream) {
       try {
+        console.log("closing file stream");
         await fileStream.close();
-        console.log("closed fileWritableStream");
+        console.log("closed file stream");
       } catch (err) {
         console.warn(err);
       }
@@ -235,6 +241,7 @@ async function encodeVideo({
 
     return;
   } catch (err) {
+    console.error(err?.message ?? err);
     await close();
     throw err;
   }

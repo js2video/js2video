@@ -441,7 +441,7 @@ class VideoTemplate {
 
       await this.cleanupExport();
     } catch (err) {
-      console.error(err.message);
+      console.error(err?.message ?? err);
       await this.cleanupExport();
       throw err;
     }
