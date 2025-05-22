@@ -261,25 +261,39 @@ class VideoTemplate {
       audioInputs.map((obj) => obj.js2video_audioBuffer)
     );
 
-    // no need to slice
-    if (
-      this.rangeStartTime <= 0 &&
-      this.rangeEndTime >= mergedBuffer.duration
-    ) {
-      console.log("no need to slice");
-      return mergedBuffer;
+    let resultBuffer;
+
+    const rangeDuration = this.rangeEndTime - this.rangeStartTime;
+
+    if (rangeDuration > mergedBuffer.duration) {
+      console.log("pad audio");
+      // pad
+      resultBuffer = crunker.padAudio(
+        mergedBuffer,
+        mergedBuffer.duration,
+        rangeDuration - mergedBuffer.duration
+      );
+    } else if (rangeDuration < mergedBuffer.duration) {
+      console.log("slice audio");
+      // slice
+      resultBuffer = crunker.sliceAudio(
+        mergedBuffer,
+        this.rangeStartTime,
+        Math.min(mergedBuffer.duration, this.rangeEndTime)
+      );
+    } else {
+      console.log("keep audio");
+      resultBuffer = mergedBuffer;
     }
 
-    // slice to match output length
-    const outputBuffer = crunker.sliceAudio(
-      mergedBuffer,
-      this.rangeStartTime,
-      Math.min(mergedBuffer.duration, this.rangeEndTime)
-    );
+    console.log({
+      rangeDuration,
+      bufferDuration: resultBuffer.duration,
+    });
 
     crunker.close();
 
-    return outputBuffer;
+    return resultBuffer;
   }
 
   /**

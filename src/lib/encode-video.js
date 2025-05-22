@@ -6,28 +6,27 @@ import {
 import { AVC } from "media-codecs";
 
 function audioBufferToAudioData(audioBuffer) {
+  // Create a new Float32Array to hold the planar audio data
   const numChannels = audioBuffer.numberOfChannels;
-  const length = audioBuffer.length;
-  const interleaved = new Int16Array(length * numChannels);
-
-  for (let i = 0; i < length; i++) {
-    for (let c = 0; c < numChannels; c++) {
-      const sample = audioBuffer.getChannelData(c)[i];
-      // Clamp float [-1.0, 1.0] to int16 [-32768, 32767]
-      interleaved[i * numChannels + c] =
-        Math.max(-1, Math.min(1, sample)) * 32767;
-    }
+  const lengthPerChannel = audioBuffer.length;
+  const planarData = new Float32Array(numChannels * lengthPerChannel);
+  // Fill the Float32Array with planar audio data
+  for (let channel = 0; channel < numChannels; channel++) {
+    const channelData = audioBuffer.getChannelData(channel);
+    planarData.set(channelData, channel * lengthPerChannel);
   }
-
-  return new AudioData({
-    format: "s16",
+  // Construct an AudioData object
+  const audioData = new AudioData({
+    format: "f32-planar",
     sampleRate: audioBuffer.sampleRate,
-    numberOfFrames: length,
-    numberOfChannels: numChannels,
+    numberOfFrames: lengthPerChannel,
+    numberOfChannels: audioBuffer.numberOfChannels,
     timestamp: 0,
-    data: interleaved,
+    data: planarData,
   });
+  return audioData;
 }
+
 /**
  * Exports a video template to MP4
  * @param {Object} options
