@@ -8,21 +8,20 @@ import { AVC } from "media-codecs";
 function audioBufferToAudioData(audioBuffer) {
   const numChannels = audioBuffer.numberOfChannels;
   const lengthPerChannel = audioBuffer.length;
-  const interleavedData = new Float32Array(numChannels * lengthPerChannel);
-  // Interleave the audio: [L0, R0, L1, R1, ...]
-  for (let i = 0; i < lengthPerChannel; i++) {
-    for (let channel = 0; channel < numChannels; channel++) {
-      interleavedData[i * numChannels + channel] =
-        audioBuffer.getChannelData(channel)[i];
-    }
+  const planarData = new Float32Array(numChannels * lengthPerChannel);
+  for (let channel = 0; channel < numChannels; channel++) {
+    planarData.set(
+      audioBuffer.getChannelData(channel),
+      channel * lengthPerChannel
+    );
   }
   const audioData = new AudioData({
-    format: "f32",
+    format: "f32-planar",
     sampleRate: audioBuffer.sampleRate,
-    numberOfFrames: lengthPerChannel,
+    numberOfFrames: planarData.length / numChannels,
     numberOfChannels: numChannels,
-    timestamp: 0, // Set this if you're streaming multiple chunks
-    data: interleavedData,
+    timestamp: 0,
+    data: planarData,
   });
   return audioData;
 }
@@ -189,7 +188,7 @@ async function encodeVideo({
         codec: audioCodec,
         sampleRate: audioBuffer.sampleRate,
         numberOfChannels: audioBuffer.numberOfChannels,
-        bitrate: 192000, // 192 kbps
+        bitrate: 128000,
       };
 
       const audioConfigTest = await AudioEncoder.isConfigSupported(
