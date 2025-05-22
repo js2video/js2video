@@ -59,7 +59,7 @@ async function encodeVideo({
   signal,
   fileStream,
 }) {
-  let muxer, audioEncoder, videoEncoder, target;
+  let muxer, audioEncoder, videoEncoder, target, hasReceivedOutput;
 
   async function close() {
     console.log("closing encoders");
@@ -151,6 +151,10 @@ async function encodeVideo({
     videoEncoder = new VideoEncoder({
       output: (chunk, meta) => {
         muxer.addVideoChunk(chunk, meta);
+        if (!hasReceivedOutput) {
+          console.log("frame outputted", chunk, meta);
+        }
+        hasReceivedOutput = true;
       },
       error: (e) => console.error(e),
     });
@@ -227,9 +231,10 @@ async function encodeVideo({
         });
         // flush every keyframe
         videoFrame.close();
-        if (currentFrame % Math.round(fps * 5) === 0) {
+        if (hasReceivedOutput && currentFrame % Math.round(fps * 5) === 0) {
           console.log("video frame flush", frame, frames, performance.now());
           await videoEncoder.flush();
+          console.log("video frame flushed", frame, frames, performance.now());
         }
         progressHandler();
         currentFrame++;
