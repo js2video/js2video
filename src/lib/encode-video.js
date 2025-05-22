@@ -5,28 +5,6 @@ import {
 } from "mp4-muxer";
 import { AVC } from "media-codecs";
 
-function audioBufferToAudioData(audioBuffer) {
-  // Create a new Float32Array to hold the planar audio data
-  const numChannels = audioBuffer.numberOfChannels;
-  const lengthPerChannel = audioBuffer.length;
-  const planarData = new Float32Array(numChannels * lengthPerChannel);
-  // Fill the Float32Array with planar audio data
-  for (let channel = 0; channel < numChannels; channel++) {
-    const channelData = audioBuffer.getChannelData(channel);
-    planarData.set(channelData, channel * lengthPerChannel);
-  }
-  // Construct an AudioData object
-  const audioData = new AudioData({
-    format: "f32-planar",
-    sampleRate: audioBuffer.sampleRate,
-    numberOfFrames: lengthPerChannel,
-    numberOfChannels: audioBuffer.numberOfChannels,
-    timestamp: 0,
-    data: planarData,
-  });
-  return audioData;
-}
-
 /**
  * Exports a video template to MP4
  * @param {Object} options
@@ -196,9 +174,43 @@ async function encodeVideo({
 
       console.log("audio encoder created", audioEncoderConfig);
 
-      audioEncoder.encode(audioBufferToAudioData(audioBuffer));
+      const chunkSize = 1024; // or 2048, depending on codec
+      let timestamp = 0; // in microseconds
+      const sampleRate = audioBuffer.sampleRate;
+
+      for (let offset = 0; offset < audioBuffer.length; offset += chunkSize) {
+        const length = Math.min(chunkSize, audioBuffer.length - offset);
+        const planarData = new Float32Array(
+          length * audioBuffer.numberOfChannels
+        );
+
+        for (
+          let channel = 0;
+          channel < audioBuffer.numberOfChannels;
+          channel++
+        ) {
+          const channelData = audioBuffer
+            .getChannelData(channel)
+            .subarray(offset, offset + length);
+          planarData.set(channelData, channel * length);
+        }
+
+        const audioData = new AudioData({
+          format: "f32-planar",
+          sampleRate,
+          numberOfFrames: length,
+          numberOfChannels: audioBuffer.numberOfChannels,
+          timestamp, // timestamp in microseconds
+          data: planarData,
+        });
+
+        audioEncoder.encode(audioData);
+        timestamp += (length / sampleRate) * 1_000_000; // convert seconds to µs
+      }
+
       await audioEncoder.flush();
       audioEncoder.close();
+
       console.log("flushed + closed audioencoder");
     }
 
