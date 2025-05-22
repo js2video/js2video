@@ -19,7 +19,7 @@ addEventListener("DOMContentLoaded", async () => {
       await vt.dispose();
       return result;
     } catch (err) {
-      console.error(err.message);
+      console.error(err?.message || err);
       // cleanup and rethrow
       await vt.dispose();
       throw err;

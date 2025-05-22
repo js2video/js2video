@@ -57,7 +57,10 @@ export const exportVideo = async ({ templateUrl = "", params = {} }) => {
 
   const page = await browser.newPage();
 
-  page.on("console", (msg) => console.log(`[js2video/export]: ${msg.text()}`));
+  page.on("console", async (msg) => {
+    const args = await Promise.all(msg.args().map((arg) => arg.jsonValue()));
+    console.log(`[js2video/export:${msg.type()}]`, ...args);
+  });
 
   console.log("goto", pageUrl);
 
@@ -113,7 +116,7 @@ export const exportVideo = async ({ templateUrl = "", params = {} }) => {
       return await window.exportVideo(options);
     }, options);
   } catch (err) {
-    console.error(err?.message ?? err);
+    console.error("export error:", err?.message ?? err);
     // cleanup + rethrow
     await destroy();
     throw err;

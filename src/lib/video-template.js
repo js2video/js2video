@@ -412,8 +412,10 @@ class VideoTemplate {
    */
   async export({ signal, fileStream } = {}) {
     try {
-      console.log("startExport");
+      console.log("export started");
       this.isExporting = true;
+
+      const a = c;
 
       await Promise.all(this.objects.map((obj) => obj.js2video_startExport()));
       await this.seek({ time: this.rangeStartTime });
@@ -441,6 +443,7 @@ class VideoTemplate {
 
       await this.cleanupExport();
     } catch (err) {
+      console.error(err.message);
       await this.cleanupExport();
       throw err;
     }
