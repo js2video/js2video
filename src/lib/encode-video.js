@@ -102,6 +102,9 @@ async function encodeVideo({
     const audioCodec = "mp4a.40.2";
     const videoCodec = AVC.getCodec({ profile: "Main", level: "5.2" });
 
+    console.log("audio codec", audioCodec);
+    console.log("video codec", videoCodec);
+
     if (!fileStream) {
       target = new StreamTarget({
         onData: async (chunk, position) => {
@@ -113,6 +116,8 @@ async function encodeVideo({
     } else {
       target = new FileSystemWritableFileStreamTarget(fileStream);
     }
+
+    console.log("target created");
 
     const muxerOptions = {
       fastStart: false,
@@ -135,6 +140,8 @@ async function encodeVideo({
     // @ts-ignore
     muxer = new Muxer(muxerOptions);
 
+    console.log("muxer created", muxerOptions);
+
     videoEncoder = new VideoEncoder({
       output: (chunk, meta) => {
         muxer.addVideoChunk(chunk, meta);
@@ -142,13 +149,23 @@ async function encodeVideo({
       error: (e) => console.error(e),
     });
 
-    videoEncoder.configure({
+    const videoEncoderConfig = {
       codec: videoCodec,
       width: width,
       height: height,
       bitrate: bitrate,
-      latencyMode: "quality",
-    });
+      contentHint: "detail",
+    };
+
+    const videoConfigTest = await VideoEncoder.isConfigSupported(
+      videoEncoderConfig
+    );
+
+    console.log("video encoder config supported?", videoConfigTest);
+
+    videoEncoder.configure(videoEncoderConfig);
+
+    console.log("video encoder created", videoEncoderConfig, performance.now());
 
     if (audioBuffer) {
       audioEncoder = new AudioEncoder({
@@ -158,12 +175,16 @@ async function encodeVideo({
         error: (e) => console.error(e),
       });
 
-      audioEncoder.configure({
+      const audioEncoderConfig = {
         codec: audioCodec,
         sampleRate: audioBuffer.sampleRate,
         numberOfChannels: audioBuffer.numberOfChannels,
         bitrate: 192000, // 192 kbps
-      });
+      };
+
+      audioEncoder.configure(audioEncoderConfig);
+
+      console.log("audio encoder created", audioEncoderConfig);
 
       audioEncoder.encode(audioBufferToAudioData(audioBuffer));
       await audioEncoder.flush();
@@ -201,6 +222,7 @@ async function encodeVideo({
         // flush every keyframe
         videoFrame.close();
         if (currentFrame % Math.round(fps * 5) === 0) {
+          console.log("video frame flush", frame, frames, performance.now());
           await videoEncoder.flush();
         }
         progressHandler();
