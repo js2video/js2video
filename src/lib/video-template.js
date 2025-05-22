@@ -415,8 +415,6 @@ class VideoTemplate {
       console.log("export started");
       this.isExporting = true;
 
-      const a = c;
-
       await Promise.all(this.objects.map((obj) => obj.js2video_startExport()));
       await this.seek({ time: this.rangeStartTime });
       this.pause();
