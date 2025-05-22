@@ -133,7 +133,7 @@ async function encodeVideo({
         width: width,
         height: height,
       },
-      firstTimestampBehavior: "offset",
+      firstTimestampBehavior: "strict",
       ...(audioBuffer && {
         audio: {
           codec: "aac",
@@ -180,12 +180,14 @@ async function encodeVideo({
     if (audioBuffer) {
       audioEncoder = new AudioEncoder({
         output: (chunk, meta) => {
-          console.log(
-            `[audioChunk] ts=${chunk.timestamp / 1_000_000} ts=${
-              chunk.timestamp
-            }, duration=${chunk.duration}`
-          );
-          muxer.addAudioChunk(chunk, meta);
+          if (chunk.timestamp / 1_000_000 < timeline.duration()) {
+            console.log(
+              `[audioChunk] ts=${chunk.timestamp / 1_000_000} ts=${
+                chunk.timestamp
+              }, duration=${chunk.duration}`
+            );
+            muxer.addAudioChunk(chunk, meta);
+          }
         },
         error: (e) => console.error(e),
       });
