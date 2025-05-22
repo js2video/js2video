@@ -69,7 +69,7 @@ async function encodeVideo({
         console.log("flushing audio encoder");
         await audioEncoder.flush();
         audioEncoder.close();
-        console.log("closed audioEncoder");
+        console.log("flushed and closed audioEncoder");
       } catch (err) {
         console.warn(err);
       }
@@ -79,7 +79,7 @@ async function encodeVideo({
         console.log("flushing video encoder");
         await videoEncoder.flush();
         videoEncoder.close();
-        console.log("closed videoEncoder");
+        console.log("flushed and closed videoEncoder");
       } catch (err) {
         console.warn(err);
       }
@@ -133,7 +133,7 @@ async function encodeVideo({
         width: width,
         height: height,
       },
-      firstTimestampBehavior: "strict",
+      firstTimestampBehavior: "offset",
       ...(audioBuffer && {
         audio: {
           codec: "aac",
@@ -180,14 +180,12 @@ async function encodeVideo({
     if (audioBuffer) {
       audioEncoder = new AudioEncoder({
         output: (chunk, meta) => {
-          if (chunk.timestamp / 1_000_000 < timeline.duration()) {
-            console.log(
-              `[audioChunk] ts=${chunk.timestamp / 1_000_000} ts=${
-                chunk.timestamp
-              }, duration=${chunk.duration}`
-            );
-            muxer.addAudioChunk(chunk, meta);
-          }
+          // console.log(
+          //   `[audioChunk] ts=${chunk.timestamp / 1_000_000} ts=${
+          //     chunk.timestamp
+          //   }, duration=${chunk.duration}`
+          // );
+          muxer.addAudioChunk(chunk, meta);
         },
         error: (e) => console.error(e),
       });
@@ -210,11 +208,6 @@ async function encodeVideo({
       console.log("audio encoder created", audioEncoderConfig);
 
       audioEncoder.encode(audioBufferToAudioData(audioBuffer));
-
-      await audioEncoder.flush();
-      audioEncoder.close();
-
-      console.log("flushed + closed audioencoder");
     }
 
     let frame = 0;
