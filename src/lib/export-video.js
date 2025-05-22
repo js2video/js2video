@@ -71,8 +71,17 @@ export const exportVideo = async ({ templateUrl = "", params = {} }) => {
 
   console.log("export function ready");
 
-  const outputFile = path.join(os.tmpdir(), `js2video-${nanoid()}.mp4`);
+  const tempDir = process.env.TEMP_DIR ?? os.tmpdir();
+
+  console.log("temp dir", tempDir);
+
+  const outputFile = path.join(tempDir, `video-${nanoid()}.mp4`);
+
+  console.log("exporting file to", outputFile);
+
   const fileHandle = await fs.open(outputFile, "w");
+
+  console.log("file handle created", outputFile);
 
   // page can now call writeChunk() from its exportVideo()
   await page.exposeFunction("writeChunk", async (chunk, position) => {
@@ -104,7 +113,7 @@ export const exportVideo = async ({ templateUrl = "", params = {} }) => {
       return await window.exportVideo(options);
     }, options);
   } catch (err) {
-    console.error(err);
+    console.error(err?.message ?? err);
     // cleanup + rethrow
     await destroy();
     throw err;
