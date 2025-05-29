@@ -67,7 +67,7 @@ export class FrameSeeker {
     } catch (err) {
       console.log(err);
     }
-    this.file.releaseUsedSamples(this.track.id, sample.number);
+    // this.file.releaseUsedSamples(this.track.id, sample.number);
   }
 
   async loadSamples() {
@@ -198,6 +198,16 @@ export class FrameSeeker {
 
   async destroy() {
     console.log("destroy frame seeker");
-    await this.stop();
+    if (this?.track?.id && this?.samples?.length) {
+      const lastSample = this.samples.pop();
+      console.log("releasing samples", lastSample);
+      this.file.releaseUsedSamples(this.track.id, lastSample.number);
+    }
+    try {
+      await this.stop();
+    } catch (err) {
+      console.error(err);
+    }
+    console.log("destroyed frame seeker");
   }
 }
