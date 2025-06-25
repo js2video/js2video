@@ -3,25 +3,19 @@
 @tailwind utilities;
 
 @font-face {
-  font-family: "mona-sans";
-  src: url("/fonts/MonaSansVF-Regular.woff2")
-    format("woff2 supports variations");
-  src: url("/fonts/MonaSansVF-Regular.woff2") format("woff2-variations");
-  font-weight: 200 900;
-  font-stretch: 75% 125%;
+  font-family: Inter;
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url(/fonts/Inter-VariableFont_opsz,wght.ttf) format("woff2");
 }
 
 :root {
-  --font-ui: "mona-sans";
+  --font-ui: "Inter";
 }
 
 .timeline-editor-edit-row {
   background-image: none!important;
-}
-
-html {
-  /* https://github.com/github/mona-sans?tab=readme-ov-file#stylistic-sets */
-  font-feature-settings: "ss05" off;
 }
 
 body {
