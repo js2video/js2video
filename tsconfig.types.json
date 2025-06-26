@@ -1,5 +1,5 @@
 {
-  "include": ["src/index.js", "src/lib/export-video.js"],
+  "include": ["src/index.js", "src/lib/export-video.js", "src/template-ref.js"],
   "compilerOptions": {
     "jsx": "react-jsx",
     "allowJs": true,

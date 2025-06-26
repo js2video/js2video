@@ -6,7 +6,11 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const config = [
   {
-    input: ["./types/index.d.ts", "./types/lib/export-video.d.ts"],
+    input: [
+      "./types/index.d.ts",
+      "./types/lib/export-video.d.ts",
+      "./types/template-ref.d.ts",
+    ],
     output: [
       {
         dir: resolve(__dirname, "dist"),
