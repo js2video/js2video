@@ -20,4 +20,4 @@ async function loadTextbox({ text, options = {} }) {
   return obj;
 }
 
-export { loadTextbox };
+export { loadTextbox, JS2VideoTextbox };

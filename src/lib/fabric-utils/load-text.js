@@ -20,4 +20,4 @@ async function loadText({ text, options = {} }) {
   return obj;
 }
 
-export { loadText };
+export { loadText, JS2VideoText };

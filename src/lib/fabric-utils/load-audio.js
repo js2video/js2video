@@ -128,4 +128,4 @@ const loadAudio = async ({
   return obj;
 };
 
-export { loadAudio };
+export { loadAudio, JS2VideoAudio };

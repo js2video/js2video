@@ -44,4 +44,4 @@ async function loadThree({ options = {} }) {
   return obj;
 }
 
-export { loadThree };
+export { loadThree, JS2VideoThree };

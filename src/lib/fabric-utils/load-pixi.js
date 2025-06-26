@@ -63,4 +63,4 @@ async function loadPixi({ canvas, options = {} }) {
   return obj;
 }
 
-export { loadPixi };
+export { loadPixi, JS2VideoPixi };

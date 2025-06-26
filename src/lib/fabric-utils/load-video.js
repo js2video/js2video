@@ -124,4 +124,4 @@ async function loadVideo({ url, options = {}, onImageData }) {
   return obj;
 }
 
-export { loadVideo };
+export { loadVideo, JS2VideoVideo, FrameSeeker };

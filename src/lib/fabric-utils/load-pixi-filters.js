@@ -60,4 +60,4 @@ async function loadPixiFilters({ canvas, filters = [], options = {} }) {
   return obj;
 }
 
-export { loadPixiFilters };
+export { loadPixiFilters, JS2VideoPixiFilter };

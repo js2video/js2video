@@ -155,4 +155,4 @@ async function loadWaveformBars({
   return obj;
 }
 
-export { loadWaveformBars };
+export { loadWaveformBars, JS2VideoWaveformBars };

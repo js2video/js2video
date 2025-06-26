@@ -80,4 +80,4 @@ async function loadLottie({ url, options = {} }) {
   return obj;
 }
 
-export { loadLottie };
+export { loadLottie, JS2VideoLottie };

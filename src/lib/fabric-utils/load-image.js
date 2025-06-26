@@ -30,4 +30,4 @@ async function loadImage({ url, options = {} }) {
   return obj;
 }
 
-export { loadImage };
+export { loadImage, JS2VideoImage };
