@@ -1,0 +1,21 @@
+# JS2Video
+
+URL: https://js2video.com
+
+## Video Templates
+
+Video Templates are written in JavaScript and exports a template function and the default params.
+
+Our engine executes the template function with the default params + user params and renders a video on the client or server.
+
+## Video Template Examples
+
+{{#each examples}}
+### {{file}}
+
+```javascript
+{{{code}}}
+```
+
+{{/each}}
+

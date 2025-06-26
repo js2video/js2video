@@ -1,0 +1,1917 @@
+# JS2Video
+
+URL: https://js2video.com
+
+## Video Templates
+
+Video Templates are written in JavaScript and exports a template function and the default params.
+
+Our engine executes the template function with the default params + user params and renders a video on the client or server.
+
+## Video Template Examples
+
+### audio-waveform-bars.js
+
+```javascript
+/*
+Load audio from URL and display waveform bars
+*/
+
+const defaultParams = {
+  audioUrl: "https://js2video.com/audio/audio.mp3",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set background color
+  canvas.set({ backgroundColor: "#ff0200" });
+
+  // load audio from URL
+  const audio = await canvasUtils.loadAudio({ url: params.audioUrl });
+
+  // add audio to canvas
+  canvas.add(audio);
+
+  // analyze audio waveform
+  const analyzedAudio = await utils.analyzeAudio({
+    url: params.audioUrl,
+    audioBuffer: audio.js2video_audioBuffer,
+    fps: params.fps,
+    fftSize: 16384,
+    minDb: -90,
+    maxDb: -10,
+    audioSmoothing: 0.2,
+    minFreq: 40,
+    maxFreq: 300,
+    numberOfBins: 32,
+  });
+
+  // display waveform bars
+  const waveform = await canvasUtils.loadWaveformBars({
+    audio: analyzedAudio,
+    paddingInner: 0.2,
+    paddingOuter: 0,
+    orientation: "vertical",
+    anchor: "center",
+    roundedCaps: true,
+    options: {
+      fill: "#ffffff",
+      width: params.size.width * 0.5,
+      height: params.size.height * 0.9,
+      originY: "center",
+      originX: "center",
+    },
+    duration: audio.js2video_duration,
+  });
+  canvas.add(waveform);
+
+  // put bars in center
+  canvas.centerObject(waveform);
+
+  // create animation in the duration of the audio
+  timeline.to({}, { duration: audio.js2video_duration }, 0);
+};
+
+export { template, defaultParams };
+
+```
+
+### bg-image.js
+
+```javascript
+/*
+Background image with text overlay
+*/
+
+const defaultParams = {
+  text: "Don't panic!",
+  imageUrl: "https://js2video.com/images/ocean.jpg",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // load image from URL
+  const image = await canvasUtils.loadImage({
+    url: params.imageUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  // add image to canvas
+  canvas.add(image);
+
+  // scale video to cover canvas
+  canvasUtils.scaleToCoverCanvas(image, canvas);
+
+  // center video on canvas
+  canvas.centerObject(image);
+
+  // load text object
+  const text = await canvasUtils.loadText({
+    text: params.text,
+    options: {
+      fontSize: 200,
+      fontFamily: "sans-serif",
+      fill: "white",
+    },
+  });
+
+  // add text to canvas
+  canvas.add(text);
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // scale up image a bit
+  timeline.to(
+    image,
+    {
+      scaleX: image.scaleX * 1.2,
+      scaleY: image.scaleY * 1.2,
+      duration: 5,
+      ease: "linear",
+    },
+    0
+  );
+
+  // fade out text
+  timeline.to(text, { opacity: 0, duration: 5 }, 0);
+};
+
+export { template, defaultParams };
+
+```
+
+### chars.js
+
+```javascript
+/*
+Animate text as separate characters
+*/
+
+const defaultParams = {
+  text: "The ships hung in the sky in much the same way that bricks don't.",
+  fontFamily: "Liter",
+  fps: 30,
+  size: {
+    width: 1080,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#000000" });
+
+  // load Google font by name
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load text object
+  const text = await canvasUtils.loadChars({
+    canvas,
+    text: params.text,
+    options: {
+      width: canvas.width * 0.8,
+      fontSize: 120,
+      fontWeight: "bold",
+      fontFamily: params.fontFamily,
+      fill: "white",
+      textAlign: "center",
+    },
+  });
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // animate chars
+  timeline
+    .from(text._objects, {
+      left: "-=100",
+      top: 0,
+      opacity: 0,
+      duration: 0.1,
+      stagger: 0.02,
+      ease: "back",
+      duration: 1,
+    })
+    .to(text._objects, {
+      delay: 1,
+      opacity: 0,
+      duration: 0.5,
+      stagger: {
+        each: 0.02,
+        from: "random",
+      },
+    });
+};
+
+export { template, defaultParams };
+
+```
+
+### confetti.js
+
+```javascript
+/* 
+Animated confetti from SVG
+*/
+
+const defaultParams = {
+  text: "You Made It!",
+  fontFamily: "Bangers",
+  fps: 30,
+  size: {
+    width: 1080,
+    height: 1920,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set bg color
+  canvas.set({ backgroundColor: "#111111" });
+
+  // load Google font by name
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load text object
+  const text = await canvasUtils.loadTextbox({
+    text: params.text,
+    options: {
+      width: params.size.width * 0.8,
+      fontSize: 180,
+      fontFamily: params.fontFamily,
+      fill: "#ffffff",
+      textAlign: "center",
+    },
+  });
+
+  text.set({ originX: "center", originY: "center" });
+
+  // add + center text
+  canvas.add(text);
+  canvas.centerObject(text);
+
+  // animate text
+  timeline.from(text, {
+    opacity: 0,
+    scaleX: 0.01,
+    scaleY: 0.1,
+    duration: 0.8,
+    ease: "elastic",
+  });
+
+  // load svg from url
+  const svg = await canvasUtils.loadSvg({ url: "/svg/confetti.svg" });
+
+  // scale + center svg
+  canvasUtils.scaleToCoverCanvas(svg, canvas, 1.1);
+  canvas.centerObject(svg);
+
+  // get confetti "strings"
+  const confettis = svg.getObjects();
+
+  // animate them
+  confettis.map((confetti) => {
+    const length = utils.lerp(
+      100,
+      Math.max(params.size.width, params.size.height),
+      Math.random()
+    );
+    const pathLength = canvasUtils.getSvgPathLength(confetti.path);
+    canvas.add(confetti);
+    confetti.set({
+      objectCaching: false,
+    });
+    timeline.fromTo(
+      confetti,
+      {
+        stroke: utils.randomColor(),
+        strokeDashArray: [length, pathLength],
+        strokeWidth: utils.lerp(3, 60, Math.random()),
+        strokeDashOffset: pathLength + length * 2,
+      },
+      {
+        strokeDashOffset: length,
+        delay: utils.lerp(0, 0.4, Math.random()),
+        duration: utils.lerp(1, 3, Math.random()),
+        ease: "power4.out",
+        repeat: 1,
+        repeatDelay: 0.5,
+      },
+      0
+    );
+  });
+};
+
+export { template, defaultParams };
+
+```
+
+### counter.js
+
+```javascript
+/*
+Animate a counter
+*/
+
+const defaultParams = {
+  fontFamily: "Space Mono",
+  from: "0",
+  to: "53.9",
+  prefix: "",
+  postfix: "%",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set background color
+  canvas.set({ backgroundColor: "#204440" });
+
+  // create a formatter from the number
+  const formatter = new Intl.NumberFormat("en-US", {
+    minimumIntegerDigits: 2,
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  });
+
+  // load google font
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load text object
+  const text = await canvasUtils.loadText({
+    text: params.from,
+    options: {
+      fontSize: 300,
+      fontFamily: params.fontFamily,
+      fontWeight: "bold",
+      fill: "#ffffff",
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  // add text to canvas
+  canvas.add(text);
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // animate counter
+  timeline.fromTo(
+    text,
+    { text: params.from },
+    {
+      text: params.to,
+      duration: 8,
+      modifiers: {
+        text: function (value, obj) {
+          obj.set({
+            text: params.prefix + formatter.format(value + "") + params.postfix,
+          });
+        },
+      },
+      ease: "expo.inOut",
+    },
+    0
+  );
+
+  // add some pause at the end
+  timeline.to({}, { duration: 2 });
+};
+
+export { template, defaultParams };
+
+```
+
+### custom-font.js
+
+```javascript
+/*
+Load custom font by URL
+*/
+
+const defaultParams = {
+  text: "Don't panic!",
+  fontUrl: "https://js2video.com/fonts/calsans-semibold.woff2",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set background color
+  canvas.set({ backgroundColor: "#1f7dff" });
+
+  // load font from URL
+  const fontFamily = await utils.loadFont(params.fontUrl);
+
+  // load text object
+  const text = await canvasUtils.loadText({
+    text: params.text,
+    options: {
+      fontSize: 200,
+      fontFamily: fontFamily,
+      fill: "#000000",
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  // add text to canvas
+  canvas.add(text);
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // animate text in - out
+  timeline
+    .from(text, {
+      scaleX: 0,
+      scaleY: 0,
+      duration: 0.5,
+      delay: 0.2,
+      ease: "elastic",
+    })
+    .to(text, {
+      opacity: 0,
+      duration: 2,
+      delay: 1,
+      ease: "expo.out",
+    });
+};
+
+export { template, defaultParams };
+
+```
+
+### elevenlabs-tts-subtitles.js
+
+```javascript
+const defaultParams = {
+  elevenLabsDataUrl: "https://js2video.com/elevenlabs/speech-1.json",
+  imageUrl: "https://js2video.com/images/ai/axolotl.jpeg",
+  fontFamily: "Baloo",
+  fps: 30,
+  size: {
+    width: 1080,
+    height: 1920,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // load image from URL
+  const image = await canvasUtils.loadImage({
+    url: params.imageUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  // add, scale and center image
+  canvas.add(image);
+  canvasUtils.scaleToCoverCanvas(image, canvas);
+  canvas.centerObject(image);
+
+  // load gogle font by name
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // create text for subtitles
+  const textObject = await canvasUtils.loadTextbox({
+    text: "",
+    options: {
+      width: params.size.width * 0.8,
+      fontFamily: params.fontFamily,
+      fontSize: 120,
+      originX: "center",
+      originY: "center",
+      left: params.size.width * 0.5,
+      top: params.size.height * 0.8,
+      textAlign: "center",
+      fontWeight: "bold",
+      stroke: "black",
+      fill: "#ddff00",
+      strokeWidth: 8,
+      paintFirst: "stroke",
+    },
+  });
+
+  // add text obj to canvas
+  canvas.add(textObject);
+
+  // load audio and subtitles
+  await canvasUtils.loadElevenLabsSpeech({
+    timeline,
+    canvas,
+    dataUrl: params.elevenLabsDataUrl,
+    textObject,
+    modifyText: (text) => text.toUpperCase(),
+    offset: 0.5,
+    minDuration: 0.4,
+    animateFrom: { opacity: 0, scaleX: 0.6, scaleY: 0.6 },
+    animateTo: {
+      duration: 0.2,
+      opacity: 1,
+      scaleX: 1,
+      scaleY: 1,
+      ease: "back",
+    },
+  });
+
+  // add some pause at the end
+  timeline.to({}, { duration: 1 });
+
+  // scale up image
+  timeline.to(
+    image,
+    {
+      scaleX: image.scaleX * 1.2,
+      scaleY: image.scaleY * 1.2,
+      duration: timeline.duration(),
+      ease: "linear",
+    },
+    0
+  );
+};
+
+export { template, defaultParams };
+
+```
+
+### google-font.js
+
+```javascript
+/*
+Load Google font by name
+*/
+
+const defaultParams = {
+  text: "The ships hung in the sky in much the same way that bricks don't.",
+  fontFamily: "Krona One",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set background color
+  canvas.set({ backgroundColor: "#a284fa" });
+
+  // load Google font by name
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load text object
+  const text = await canvasUtils.loadTextbox({
+    text: params.text,
+    options: {
+      width: 1200,
+      fontSize: 120,
+      fontFamily: params.fontFamily,
+      fill: "#ffffff",
+      textAlign: "center",
+    },
+  });
+
+  // add text to canvas
+  canvas.add(text);
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // animate text in - out
+  timeline
+    .from(text, {
+      opacity: 0,
+      duration: 1,
+    })
+    .to(text, {
+      opacity: 0,
+      duration: 1,
+      delay: 2,
+    });
+};
+
+export { template, defaultParams };
+
+```
+
+### hello-world.js
+
+```javascript
+const defaultParams = {
+  name: "Unknown",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#0000ee" });
+
+  const text = await canvasUtils.loadText({
+    text: `Hello ${params.name}!`,
+    options: {
+      fontSize: 200,
+      fontFamily: "sans-serif",
+      fill: "white",
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  canvas.add(text);
+  canvas.centerObject(text);
+
+  timeline.from(text, {
+    scaleX: 0,
+    scaleY: 0,
+    duration: 0.5,
+    delay: 0.2,
+    ease: "elastic",
+  });
+
+  timeline.to(text, {
+    opacity: 0,
+    duration: 2,
+    delay: 1,
+    ease: "expo.out",
+  });
+};
+
+export { template, defaultParams };
+
+```
+
+### lottie-emoji.js
+
+```javascript
+/*
+Load Lottie animation from URL
+*/
+
+const defaultParams = {
+  lottieUrl: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f92f/lottie.json",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set canvas background color
+  canvas.set({ backgroundColor: "papayawhip" });
+
+  // load lottie animation from URL
+  const lottie = await canvasUtils.loadLottie({
+    url: params.lottieUrl,
+    options: {
+      width: params.size.width / 2,
+      height: params.size.height / 2,
+    },
+  });
+
+  // add/center lottie animation on canvas
+  canvas.add(lottie);
+  canvas.centerObject(lottie);
+
+  // create a dummy animation as long as the lottie animation
+  timeline.to({}, { duration: lottie.js2video_lottie.duration });
+};
+
+export { template, defaultParams };
+
+```
+
+### pixi.js
+
+```javascript
+/*
+Load Pixi
+*/
+
+const defaultParams = {
+  fontFamily: "Bangers",
+  lottieUrl: "https://fonts.gstatic.com/s/e/notoemoji/latest/1f92f/lottie.json",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  const pixi = await canvasUtils.loadPixi({ canvas });
+  canvas.add(pixi);
+
+  const text = new Pixi.HTMLText({
+    text: "This is a <h1 style='margin:0;padding:0;text-decoration:underline;font-family:inter'>HAHA</h1> <em style='color:red'>styled</em><br /> text! <a style='text-underline' href='http://vg.no'>a</a>",
+    style: {
+      fontSize: 120,
+      fontWeight: 650,
+      fill: "yellow",
+    },
+  });
+
+  pixi.js2video_app.stage.addChild(text);
+
+  // const filter = new PixiFilters.AsciiFilter({ size: 28 });
+  // pixi.js2video_app.stage.filters = [filter];
+
+  // create a dummy animation as long as the lottie animation
+  timeline.to({}, { duration: 2 }, 0);
+};
+
+export { template, defaultParams };
+
+```
+
+### svg-string.js
+
+```javascript
+/*
+Load SVG from string
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set background color
+  canvas.set({ backgroundColor: "#e9e9e9" });
+
+  // load SVG from string
+  const svg = await canvasUtils.loadSvgFromString({
+    string: `
+     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c8c8c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smile"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>`,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  // add/scale/center SVG
+  canvas.add(svg);
+  canvasUtils.scaleToFitCanvas(svg, canvas);
+  canvas.centerObject(svg);
+
+  // animate SVG
+  timeline.to(svg, { angle: 360, duration: 6 });
+};
+
+export { template, defaultParams };
+
+```
+
+### text-glitch-filter.js
+
+```javascript
+/*
+Text with glitch + blur filter
+https://pixijs.io/filters/docs/GlitchFilter.html
+https://pixijs.io/filters/docs/KawaseBlurFilter.html
+*/
+
+const defaultParams = {
+  text: "SAN DIEGO 1992",
+  fontFamily: "Liter", // Google Font
+  imageUrl: "https://js2video.com/images/ai/beach.jpg", // AI-generated
+  fps: 30,
+  size: {
+    width: 1280,
+    height: 960,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // generates a random number within a specified range, ensuring
+  // the change from the current value does not exceed maxChange.
+  function random2(current, min, max, maxChange) {
+    const lowerBound = Math.max(min, current - maxChange);
+    const upperBound = Math.min(max, current + maxChange);
+    return Math.random() * (upperBound - lowerBound) + lowerBound;
+  }
+
+  // create a random number
+  const random = (from, to) => utils.lerp(from, to, Math.random());
+
+  // set background color
+  canvas.set({ backgroundColor: "#000088" });
+
+  // load Google font by name
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load image from URL
+  const image = await canvasUtils.loadImage({
+    url: params.imageUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+      opacity: 0.4,
+    },
+  });
+
+  // add image to canvas
+  canvas.add(image);
+
+  // scale video to cover canvas
+  canvasUtils.scaleToCoverCanvas(image, canvas);
+
+  // center video on canvas
+  canvas.centerObject(image);
+
+  // load text object
+  const text = await canvasUtils.loadTextbox({
+    text: params.text,
+    options: {
+      width: params.size.width * 0.5,
+      fontSize: 60,
+      fontFamily: params.fontFamily,
+      fontWeight: "bold",
+      fill: "#ffffff",
+      textAlign: "center",
+    },
+  });
+
+  // add text to canvas, scale and center
+  canvas.add(text);
+  canvasUtils.scaleToFitCanvas(text, canvas, 0.9);
+  canvas.centerObject(text);
+
+  const filters = [];
+
+  const glitchFilter = new PixiFilters.GlitchFilter({
+    slices: 20,
+    offset: 10,
+    green: { x: 10, y: 10 },
+  });
+  filters.push(glitchFilter);
+
+  const blurFilter = new PixiFilters.KawaseBlurFilter();
+  filters.push(blurFilter);
+
+  const pixiFilters = await canvasUtils.loadPixiFilters({ canvas, filters });
+  canvas.add(pixiFilters);
+
+  pixiFilters.set({
+    left: params.size.width * 0.5,
+    top: 0,
+    scaleX: 1.1,
+    scaleY: 1.1,
+    originX: "center",
+  });
+
+  // scale up image a bit
+  timeline.to(
+    image,
+    {
+      scaleX: image.scaleX * 1.2,
+      scaleY: image.scaleY * 1.2,
+      duration: 5,
+      ease: "linear",
+    },
+    0
+  );
+
+  // animate filter properties
+  timeline.to(
+    {},
+    {
+      duration: 5,
+      onUpdate: () => {
+        filters.map((f) => {
+          f.slices = parseInt(random(18, 22));
+          f.offset = random2(f.offset, -10, 10, 2);
+          f.strength = random2(f.strength, 0, 1, 0.1);
+          f.green = { x: random(0, 12), y: 0 };
+        });
+      },
+    },
+    0
+  );
+};
+
+export { template, defaultParams };
+
+```
+
+### transition-fade.js
+
+```javascript
+/*
+Transition: fade in/out
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#f3f8fb" });
+
+  const obj = new Fabric.Rect({
+    width: 200,
+    height: 200,
+    scaleX: 2,
+    scaleY: 2,
+    fill: "#ff1d63",
+  });
+
+  // add object to canvas
+  canvas.add(obj);
+  canvas.centerObject(obj);
+
+  // add transitions
+  timeline.fadeIn(obj).fadeOut(obj, { delay: 1 });
+};
+
+export { template, defaultParams };
+
+```
+
+### transition-scale-down.js
+
+```javascript
+/*
+Transition: scale down in/out
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#f3f8fb" });
+
+  const obj = new Fabric.Rect({
+    width: 200,
+    height: 200,
+    scaleX: 2,
+    scaleY: 2,
+    fill: "#ff1d63",
+    originX: "center",
+    originY: "center",
+  });
+
+  // add object to canvas
+  canvas.add(obj);
+  canvas.centerObject(obj);
+
+  // scale down in/out
+  timeline.scaleDownIn(obj).scaleDownOut(obj, { delay: 1 });
+};
+
+export { template, defaultParams };
+
+```
+
+### transition-scale-up.js
+
+```javascript
+/*
+Transition: scale up in/out
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#f3f8fb" });
+
+  const obj = new Fabric.Rect({
+    width: 200,
+    height: 200,
+    scaleX: 2,
+    scaleY: 2,
+    fill: "#ff1d63",
+    originX: "center",
+    originY: "center",
+  });
+
+  // add object to canvas
+  canvas.add(obj);
+  canvas.centerObject(obj);
+
+  // scale down in/out
+  timeline.scaleUpIn(obj).scaleUpOut(obj, { delay: 1 });
+};
+
+export { template, defaultParams };
+
+```
+
+### transition-slide-down.js
+
+```javascript
+/*
+Transition: slide down in/out
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#f3f8fb" });
+
+  const obj = new Fabric.Rect({
+    width: 200,
+    height: 200,
+    scaleX: 2,
+    scaleY: 2,
+    fill: "#ff1d63",
+  });
+
+  // add object to canvas
+  canvas.add(obj);
+  canvas.centerObject(obj);
+
+  // slide down in/out
+  timeline.slideDownIn(obj).slideDownOut(obj, { delay: 1 });
+};
+
+export { template, defaultParams };
+
+```
+
+### transition-slide-left.js
+
+```javascript
+/*
+Transition: slide left in/out
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#f3f8fb" });
+
+  const obj = new Fabric.Rect({
+    width: 200,
+    height: 200,
+    scaleX: 2,
+    scaleY: 2,
+    fill: "#ff1d63",
+  });
+
+  // add object to canvas
+  canvas.add(obj);
+  canvas.centerObject(obj);
+
+  // slide left in/out
+  timeline.slideLeftIn(obj).slideLeftOut(obj, { delay: 1 });
+};
+
+export { template, defaultParams };
+
+```
+
+### transition-slide-right.js
+
+```javascript
+/*
+Transition: slide left in/out
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#f3f8fb" });
+
+  const obj = new Fabric.Rect({
+    width: 200,
+    height: 200,
+    scaleX: 2,
+    scaleY: 2,
+    fill: "#ff1d63",
+  });
+
+  // add object to canvas
+  canvas.add(obj);
+  canvas.centerObject(obj);
+
+  // slide right in/out
+  timeline.slideRightIn(obj).slideRightOut(obj, { delay: 1 });
+};
+
+export { template, defaultParams };
+
+```
+
+### transition-slide-up.js
+
+```javascript
+/*
+Transition: slide up in/out
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  canvas.set({ backgroundColor: "#f3f8fb" });
+
+  const obj = new Fabric.Rect({
+    width: 200,
+    height: 200,
+    scaleX: 2,
+    scaleY: 2,
+    fill: "#ff1d63",
+  });
+
+  // add object to canvas
+  canvas.add(obj);
+  canvas.centerObject(obj);
+
+  // slide up in/out
+  timeline.slideUpIn(obj).slideUpOut(obj, { delay: 1 });
+};
+
+export { template, defaultParams };
+
+```
+
+### typewriter.js
+
+```javascript
+/*
+Write a text in a typewriter style
+*/
+
+const defaultParams = {
+  text: "Are we human?",
+  fontFamily: "Space Grotesk",
+  cursor: "▎",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set background color
+  canvas.set({ backgroundColor: "#fefb9f" });
+
+  // load google font
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load text object
+  const text = await canvasUtils.loadTextbox({
+    text: "",
+    options: {
+      width: params.size.width * 0.8,
+      fontSize: 140,
+      fontFamily: params.fontFamily,
+      fontWeight: "bold",
+      fill: "#000000",
+      originX: "center",
+      originY: "center",
+      textAlign: "center",
+    },
+  });
+
+  // add text to canvas
+  canvas.add(text);
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // split text into chars
+  const seg = new Intl.Segmenter("en", { granularity: "grapheme" });
+  const chars = [...seg.segment(params.text)].map((s) => s.segment);
+
+  // animate chars
+  timeline.to(
+    text,
+    {
+      text: "",
+      duration: chars.length * 0.1,
+      modifiers: {
+        text: function (value, obj) {
+          const charsToShow = Math.floor(
+            utils.lerp(0, chars.length, this.progress())
+          );
+          obj.set({
+            text: !charsToShow
+              ? ""
+              : chars.slice(0, charsToShow).join("") + params.cursor,
+          });
+        },
+      },
+    },
+    0
+  );
+
+  // add some pause at the end
+  timeline.to({}, { duration: 3 });
+};
+
+export { template, defaultParams };
+
+```
+
+### video-adjustment-filter.js
+
+```javascript
+/*
+Background video with an adjustment filter
+https://pixijs.io/filters/docs/AdjustmentFilter.html
+*/
+
+const defaultParams = {
+  videoUrl: "https://js2video.com/video/bbb.mp4",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+  filter: {
+    alpha: 1,
+    blue: 1.05,
+    brightness: 1.2,
+    contrast: 0.85,
+    gamma: 1.1,
+    green: 1.05,
+    red: 1.15,
+    saturation: 3.1,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // load video from URL
+  const video = await canvasUtils.loadVideo({
+    url: params.videoUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  canvas.add(video);
+  canvasUtils.scaleToCoverCanvas(video, canvas);
+  canvas.centerObject(video);
+
+  const filters = [];
+
+  // https://pixijs.io/filters/docs/AdjustmentFilter.html
+  const adjustmentFilter = new PixiFilters.AdjustmentFilter(params.filter);
+  filters.push(adjustmentFilter);
+
+  const pixiFilters = await canvasUtils.loadPixiFilters({
+    canvas,
+    filters,
+  });
+
+  canvas.add(pixiFilters);
+
+  // create a no-op animation with the duration of the video
+  timeline.to(
+    {},
+    {
+      duration: video.js2video_duration,
+    },
+    0
+  );
+};
+
+export { template, defaultParams };
+
+```
+
+### video-colormatrix-filter.js
+
+```javascript
+/*
+Background video with a custom colorMatrix filter
+https://pixijs.download/dev/docs/filters.ColorMatrixFilter.html
+*/
+
+const defaultParams = {
+  videoUrl: "https://js2video.com/video/bbb.mp4",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+  matrix: [
+    1.9125277891456083, -0.8545344976951645, -0.09155508482755585, 0,
+    11.793603434377337, -0.3087833385928097, 1.7658908555458428,
+    -0.10601743074722245, 0, -70.35205161461398, -0.231103377548616,
+    -0.7501899197440212, 1.847597816108189, 0, 30.950940869491138, 0, 0, 0, 1,
+    0,
+  ],
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // load video from URL
+  const video = await canvasUtils.loadVideo({
+    url: params.videoUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  canvas.add(video);
+  canvasUtils.scaleToCoverCanvas(video, canvas);
+  canvas.centerObject(video);
+
+  const filters = [];
+
+  const colorMatrixFilter = new Pixi.ColorMatrixFilter();
+
+  // color matrix for TechniColor
+  // you can ask a LLM to create these for you!
+  colorMatrixFilter._loadMatrix(params.matrix, true);
+
+  filters.push(colorMatrixFilter);
+
+  const pixiFilters = await canvasUtils.loadPixiFilters({ canvas, filters });
+  canvas.add(pixiFilters);
+
+  // create a no-op animation with the duration of the video
+  timeline.to(
+    {},
+    {
+      duration: video.js2video_duration,
+    },
+    0
+  );
+};
+
+export { template, defaultParams };
+
+```
+
+### video-filtermask.js
+
+```javascript
+/*
+Background video with a custom colorMatrix filter
+https://pixijs.download/dev/docs/filters.ColorMatrixFilter.html
+*/
+
+const defaultParams = {
+  videoUrl: "https://js2video.com/video/bbb.mp4",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+  filter: {
+    alpha: 1,
+    blue: 1,
+    brightness: 1,
+    contrast: 3,
+    gamma: 1,
+    green: 1,
+    red: 1,
+    saturation: 0,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // load video from URL
+  const video = await canvasUtils.loadVideo({
+    url: params.videoUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  canvas.add(video);
+  canvasUtils.scaleToCoverCanvas(video, canvas);
+  canvas.centerObject(video);
+
+  const filters = [];
+
+  // https://pixijs.io/filters/docs/AdjustmentFilter.html
+  const adjustmentFilter = new PixiFilters.AdjustmentFilter(params.filter);
+  filters.push(adjustmentFilter);
+
+  const pixiFilters = await canvasUtils.loadPixiFilters({
+    canvas,
+    filters,
+  });
+
+  const mask = new Fabric.Circle({
+    originX: "center",
+    originY: "center",
+    left: params.size.width * 0.5,
+    top: params.size.height * 0.5,
+    radius: Math.min(params.size.height, params.size.width) * 0.5 * 0.8,
+    absolutePositioned: true,
+  });
+
+  // add filter mask
+  pixiFilters.set({
+    clipPath: mask,
+  });
+
+  canvas.add(pixiFilters);
+
+  // animate the mask
+  timeline.fromTo(
+    mask,
+    { left: 0 },
+    {
+      left: params.size.width,
+      duration: video.js2video_duration,
+    },
+    0
+  );
+};
+
+export { template, defaultParams };
+
+```
+
+### video-overlay.js
+
+```javascript
+/*
+Background video with text overlay
+*/
+
+const defaultParams = {
+  text: "Don't panic!",
+  videoUrl: "https://js2video.com/video/bbb.mp4",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // set background color
+  canvas.set({ backgroundColor: "green" });
+
+  // load video from URL
+  const video = await canvasUtils.loadVideo({
+    url: params.videoUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  // add video to canvas
+  canvas.add(video);
+
+  // scale video to fit canvas
+  canvasUtils.scaleToFitCanvas(video, canvas);
+
+  // center video on canvas
+  canvas.centerObject(video);
+
+  // load text object
+  const text = await canvasUtils.loadText({
+    text: params.text,
+    options: {
+      fontSize: 200,
+      fontFamily: "sans-serif",
+      fill: "white",
+    },
+  });
+
+  // add text to canvas
+  canvas.add(text);
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // create a no-op animation with the duration of the video
+  timeline.from(
+    video,
+    {
+      scaleX: 0.1,
+      scaleY: 0.2,
+      opacity: 0,
+      duration: 1.2,
+      ease: "elastic",
+    },
+    0
+  );
+
+  // create a no-op animation with the duration of the video
+  timeline.to(
+    {},
+    {
+      duration: video.js2video_duration,
+    },
+    0
+  );
+};
+
+export { template, defaultParams };
+
+```
+
+### video-pixi-filter.js
+
+```javascript
+/*
+Background video with old film filter
+https://pixijs.io/filters/docs/
+*/
+
+const defaultParams = {
+  videoUrl: "https://js2video.com/video/bbb.mp4",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  // load video from URL
+  const video = await canvasUtils.loadVideo({
+    url: params.videoUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  canvas.add(video);
+  canvasUtils.scaleToCoverCanvas(video, canvas);
+  canvas.centerObject(video);
+
+  const oldFilmFilter = new PixiFilters.OldFilmFilter({
+    sepia: 1,
+    noise: 0.1,
+    noiseSize: 2,
+    seed: Math.random(),
+    scratchWidth: 8,
+    vignettingAlpha: 0.2,
+  });
+  const filters = [oldFilmFilter];
+  const pixiFilters = await canvasUtils.loadPixiFilters({ canvas, filters });
+  canvas.add(pixiFilters);
+
+  // create a no-op animation with the duration of the video
+  timeline.to(
+    {},
+    {
+      duration: video.js2video_duration,
+      onUpdate: () => {
+        filters.map((f) => (f.seed = Math.random()));
+      },
+    },
+    0
+  );
+};
+
+export { template, defaultParams };
+
+```
+
+

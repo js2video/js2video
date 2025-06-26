@@ -144,9 +144,9 @@ const ExportServerButton = () => {
   const rangeEnd = useRangeEnd();
 
   // @ts-ignore
-  const apiUrl = import.meta.env.VITE_EXPORT_API_URL;
+  const exportUrl = import.meta.env.VITE_EXPORT_URL;
 
-  if (!apiUrl) {
+  if (!exportUrl) {
     return;
   }
 
@@ -157,7 +157,7 @@ const ExportServerButton = () => {
       }
     }
 
-    await fetch(apiUrl, {
+    await fetch(exportUrl, {
       method: "POST",
       body: JSON.stringify({
         templateUrl: videoTemplate.templateUrl,
