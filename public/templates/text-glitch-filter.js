@@ -16,12 +16,16 @@ const defaultParams = {
 };
 
 const template = async ({
-  canvas,
+  gsap,
   timeline,
+  canvas,
+  canvasElement,
   params,
+  Fabric,
+  Pixi,
+  PixiFilters,
   utils,
   canvasUtils,
-  PixiFilters,
 }) => {
   // generates a random number within a specified range, ensuring
   // the change from the current value does not exceed maxChange.

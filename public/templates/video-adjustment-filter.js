@@ -23,14 +23,16 @@ const defaultParams = {
 };
 
 const template = async ({
-  canvas,
-  Pixi,
+  gsap,
   timeline,
+  canvas,
+  canvasElement,
   params,
+  Fabric,
+  Pixi,
+  PixiFilters,
   utils,
   canvasUtils,
-  PixiFilters,
-  Fabric,
 }) => {
   // load video from URL
   const video = await canvasUtils.loadVideo({

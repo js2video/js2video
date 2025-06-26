@@ -12,7 +12,18 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, params, utils, canvasUtils }) => {
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
   // set background color
   canvas.set({ backgroundColor: "#a284fa" });
 

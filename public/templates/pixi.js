@@ -13,13 +13,16 @@ const defaultParams = {
 };
 
 const template = async ({
-  canvas,
+  gsap,
   timeline,
+  canvas,
+  canvasElement,
   params,
-  utils,
-  PixiFilters,
-  canvasUtils,
+  Fabric,
   Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
 }) => {
   const pixi = await canvasUtils.loadPixi({ canvas });
   canvas.add(pixi);

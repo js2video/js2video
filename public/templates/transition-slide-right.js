@@ -10,7 +10,18 @@ const defaultParams = {
   },
 };
 
-const template = async ({ canvas, timeline, Fabric }) => {
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
   canvas.set({ backgroundColor: "#f3f8fb" });
 
   const obj = new Fabric.Rect({
