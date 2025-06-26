@@ -10,6 +10,8 @@ Our engine executes the template function with the default params + user params 
 
 ## Video Template Examples
 
+Use this examples to modify / create your video templates.
+
 {{#each examples}}
 ### {{file}}
 
