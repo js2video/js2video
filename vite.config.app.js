@@ -40,6 +40,7 @@ export default defineConfig({
       input: {
         index: resolve(__dirname, "index.html"),
         play: resolve(__dirname, "play/index.html"),
+        iframe: resolve(__dirname, "iframe/index.html"),
       },
     },
   },
