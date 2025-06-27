@@ -47,17 +47,15 @@ export default defineConfig({
     port: 3000,
     hmr: false,
     proxy: {
-      "/cdn": {
-        target: "https://s3.eu-central-1.wasabisys.com",
+      "/api": {
+        target: "http://localhost:3002",
         changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/cdn/, "/js2video-public-cdn"),
+        rewrite: (path) => path.replace(/^\/api/, ""),
       },
-      ...(process.env.NODE_ENV === "development" && {
-        "/docs": {
-          target: "http://localhost:5173", // VitePress server
-          changeOrigin: true,
-        },
-      }),
+      "/docs": {
+        target: "http://localhost:5173",
+        changeOrigin: true,
+      },
     },
   },
 });

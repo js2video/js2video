@@ -18,7 +18,7 @@
     }
   },
   "files": [
-    "src",
+    "src/lib",
     "dist/types",
     "dist/index.js",
     "dist/index.css",
@@ -52,12 +52,19 @@
     "postinstall": "npm run build-server-client"
   },
   "devDependencies": {
+    "@auth0/auth0-react": "2.3.0",
+    "@codemirror/lang-javascript": "6.2.2",
+    "@headlessui/react": "2.2.4",
+    "@lezer/highlight": "1.2.1",
     "@types/react": "18.3.11",
+    "@uiw/codemirror-theme-dracula": "4.23.6",
+    "@uiw/react-codemirror": "4.23.6",
     "@vitejs/plugin-react": "4.3.3",
     "autoprefixer": "10.4.20",
     "handlebars": "4.7.8",
     "npm-run-all": "4.1.5",
     "postcss": "8.4.49",
+    "react-resizable-panels": "2.1.7",
     "rimraf": "6.0.1",
     "rollup": "4.24.4",
     "rollup-plugin-dts": "6.1.1",
@@ -85,12 +92,8 @@
     }
   },
   "dependencies": {
-    "@codemirror/lang-javascript": "6.2.2",
-    "@lezer/highlight": "1.2.1",
     "@lottiefiles/dotlottie-web": "0.38.1",
     "@radix-ui/react-slider": "1.2.1",
-    "@uiw/codemirror-theme-dracula": "4.23.6",
-    "@uiw/react-codemirror": "4.23.6",
     "@xzdarcy/react-timeline-editor": "0.1.9",
     "canvas-confetti": "1.9.3",
     "clsx": "2.1.1",
@@ -106,7 +109,6 @@
     "nanoid": "5.0.9",
     "pixi-filters": "6.0.5",
     "pixi.js": "8.4.1",
-    "react-resizable-panels": "2.1.7",
     "tailwind-merge": "2.5.4",
     "zod": "3.23.8"
   }

@@ -282,7 +282,11 @@ const TogglePlayButton = () => {
         videoTemplate.togglePlay();
       }}
     >
-      {isPlaying ? <PauseIcon size={22} /> : <PlayIcon size={22} />}
+      {isPlaying ? (
+        <PauseIcon size={22} strokeWidth={1} />
+      ) : (
+        <PlayIcon size={22} strokeWidth={1} />
+      )}
     </ControlButton>
   );
 };
@@ -296,7 +300,7 @@ const RewindButton = () => {
         await videoTemplate.rewind();
       }}
     >
-      <RewindIcon size={22} />
+      <RewindIcon size={22} strokeWidth={1} />
     </ControlButton>
   );
 };
@@ -383,14 +387,14 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
               onClick={zoomIn}
               className="opacity-60 hover:opacity-80"
             >
-              <ZoomInIcon />
+              <ZoomInIcon strokeWidth={1} />
             </button>
             <button
               title="Zoom out timeline"
               onClick={zoomOut}
               className="opacity-60 hover:opacity-80"
             >
-              <ZoomOutIcon />
+              <ZoomOutIcon strokeWidth={1} />
             </button>
           </div>
           <div className="flex gap-3">
@@ -399,7 +403,7 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
               onClick={setRangeStartToCurrentTime}
               className="opacity-60 hover:opacity-80"
             >
-              <ScissorsLineDashedIcon />
+              <ScissorsLineDashedIcon strokeWidth={1} />
             </button>
             <button
               title="Set range end to playhead position"
@@ -414,7 +418,7 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
             onClick={resetRange}
             className="opacity-60 hover:opacity-80"
           >
-            <UnfoldHorizontalIcon />
+            <UnfoldHorizontalIcon strokeWidth={1} />
           </button>
         </div>
         <div className="flex justify-center flex-1">

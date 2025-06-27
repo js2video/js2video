@@ -18,6 +18,10 @@
   background-image: none!important;
 }
 
+canvas {
+  @apply border border-[#222];
+}
+
 body {
-  @apply font-ui;
+  @apply font-ui antialiased;
 }

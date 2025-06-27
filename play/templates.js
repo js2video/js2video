@@ -94,6 +94,19 @@ const templates = [
     ],
   },
   {
+    group: "Gradients",
+    items: [
+      {
+        label: "Horizontal bakground gradient",
+        url: "/templates/horizontal-gradient.js",
+      },
+      {
+        label: "Vertical bakground gradient",
+        url: "/templates/vertical-gradient.js",
+      },
+    ],
+  },
+  {
     group: "Lottie",
     items: [
       {

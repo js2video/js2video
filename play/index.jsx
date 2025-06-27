@@ -1,61 +1,17 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { JS2Video } from "../src";
 import { Loader2Icon, XIcon } from "lucide-react";
 import { templates } from "./templates";
+import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
+import { Editor } from "../src/components/editor";
+import { AppProvider } from "../src/components/context";
+import { Profile } from "../src/components/profile";
 import "../index.css";
 
-const EditorHeader = () => {
-  const [activeTab, setActiveTab] = useState("");
-  if (activeTab === "examples") {
-    return (
-      <div className="bg-[#282a36] absolute overflow-scroll whitespace-nowrap inset-0 p-2 z-50 mt-[1px] flex flex-col gap-4">
-        <div className="flex justify-between">
-          <div className="flex text-lg pt-[2px] font-bold">
-            Template examples
-          </div>
-          <button onClick={(e) => setActiveTab(null)}>
-            <XIcon size={30} />
-          </button>
-        </div>
-        <div className="text-sm">
-          {templates.map((template, index) => (
-            <div key={index} className="mb-3">
-              <h2 className="mb-2 opacity-60">{template.group}</h2>
-              <ul className="list-disc flex flex-col gap-2 pl-6">
-                {template.items.map((item, itemIndex) => (
-                  <li key={itemIndex}>
-                    <a href={"/play/?t=" + location.origin + item.url}>
-                      {item.label}
-                    </a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-        </div>
-      </div>
-    );
-  } else {
-    return (
-      <div className="flex items-center gap-2 -mb-3 -mx-2">
-        <button className="font-medium text-sm border-b pb-2 px-4 border-blue-300">
-          Code
-        </button>
-        <button
-          className="font-medium text-sm  pb-2 px-4"
-          onClick={(e) => setActiveTab("examples")}
-        >
-          Examples
-        </button>
-      </div>
-    );
-  }
-};
-
 const App = () => {
+  const [displayIframe, setDisplayIframe] = useState(false);
   const [templateUrl, setTemplateUrl] = useState("");
-  const [params, setParams] = useState({});
+  const iframeRef = useRef();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -73,13 +29,13 @@ const App = () => {
 
   return (
     <div className="h-screen flex flex-col max-w-screen-2xl w-full mx-auto">
-      <header className="p-3 bg-black border-b border-gray-600 text-white flex justify-between items-center">
-        <div className="flex items-center">
+      <header className="p-3 border-b border-[#666] text-white flex justify-between items-center">
+        <a href="/">
           <img
             style={{ height: "26px" }}
             src="/images/js2video-logo-dark.svg"
           />
-        </div>
+        </a>
         <div className="flex gap-6 items-center text-sm font-medium">
           <a href="/docs/">Docs</a>
           <a href="https://github.com/js2video/js2video" target="_blank">
@@ -89,23 +45,38 @@ const App = () => {
               src="/images/github-mark.png"
             />
           </a>
+          <Profile />
         </div>
       </header>
-      <div className="bg-[#2a2a36] text-white flex-1 flex">
-        <JS2Video
-          templateUrl={templateUrl}
-          params={params}
-          EditorHeader={EditorHeader}
-          showEditor={true}
-          autoPlay={false}
-          loop={true}
-          enableUnsecureMode={true}
-          videoFilePrefix="js2video"
-          hideExportButton={false}
-        />
+      <div className="text-white flex-1 flex">
+        <PanelGroup direction="horizontal">
+          <Panel defaultSize={30} className="flex border-r border-[#666]">
+            <Editor
+              templates={templates}
+              iframeRef={iframeRef}
+              templateUrl={templateUrl}
+              onMessageListenerReady={() => setDisplayIframe(true)}
+            />
+          </Panel>
+          <PanelResizeHandle />
+          <Panel className="flex flex-col">
+            {displayIframe && (
+              <iframe
+                ref={iframeRef}
+                sandbox="allow-scripts"
+                src="/iframe/"
+                className="flex-1"
+              />
+            )}
+          </Panel>
+        </PanelGroup>
       </div>
     </div>
   );
 };
 
-ReactDOM.createRoot(document.getElementById("app")).render(<App />);
+ReactDOM.createRoot(document.getElementById("app")).render(
+  <AppProvider>
+    <App />
+  </AppProvider>
+);

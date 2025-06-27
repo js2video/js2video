@@ -10,6 +10,8 @@ Our engine executes the template function with the default params + user params 
 
 ## Video Template Examples
 
+Use this examples to modify / create your video templates.
+
 ### audio-waveform-bars.js
 
 ```javascript
@@ -728,6 +730,76 @@ const template = async ({
 
   const text = await canvasUtils.loadText({
     text: `Hello ${params.name}!`,
+    options: {
+      fontSize: 200,
+      fontFamily: "sans-serif",
+      fill: "white",
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  canvas.add(text);
+  canvas.centerObject(text);
+
+  timeline.from(text, {
+    scaleX: 0,
+    scaleY: 0,
+    duration: 0.5,
+    delay: 0.2,
+    ease: "elastic",
+  });
+
+  timeline.to(text, {
+    opacity: 0,
+    duration: 2,
+    delay: 1,
+    ease: "expo.out",
+  });
+};
+
+export { template, defaultParams };
+
+```
+
+### horizontal-gradient.js
+
+```javascript
+/** Horizontal Background Gradient */
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  const gradient = new Fabric.Gradient({
+    type: "linear",
+    coords: { x1: 0, y1: 0, x2: params.size.width, y2: 0 },
+    colorStops: [
+      { offset: 0, color: "#ff69b4" }, // hot pink
+      { offset: 1, color: "#39ff14" }, // neon green
+    ],
+  });
+
+  canvas.set({ backgroundColor: gradient });
+
+  const text = await canvasUtils.loadText({
+    text: "Horizontal Gradient",
     options: {
       fontSize: 200,
       fontFamily: "sans-serif",
@@ -1494,6 +1566,76 @@ const template = async ({
 
   // add some pause at the end
   timeline.to({}, { duration: 3 });
+};
+
+export { template, defaultParams };
+
+```
+
+### vertical-gradient.js
+
+```javascript
+/** Vertical Background Gradient */
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+}) => {
+  const gradient = new Fabric.Gradient({
+    type: "linear",
+    coords: { x1: 0, y1: 0, x2: 0, y2: params.size.height },
+    colorStops: [
+      { offset: 0, color: "#ff69b4" }, // hot pink
+      { offset: 1, color: "#39ff14" }, // neon green
+    ],
+  });
+
+  canvas.set({ backgroundColor: gradient });
+
+  const text = await canvasUtils.loadText({
+    text: "Vertical Gradient",
+    options: {
+      fontSize: 200,
+      fontFamily: "sans-serif",
+      fill: "white",
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  canvas.add(text);
+  canvas.centerObject(text);
+
+  timeline.from(text, {
+    scaleX: 0,
+    scaleY: 0,
+    duration: 0.5,
+    delay: 0.2,
+    ease: "elastic",
+  });
+
+  timeline.to(text, {
+    opacity: 0,
+    duration: 2,
+    delay: 1,
+    ease: "expo.out",
+  });
 };
 
 export { template, defaultParams };
