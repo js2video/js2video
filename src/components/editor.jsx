@@ -167,9 +167,6 @@ const Editor = ({
           <Modal>
             <div className="flex flex-col gap-2">
               <div>Coming Soon!</div>
-              <div className="opacity-60">
-                We're opening up the server video export API soon.
-              </div>
             </div>
             <button className="opacity-50 hover:opacity-80">Rest API</button>
           </Modal>
