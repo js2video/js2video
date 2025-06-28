@@ -374,7 +374,7 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
   };
 
   return (
-    <div className="flex flex-col bg-black">
+    <div className="flex flex-col bg-black border-t pt-2 border-[#444]">
       <div className="flex items-center px-2">
         <div className="flex flex-1 gap-8">
           <div className="flex">
