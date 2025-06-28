@@ -64,7 +64,7 @@ const App = () => {
               <iframe
                 ref={iframeRef}
                 sandbox="allow-scripts"
-                src="/iframe/"
+                src={import.meta.env.VITE_IFRAME_URL}
                 className="flex-1"
               />
             )}

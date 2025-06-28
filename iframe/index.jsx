@@ -8,15 +8,23 @@ const App = () => {
   const [templateUrl, setTemplateUrl] = useState(null);
 
   useEffect(() => {
-    function handleMessage(event) {
-      if (event.origin !== location.origin) {
-        console.log("bad origin");
+    function handleMessage(message) {
+      console.log("Received message in iframe:", message);
+      if (message.origin !== import.meta.env.VITE_PARENT_ORIGIN) {
+        console.log(
+          "skipping message from not parent origin:",
+          import.meta.env.VITE_PARENT_ORIGIN
+        );
         return;
       }
-      setTemplateUrl(event.data);
+      console.log("set template url", message.data);
+      setTemplateUrl(message.data);
     }
     window.addEventListener("message", handleMessage);
-    window.parent.postMessage({ type: "iframe-ready" }, "*");
+    window.parent.postMessage(
+      { type: "iframe-ready" },
+      import.meta.env.VITE_PARENT_ORIGIN
+    );
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
