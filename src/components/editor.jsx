@@ -42,9 +42,16 @@ const Editor = ({
   }, [isChanged]);
 
   useEffect(() => {
-    function handleMessage(event) {
-      console.log("Received message from child:", event);
-      if (event.origin === "null" && event.data?.type === "iframe-ready") {
+    function handleMessage(message) {
+      console.log("Received message in parent:", message);
+      if (message.origin !== "null") {
+        console.log(
+          "Skipping message in parent (origin is not null)",
+          message.origin
+        );
+        return;
+      }
+      if (message.data?.type === "iframe-ready") {
         setIsIframeReady(true);
       }
     }

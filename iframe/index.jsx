@@ -12,7 +12,7 @@ const App = () => {
       console.log("Received message in iframe:", message);
       if (message.origin !== import.meta.env.VITE_PARENT_ORIGIN) {
         console.log(
-          "skipping message from not parent origin:",
+          "Skipping message from not parent origin:",
           import.meta.env.VITE_PARENT_ORIGIN
         );
         return;
