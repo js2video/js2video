@@ -5,27 +5,18 @@ import { draculaInit } from "@uiw/codemirror-theme-dracula";
 import { Loader2Icon, RefreshCwIcon, WandSparklesIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn, stringToBase64Url } from "../lib/utils";
-import { useAuth0 } from "@auth0/auth0-react";
-import { Modal } from "./modal";
+import { APIButton } from "./api-button";
+import { ExamplesButton } from "./examples-button";
+import { useApp } from "./context";
 
-const Editor = ({
-  templateUrl,
-  iframeRef,
-  onMessageListenerReady,
-  templates,
-}) => {
+const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
   const [code, setCode] = useState("");
   const [codePrompt, setCodePrompt] = useState("");
   const [isPrompting, setIsPrompting] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
   const [isIframeReady, setIsIframeReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const {
-    loginWithPopup,
-    isAuthenticated,
-    isLoading: isAuthLoading,
-    getAccessTokenSilently,
-  } = useAuth0();
+  const { login, user, isLoadingUser, getAccessToken } = useApp();
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -95,20 +86,15 @@ const Editor = ({
 
   async function sendCodePrompt() {
     try {
-      if (isAuthLoading) {
+      if (isLoadingUser) {
         return;
       }
-      if (!isAuthenticated) {
-        loginWithPopup({
-          authorizationParams: {
-            screen_hint: "signup",
-          },
-        });
+      if (!user) {
+        login();
         return;
       }
       setIsPrompting(true);
-      const token = await getAccessTokenSilently();
-      console.log({ token });
+      const token = await getAccessToken();
       const { error, data } = await fetch("/api/ai/template-code", {
         method: "POST",
         headers: {
@@ -137,59 +123,37 @@ const Editor = ({
   return (
     <div className="flex-1 flex flex-col relative">
       <div className="flex px-2 py-2 justify-between items-center bg-black text-white">
-        <div className="flex items-center gap-6 text-sm font-medium">
+        <div className="flex items-center gap-6 pl-1 text-sm font-medium">
           <div>Code</div>
-          <Modal>
-            <div className="flex flex-col gap-6">
-              <h1>Examples</h1>
-              <div className="text-sm">
-                {templates.map((template, index) => (
-                  <div key={index} className="mb-8">
-                    <h2 className="mb-1">{template.group}</h2>
-                    <ul className="flex flex-col gap-1">
-                      {template.items.map((item, itemIndex) => (
-                        <li key={itemIndex}>
-                          <a
-                            className="opacity-60 hover:opacity-80"
-                            href={"/play/?t=" + location.origin + item.url}
-                          >
-                            {item.label}
-                          </a>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button className="opacity-50 hover:opacity-80">Examples</button>
-          </Modal>
-          <Modal>
-            <div className="flex flex-col gap-2">
-              <div>Coming Soon!</div>
-            </div>
-            <button className="opacity-50 hover:opacity-80">Rest API</button>
-          </Modal>
+          <ExamplesButton />
         </div>
-        <button
-          title="Update preview"
-          disabled={!isChanged}
-          onClick={() => updateCode(code)}
-        >
-          <RefreshCwIcon
-            className={cn({
-              "opacity-50": !isChanged,
-              "animate-spin": isLoading,
-            })}
-            size={26}
-            strokeWidth={1}
+        <div className="flex items-center gap-6 text-sm">
+          <APIButton
+            body={{
+              templateUrl: stringToBase64Url(code),
+              params: {},
+            }}
           />
-        </button>
+          <button
+            title="Update preview"
+            disabled={!isChanged}
+            onClick={() => updateCode(code)}
+          >
+            <RefreshCwIcon
+              className={cn({
+                "opacity-50": !isChanged,
+                "animate-spin": isLoading,
+              })}
+              size={26}
+              strokeWidth={1}
+            />
+          </button>
+        </div>
       </div>
-      <div className="p-2 flex gap-2 bg-[#2a2a36]">
+      <div className="p-2 py-3 flex gap-3 bg-[#2a2a36]">
         <textarea
           placeholder="Prompt: set bg to black, change font to poppins etc."
-          className="flex-1 text-sm bg-black text-white focus:outline-none border border-[#444] focus:ring-0 p-2 px-2"
+          className="rounded px-4 py-2 flex-1 text-sm bg-black text-white focus:outline-none focus:ring-1 focus:ring-[#9999ff]"
           value={codePrompt}
           onChange={(e) => setCodePrompt(e.target.value)}
           rows={1}
@@ -197,10 +161,10 @@ const Editor = ({
         <button
           title="Send prompt to AI"
           onClick={sendCodePrompt}
-          disabled={isAuthLoading || isPrompting || codePrompt.length < 3}
+          disabled={isLoadingUser || isPrompting || codePrompt.length < 3}
           className="disabled:opacity-50"
         >
-          {isPrompting || isAuthLoading ? (
+          {isPrompting || isLoadingUser ? (
             <Loader2Icon strokeWidth={1} className="animate-spin" />
           ) : (
             <WandSparklesIcon strokeWidth={1} />

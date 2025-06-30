@@ -1,49 +1,25 @@
-import { useAuth0 } from "@auth0/auth0-react";
 import { Loader2Icon } from "lucide-react";
+import { ProfileButton } from "./profile-button";
+import { useApp } from "./context";
 
-const LoggedIn = ({ user }) => {
-  const { logout } = useAuth0();
-  return (
-    <button
-      onClick={(e) => {
-        if (confirm(`Log out ${user.email}?`)) {
-          logout({
-            logoutParams: { returnTo: window.location.origin },
-          });
-        }
-      }}
-    >
-      <img src={user.picture} className="h-7 rounded-full" />
-    </button>
-  );
+const LoggedIn = () => {
+  return <ProfileButton />;
 };
 
 const NotLoggedIn = () => {
-  const { loginWithPopup } = useAuth0();
-  return (
-    <button
-      onClick={() =>
-        loginWithPopup({
-          authorizationParams: {
-            screen_hint: "signup",
-          },
-        })
-      }
-    >
-      Sign Up
-    </button>
-  );
+  const { login } = useApp();
+  return <button onClick={login}>Sign Up</button>;
 };
 
 const Profile = () => {
-  const { user, isAuthenticated, isLoading } = useAuth0();
+  const { user, isLoadingUser } = useApp();
 
-  if (isLoading) {
+  if (isLoadingUser) {
     return <Loader2Icon className="animate-spin h-7" strokeWidth={1} />;
   }
 
-  if (isAuthenticated) {
-    return <LoggedIn user={user} />;
+  if (user) {
+    return <LoggedIn />;
   }
 
   return <NotLoggedIn />;
