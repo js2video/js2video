@@ -12,6 +12,9 @@
       "types": "./dist/types/index.d.ts",
       "import": "./dist/index.js"
     },
+    "./template-ref": {
+      "types": "./dist/types/template-ref.d.ts"
+    },
     "./server": {
       "types": "./dist/types/lib/export-video.d.ts",
       "import": "./src/lib/export-video.js"
