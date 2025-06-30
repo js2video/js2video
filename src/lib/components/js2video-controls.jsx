@@ -374,7 +374,7 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
   };
 
   return (
-    <div className="flex flex-col bg-black border-t pt-2 border-[#444]">
+    <div className="flex flex-col bg-black border-t pt-2 border-[#666]">
       <div className="flex items-center px-2">
         <div className="flex flex-1 gap-8">
           <div className="flex">
@@ -410,7 +410,7 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
               onClick={setRangeEndToCurrentTime}
               className="opacity-60 hover:opacity-80"
             >
-              <ScissorsLineDashedIcon className="-rotate-180" />
+              <ScissorsLineDashedIcon strokeWidth={1} className="-rotate-180" />
             </button>
           </div>
           <button
