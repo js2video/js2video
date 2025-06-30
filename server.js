@@ -43,6 +43,14 @@ const server = http.createServer(async (req, res) => {
   }
 });
 
+process.on("SIGINT", () => {
+  console.log("Gracefully shutting down...");
+  server.close(() => {
+    console.log("Server closed.");
+    process.exit(0);
+  });
+});
+
 const PORT = 3001;
 server.listen(PORT, () => {
   console.log(`Node server running on http://localhost:${PORT}`);
