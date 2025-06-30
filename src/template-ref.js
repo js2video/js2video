@@ -5,6 +5,7 @@ import * as canvasUtils from "./lib/fabric-utils";
 import * as Pixi from "pixi.js";
 import * as PixiFilters from "pixi-filters";
 import * as Fabric from "fabric";
+import * as d3 from "d3";
 
 /**
  * Video template function
@@ -19,6 +20,7 @@ import * as Fabric from "fabric";
  * @param {PixiFilters} options.PixiFilters
  * @param {utils} options.utils
  * @param {canvasUtils} options.canvasUtils
+ * @param {d3} options.d3
  */
 const templateFunction = async ({
   gsap,
@@ -31,6 +33,7 @@ const templateFunction = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {};
 
 export { templateFunction, StaticCanvas, utils, canvasUtils };
