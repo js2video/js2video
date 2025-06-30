@@ -1,0 +1,11 @@
+{
+  "files.associations": {
+    "*.html": "handlebars",
+    "*.hbs": "handlebars"
+  },
+  "[handlebars]": {
+    "editor.tabSize": 2,
+    "editor.insertSpaces": true,
+    "editor.formatOnSave": true
+  }
+}
