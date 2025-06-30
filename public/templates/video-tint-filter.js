@@ -1,24 +1,15 @@
 /*
-Background video with an adjustment filter
-https://pixijs.io/filters/docs/AdjustmentFilter.html
+Add tint with a ColorMatrixFilter filter
 */
 
 const defaultParams = {
   videoUrl: "https://js2video.com/video/bbb.mp4",
+  tintColor: "0xff0000",
+  tintIntensity: 0.3,
   fps: 30,
   size: {
     width: 1920,
     height: 1080,
-  },
-  filter: {
-    alpha: 1,
-    blue: 1.05,
-    brightness: 1.2,
-    contrast: 0.85,
-    gamma: 1.1,
-    green: 1.05,
-    red: 1.15,
-    saturation: 3.1,
   },
 };
 
@@ -44,21 +35,20 @@ const template = async ({
     },
   });
 
+  // add video to canvas
   canvas.add(video);
-  canvasUtils.scaleToCoverCanvas(video, canvas);
+  // scale video to fit canvas
+  canvasUtils.scaleToFitCanvas(video, canvas);
+  // center video on canvas
   canvas.centerObject(video);
 
+  // create tint filter
   const filters = [];
+  const tintFilter = new Pixi.ColorMatrixFilter();
+  tintFilter.tint(params.tintColor, params.tintIntensity); // Add color with 30% intensity
+  filters.push(tintFilter);
 
-  // https://pixijs.io/filters/docs/AdjustmentFilter.html
-  const adjustmentFilter = new PixiFilters.AdjustmentFilter(params.filter);
-  filters.push(adjustmentFilter);
-
-  const pixiFilters = await canvasUtils.loadPixiFilters({
-    canvas,
-    filters,
-  });
-
+  const pixiFilters = await canvasUtils.loadPixiFilters({ canvas, filters });
   canvas.add(pixiFilters);
 
   // create a no-op animation with the duration of the video

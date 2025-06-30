@@ -19,19 +19,28 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
+  const color = d3.interpolateRgbBasis(["purple", "green", "orange"]);
+
   const gradient = new Fabric.Gradient({
     type: "linear",
     coords: { x1: 0, y1: 0, x2: 0, y2: params.size.height },
     colorStops: [
-      { offset: 0, color: "#ff69b4" }, // hot pink
-      { offset: 1, color: "#39ff14" }, // neon green
+      { offset: 0, color: color(0) },
+      { offset: 0.5, color: color(0.5) },
+      { offset: 1, color: color(1) },
     ],
   });
 
   canvas.set({ backgroundColor: gradient });
 
-  timeline.to({}, { duration: 5 });
+  timeline.to(
+    {},
+    {
+      duration: 5,
+    }
+  );
 };
 
 export { template, defaultParams };

@@ -23,6 +23,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // load video from URL
   const video = await canvasUtils.loadVideo({

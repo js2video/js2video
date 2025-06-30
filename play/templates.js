@@ -91,18 +91,26 @@ const templates = [
         label: "Video filter with animated mask",
         url: "/templates/video-filtermask.js",
       },
+      {
+        label: "Video with color tint filter",
+        url: "/templates/video-tint-filter.js",
+      },
     ],
   },
   {
     group: "Gradients",
     items: [
       {
-        label: "Horizontal bakground gradient",
+        label: "Horizontal background gradient",
         url: "/templates/horizontal-gradient.js",
       },
       {
-        label: "Vertical bakground gradient",
+        label: "Vertical background gradient",
         url: "/templates/vertical-gradient.js",
+      },
+      {
+        label: "Radial background gradient",
+        url: "/templates/radial-gradient.js",
       },
     ],
   },
@@ -125,6 +133,15 @@ const templates = [
       {
         label: "Load SVG from string",
         url: "/templates/svg-string.js",
+      },
+    ],
+  },
+  {
+    group: "Charts and graphs",
+    items: [
+      {
+        label: "Bar charts",
+        url: "/templates/bar-charts.js",
       },
     ],
   },

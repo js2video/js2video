@@ -23,26 +23,22 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
-  const pixi = await canvasUtils.loadPixi({ canvas });
-  canvas.add(pixi);
-
-  const text = new Pixi.HTMLText({
-    text: "This is a <h1 style='margin:0;padding:0;text-decoration:underline;font-family:inter'>HAHA</h1> <em style='color:red'>styled</em><br /> text! <a style='text-underline' href='http://vg.no'>a</a>",
-    style: {
-      fontSize: 120,
-      fontWeight: 650,
-      fill: "yellow",
-    },
-  });
-
-  pixi.js2video_app.stage.addChild(text);
-
-  // const filter = new PixiFilters.AsciiFilter({ size: 28 });
-  // pixi.js2video_app.stage.filters = [filter];
-
-  // create a dummy animation as long as the lottie animation
-  timeline.to({}, { duration: 2 }, 0);
+  // canvas.set({ backgroundColor: "#e9e9e9" });
+  // const pixi = await canvasUtils.loadPixi({ canvas });
+  // pixi.set({ backgroundColor: "red" });
+  // canvas.add(pixi);
+  // const text = new Pixi.HTMLText({
+  //   text: "<h1>Pixi Text</h1>",
+  //   style: {
+  //     fontSize: 120,
+  //     fontWeight: 650,
+  //     fill: "black",
+  //   },
+  // });
+  // pixi.js2video_app.stage.addChild(text);
+  // timeline.to({}, { duration: 2 }, 0);
 };
 
 export { template, defaultParams };

@@ -23,6 +23,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#000000" });
 
