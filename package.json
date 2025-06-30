@@ -57,6 +57,8 @@
   "devDependencies": {
     "@auth0/auth0-react": "2.3.0",
     "@codemirror/lang-javascript": "6.2.2",
+    "@codemirror/lang-php": "6.0.2",
+    "@codemirror/lang-python": "6.2.1",
     "@headlessui/react": "2.2.4",
     "@lezer/highlight": "1.2.1",
     "@types/react": "18.3.11",
