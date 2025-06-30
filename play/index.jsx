@@ -1,7 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
 import { Loader2Icon, XIcon } from "lucide-react";
-import { templates } from "./templates";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Editor } from "../src/components/editor";
 import { AppProvider } from "../src/components/context";
@@ -37,7 +36,9 @@ const App = () => {
           />
         </a>
         <div className="flex gap-6 items-center text-sm font-medium">
-          <a href="/docs/">Docs</a>
+          <a href="/docs/" target="_blank">
+            Docs
+          </a>
           <a href="https://github.com/js2video/js2video" target="_blank">
             <img
               className="invert"
@@ -52,7 +53,6 @@ const App = () => {
         <PanelGroup direction="horizontal">
           <Panel defaultSize={30} className="flex border-r border-[#666]">
             <Editor
-              templates={templates}
               iframeRef={iframeRef}
               templateUrl={templateUrl}
               onMessageListenerReady={() => setDisplayIframe(true)}
