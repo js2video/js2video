@@ -4,6 +4,7 @@ import * as PixiFilters from "pixi-filters";
 import * as Fabric from "fabric";
 import * as utils from "./template-utils";
 import * as canvasUtils from "./fabric-utils";
+import * as d3 from "d3";
 import { encodeVideo } from "./encode-video";
 import { validateParams } from "./validate-params";
 import { getCrunker, debounceAsync } from "./utils";
@@ -178,6 +179,7 @@ class VideoTemplate {
       PixiFilters,
       utils,
       canvasUtils,
+      d3,
     });
 
     this.canvasElement.style.display = "block";
