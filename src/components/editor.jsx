@@ -2,21 +2,16 @@ import { javascript } from "@codemirror/lang-javascript";
 import CodeMirror from "@uiw/react-codemirror";
 import { tags as t } from "@lezer/highlight";
 import { draculaInit } from "@uiw/codemirror-theme-dracula";
-import { Loader2Icon, RefreshCwIcon, WandSparklesIcon } from "lucide-react";
+import { RefreshCwIcon } from "lucide-react";
 import { useEffect, useState } from "react";
 import { cn, stringToBase64Url } from "../lib/utils";
-import { APIButton } from "./api-button";
 import { ExamplesButton } from "./examples-button";
-import { useApp } from "./context";
 
 const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
   const [code, setCode] = useState("");
-  const [codePrompt, setCodePrompt] = useState("");
-  const [isPrompting, setIsPrompting] = useState(false);
   const [isChanged, setIsChanged] = useState(false);
   const [isIframeReady, setIsIframeReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const { login, user, isLoadingUser, getAccessToken } = useApp();
 
   useEffect(() => {
     const handleBeforeUnload = (e) => {
@@ -84,42 +79,6 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
     setIsChanged(true);
   }
 
-  async function sendCodePrompt() {
-    try {
-      if (isLoadingUser) {
-        return;
-      }
-      if (!user) {
-        login();
-        return;
-      }
-      setIsPrompting(true);
-      const token = await getAccessToken();
-      const { error, data } = await fetch("/api/ai/template-code", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({
-          prompt: codePrompt,
-          code,
-        }),
-      }).then((res) => res.json());
-      if (error) {
-        throw error;
-      }
-      if (!data) {
-        throw "No data";
-      }
-      updateCode(data);
-    } catch (err) {
-      alert(err?.message ?? err);
-    } finally {
-      setIsPrompting(false);
-    }
-  }
-
   return (
     <div className="flex-1 flex flex-col relative">
       <div className="flex px-2 py-2 justify-between items-center bg-black text-white">
@@ -128,12 +87,6 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
           <ExamplesButton />
         </div>
         <div className="flex items-center gap-6 text-sm">
-          <APIButton
-            body={{
-              templateUrl: stringToBase64Url(code),
-              params: {},
-            }}
-          />
           <button
             title="Update preview"
             disabled={!isChanged}
@@ -149,27 +102,6 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
             />
           </button>
         </div>
-      </div>
-      <div className="p-2 py-3 flex gap-3 bg-[#2a2a36]">
-        <textarea
-          placeholder="Prompt: set bg to black, change font to poppins etc."
-          className="rounded px-4 py-2 flex-1 text-sm bg-black text-white focus:outline-none focus:ring-1 focus:ring-[#9999ff]"
-          value={codePrompt}
-          onChange={(e) => setCodePrompt(e.target.value)}
-          rows={1}
-        ></textarea>
-        <button
-          title="Send prompt to AI"
-          onClick={sendCodePrompt}
-          disabled={isLoadingUser || isPrompting || codePrompt.length < 3}
-          className="disabled:opacity-50"
-        >
-          {isPrompting || isLoadingUser ? (
-            <Loader2Icon strokeWidth={1} className="animate-spin" />
-          ) : (
-            <WandSparklesIcon strokeWidth={1} />
-          )}
-        </button>
       </div>
       <div className="flex-1 relative">
         <div className="absolute inset-0">

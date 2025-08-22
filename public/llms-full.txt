@@ -39,6 +39,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set background color
   canvas.set({ backgroundColor: "#ff0200" });
@@ -93,6 +94,154 @@ export { template, defaultParams };
 
 ```
 
+### bar-charts.js
+
+```javascript
+/*
+Animated bar charts (scrubbable version)
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+  title: "Revenue growth this year",
+  bars: [
+    { label: "Jan", value: 120000 },
+    { label: "Feb", value: 240000 },
+    { label: "Mar", value: 480000 },
+    { label: "Apr", value: 600000 },
+    { label: "May", value: 960000 },
+  ],
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  // Load Inter font
+  await utils.loadGoogleFont("Inter");
+
+  // Set background
+  canvas.set({ backgroundColor: "#e9e9e9" });
+
+  // Layout constants
+  const padding = { top: 300, bottom: 60, left: 60, right: 60 };
+  const chartHeight = params.size.height - padding.top - padding.bottom;
+  const chartWidth = params.size.width - padding.left - padding.right;
+  const baseY = params.size.height - padding.bottom;
+
+  // Extract data
+  const bars = params.bars;
+  const labels = bars.map((b) => b.label);
+  const maxValue = d3.max(bars, (d) => d.value);
+
+  const xScale = d3
+    .scaleBand()
+    .domain(labels)
+    .range([padding.left, padding.left + chartWidth])
+    .padding(0.2);
+
+  const yScale = d3.scaleLinear().domain([0, maxValue]).range([0, chartHeight]);
+
+  // Add title
+  const title = new Fabric.Text(params.title, {
+    fontSize: 80,
+    left: params.size.width / 2,
+    top: 120,
+    originX: "center",
+    fill: "#000",
+    fontFamily: "Inter",
+  });
+  canvas.add(title);
+
+  // Create bars and labels
+  const barObjects = bars.map((barData) => {
+    const x = xScale(barData.label);
+    const width = xScale.bandwidth();
+
+    const rect = new Fabric.Rect({
+      left: x,
+      top: baseY,
+      width,
+      height: 1,
+      fill: "#005500",
+      originY: "bottom",
+    });
+
+    const valueLabel = new Fabric.Text("$0", {
+      fontSize: 36,
+      left: x + width / 2,
+      top: baseY - 20,
+      originX: "center",
+      opacity: 0,
+      fill: "#000",
+      fontFamily: "Inter",
+    });
+
+    const bottomLabel = new Fabric.Text(barData.label, {
+      fontSize: 32,
+      left: x + width / 2,
+      top: baseY + 12,
+      originX: "center",
+      fill: "#222",
+      fontFamily: "Inter",
+    });
+
+    canvas.add(rect, valueLabel, bottomLabel);
+    return { data: barData, rect, label: valueLabel };
+  });
+
+  // Render function for scrubbable animation
+  const renderBars = (progress) => {
+    const eased = gsap.parseEase("back.out(1.7)")(progress);
+
+    barObjects.forEach(({ data, rect, label }) => {
+      const targetHeight = yScale(data.value);
+      const currentHeight = targetHeight * eased;
+      const y = baseY - currentHeight;
+
+      rect.set({ height: currentHeight });
+      label.set({
+        text: `$${Math.round((data.value * Math.min(1, eased)) / 1000)}k`,
+        top: y - 40,
+        opacity: eased,
+      });
+    });
+
+    canvas.renderAll();
+  };
+
+  // Use a scrubbable state object
+  const state = { progress: 0 };
+
+  timeline.to(state, {
+    progress: 1,
+    duration: 1.5,
+    ease: "linear", // we apply easing manually in renderBars
+    onUpdate: () => {
+      renderBars(state.progress);
+    },
+  });
+
+  timeline.to({}, { duration: 2 }); // pause
+};
+
+export { template, defaultParams };
+
+```
+
 ### bg-image.js
 
 ```javascript
@@ -121,6 +270,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // load image from URL
   const image = await canvasUtils.loadImage({
@@ -204,6 +354,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#000000" });
 
@@ -281,6 +432,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set bg color
   canvas.set({ backgroundColor: "#111111" });
@@ -393,6 +545,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set background color
   canvas.set({ backgroundColor: "#204440" });
@@ -481,6 +634,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set background color
   canvas.set({ backgroundColor: "#1f7dff" });
@@ -552,6 +706,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // load image from URL
   const image = await canvasUtils.loadImage({
@@ -632,6 +787,50 @@ export { template, defaultParams };
 
 ```
 
+### empty.js
+
+```javascript
+/*
+Empty starter template
+*/
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  // set background color
+  canvas.set({ backgroundColor: "#e9e9e9" });
+
+  // dummy animation
+  timeline.to(
+    {},
+    {
+      duration: 5,
+    }
+  );
+};
+
+export { template, defaultParams };
+
+```
+
 ### google-font.js
 
 ```javascript
@@ -660,6 +859,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set background color
   canvas.set({ backgroundColor: "#a284fa" });
@@ -725,6 +925,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#0000ee" });
 
@@ -786,46 +987,23 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
+  const color = d3.interpolateRgbBasis(["purple", "green", "orange"]);
+
   const gradient = new Fabric.Gradient({
     type: "linear",
     coords: { x1: 0, y1: 0, x2: params.size.width, y2: 0 },
     colorStops: [
-      { offset: 0, color: "#ff69b4" }, // hot pink
-      { offset: 1, color: "#39ff14" }, // neon green
+      { offset: 0, color: color(0) }, // purple
+      { offset: 0.5, color: color(0.5) }, // green
+      { offset: 1, color: color(1) }, // orange
     ],
   });
 
   canvas.set({ backgroundColor: gradient });
 
-  const text = await canvasUtils.loadText({
-    text: "Horizontal Gradient",
-    options: {
-      fontSize: 200,
-      fontFamily: "sans-serif",
-      fill: "white",
-      originX: "center",
-      originY: "center",
-    },
-  });
-
-  canvas.add(text);
-  canvas.centerObject(text);
-
-  timeline.from(text, {
-    scaleX: 0,
-    scaleY: 0,
-    duration: 0.5,
-    delay: 0.2,
-    ease: "elastic",
-  });
-
-  timeline.to(text, {
-    opacity: 0,
-    duration: 2,
-    delay: 1,
-    ease: "expo.out",
-  });
+  timeline.to({}, { duration: 5 });
 };
 
 export { template, defaultParams };
@@ -859,6 +1037,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set canvas background color
   canvas.set({ backgroundColor: "papayawhip" });
@@ -912,26 +1091,76 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
-  const pixi = await canvasUtils.loadPixi({ canvas });
-  canvas.add(pixi);
+  // canvas.set({ backgroundColor: "#e9e9e9" });
+  // const pixi = await canvasUtils.loadPixi({ canvas });
+  // pixi.set({ backgroundColor: "red" });
+  // canvas.add(pixi);
+  // const text = new Pixi.HTMLText({
+  //   text: "<h1>Pixi Text</h1>",
+  //   style: {
+  //     fontSize: 120,
+  //     fontWeight: 650,
+  //     fill: "black",
+  //   },
+  // });
+  // pixi.js2video_app.stage.addChild(text);
+  // timeline.to({}, { duration: 2 }, 0);
+};
 
-  const text = new Pixi.HTMLText({
-    text: "This is a <h1 style='margin:0;padding:0;text-decoration:underline;font-family:inter'>HAHA</h1> <em style='color:red'>styled</em><br /> text! <a style='text-underline' href='http://vg.no'>a</a>",
-    style: {
-      fontSize: 120,
-      fontWeight: 650,
-      fill: "yellow",
+export { template, defaultParams };
+
+```
+
+### radial-gradient.js
+
+```javascript
+/** Radial Background Gradient */
+
+const defaultParams = {
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  const color = d3.interpolateRgbBasis(["purple", "green", "orange"]);
+
+  const gradient = new Fabric.Gradient({
+    type: "radial",
+    coords: {
+      x1: params.size.width / 2,
+      y1: params.size.height / 2,
+      r1: 0,
+      x2: params.size.width / 2,
+      y2: params.size.height / 2,
+      r2: Math.max(params.size.width, params.size.height),
     },
+    colorStops: [
+      { offset: 0, color: color(0) }, // purple
+      { offset: 0.5, color: color(0.5) }, // green
+      { offset: 1, color: color(1) }, // orange
+    ],
   });
 
-  pixi.js2video_app.stage.addChild(text);
+  canvas.set({ backgroundColor: gradient });
 
-  // const filter = new PixiFilters.AsciiFilter({ size: 28 });
-  // pixi.js2video_app.stage.filters = [filter];
-
-  // create a dummy animation as long as the lottie animation
-  timeline.to({}, { duration: 2 }, 0);
+  timeline.to({}, { duration: 5 });
 };
 
 export { template, defaultParams };
@@ -964,14 +1193,15 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set background color
-  canvas.set({ backgroundColor: "#e9e9e9" });
+  canvas.set({ backgroundColor: "hotpink" });
 
   // load SVG from string
   const svg = await canvasUtils.loadSvgFromString({
     string: `
-     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#c8c8c8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smile"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>`,
+     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="yellow" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-smile"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><line x1="9" x2="9.01" y1="9" y2="9"/><line x1="15" x2="15.01" y1="9" y2="9"/></svg>`,
     options: {
       originX: "center",
       originY: "center",
@@ -980,7 +1210,7 @@ const template = async ({
 
   // add/scale/center SVG
   canvas.add(svg);
-  canvasUtils.scaleToFitCanvas(svg, canvas);
+  canvasUtils.scaleToFitCanvas(svg, canvas, 0.8);
   canvas.centerObject(svg);
 
   // animate SVG
@@ -1003,7 +1233,6 @@ https://pixijs.io/filters/docs/KawaseBlurFilter.html
 const defaultParams = {
   text: "SAN DIEGO 1992",
   fontFamily: "Liter", // Google Font
-  imageUrl: "https://js2video.com/images/ai/beach.jpg", // AI-generated
   fps: 30,
   size: {
     width: 1280,
@@ -1022,6 +1251,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // generates a random number within a specified range, ensuring
   // the change from the current value does not exceed maxChange.
@@ -1039,25 +1269,6 @@ const template = async ({
 
   // load Google font by name
   await utils.loadGoogleFont(params.fontFamily);
-
-  // load image from URL
-  const image = await canvasUtils.loadImage({
-    url: params.imageUrl,
-    options: {
-      originX: "center",
-      originY: "center",
-      opacity: 0.4,
-    },
-  });
-
-  // add image to canvas
-  canvas.add(image);
-
-  // scale video to cover canvas
-  canvasUtils.scaleToCoverCanvas(image, canvas);
-
-  // center video on canvas
-  canvas.centerObject(image);
 
   // load text object
   const text = await canvasUtils.loadTextbox({
@@ -1095,28 +1306,17 @@ const template = async ({
   pixiFilters.set({
     left: params.size.width * 0.5,
     top: 0,
-    scaleX: 1.1,
+    scaleX: 1.3,
     scaleY: 1.1,
     originX: "center",
   });
-
-  // scale up image a bit
-  timeline.to(
-    image,
-    {
-      scaleX: image.scaleX * 1.2,
-      scaleY: image.scaleY * 1.2,
-      duration: 5,
-      ease: "linear",
-    },
-    0
-  );
 
   // animate filter properties
   timeline.to(
     {},
     {
       duration: 5,
+      // animate the glitch filter properties
       onUpdate: () => {
         filters.map((f) => {
           f.slices = parseInt(random(18, 22));
@@ -1160,6 +1360,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#f3f8fb" });
 
@@ -1209,6 +1410,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#f3f8fb" });
 
@@ -1260,6 +1462,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#f3f8fb" });
 
@@ -1311,6 +1514,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#f3f8fb" });
 
@@ -1360,6 +1564,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#f3f8fb" });
 
@@ -1409,6 +1614,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#f3f8fb" });
 
@@ -1458,6 +1664,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   canvas.set({ backgroundColor: "#f3f8fb" });
 
@@ -1510,6 +1717,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set background color
   canvas.set({ backgroundColor: "#fefb9f" });
@@ -1596,46 +1804,28 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
+  const color = d3.interpolateRgbBasis(["purple", "green", "orange"]);
+
   const gradient = new Fabric.Gradient({
     type: "linear",
     coords: { x1: 0, y1: 0, x2: 0, y2: params.size.height },
     colorStops: [
-      { offset: 0, color: "#ff69b4" }, // hot pink
-      { offset: 1, color: "#39ff14" }, // neon green
+      { offset: 0, color: color(0) },
+      { offset: 0.5, color: color(0.5) },
+      { offset: 1, color: color(1) },
     ],
   });
 
   canvas.set({ backgroundColor: gradient });
 
-  const text = await canvasUtils.loadText({
-    text: "Vertical Gradient",
-    options: {
-      fontSize: 200,
-      fontFamily: "sans-serif",
-      fill: "white",
-      originX: "center",
-      originY: "center",
-    },
-  });
-
-  canvas.add(text);
-  canvas.centerObject(text);
-
-  timeline.from(text, {
-    scaleX: 0,
-    scaleY: 0,
-    duration: 0.5,
-    delay: 0.2,
-    ease: "elastic",
-  });
-
-  timeline.to(text, {
-    opacity: 0,
-    duration: 2,
-    delay: 1,
-    ease: "expo.out",
-  });
+  timeline.to(
+    {},
+    {
+      duration: 5,
+    }
+  );
 };
 
 export { template, defaultParams };
@@ -1680,6 +1870,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // load video from URL
   const video = await canvasUtils.loadVideo({
@@ -1756,6 +1947,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // load video from URL
   const video = await canvasUtils.loadVideo({
@@ -1835,6 +2027,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // load video from URL
   const video = await canvasUtils.loadVideo({
@@ -1920,6 +2113,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // set background color
   canvas.set({ backgroundColor: "green" });
@@ -2013,6 +2207,7 @@ const template = async ({
   PixiFilters,
   utils,
   canvasUtils,
+  d3,
 }) => {
   // load video from URL
   const video = await canvasUtils.loadVideo({
@@ -2047,6 +2242,76 @@ const template = async ({
       onUpdate: () => {
         filters.map((f) => (f.seed = Math.random()));
       },
+    },
+    0
+  );
+};
+
+export { template, defaultParams };
+
+```
+
+### video-tint-filter.js
+
+```javascript
+/*
+Add tint with a ColorMatrixFilter filter
+*/
+
+const defaultParams = {
+  videoUrl: "https://js2video.com/video/bbb.mp4",
+  tintColor: "0xff0000",
+  tintIntensity: 0.3,
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  // load video from URL
+  const video = await canvasUtils.loadVideo({
+    url: params.videoUrl,
+    options: {
+      originX: "center",
+      originY: "center",
+    },
+  });
+
+  // add video to canvas
+  canvas.add(video);
+  // scale video to fit canvas
+  canvasUtils.scaleToFitCanvas(video, canvas);
+  // center video on canvas
+  canvas.centerObject(video);
+
+  // create tint filter
+  const filters = [];
+  const tintFilter = new Pixi.ColorMatrixFilter();
+  tintFilter.tint(params.tintColor, params.tintIntensity); // Add color with 30% intensity
+  filters.push(tintFilter);
+
+  const pixiFilters = await canvasUtils.loadPixiFilters({ canvas, filters });
+  canvas.add(pixiFilters);
+
+  // create a no-op animation with the duration of the video
+  timeline.to(
+    {},
+    {
+      duration: video.js2video_duration,
     },
     0
   );

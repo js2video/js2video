@@ -3,8 +3,6 @@ import ReactDOM from "react-dom/client";
 import { Loader2Icon, XIcon } from "lucide-react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Editor } from "../src/components/editor";
-import { AppProvider } from "../src/components/context";
-import { Profile } from "../src/components/profile";
 import "../index.css";
 
 const App = () => {
@@ -46,7 +44,6 @@ const App = () => {
               src="/images/github-mark.png"
             />
           </a>
-          <Profile />
         </div>
       </header>
       <div className="text-white flex-1 flex">
@@ -75,8 +72,4 @@ const App = () => {
   );
 };
 
-ReactDOM.createRoot(document.getElementById("app")).render(
-  <AppProvider>
-    <App />
-  </AppProvider>
-);
+ReactDOM.createRoot(document.getElementById("app")).render(<App />);
