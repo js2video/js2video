@@ -172,7 +172,7 @@ const ExportServerButton = () => {
   };
   return (
     <ControlButton onClick={handleClick}>
-      <SquareArrowDownIcon size={26} />
+      <SquareArrowDownIcon size={26} strokeWidth={1} />
     </ControlButton>
   );
 };
@@ -269,7 +269,7 @@ const ExportButton = () => {
       )}
 
       <ControlButton onClick={handleClick}>
-        <DownloadIcon size={26} />
+        <DownloadIcon size={26} strokeWidth={1} />
       </ControlButton>
     </>
   );
@@ -325,8 +325,6 @@ const JS2VideoControls = ({
   const scaleFactor = 0.5;
   const timelineRef = useRef();
 
-  console.log({ className });
-
   // use a listener to update react-timeline-editor time
   useEffect(() => {
     const listener = (e) => {
@@ -381,8 +379,6 @@ const JS2VideoControls = ({
     videoTemplate.setTimeRange(0, videoTemplate.duration);
   };
 
-  console.log("CL", className);
-
   return (
     <div
       className={cn(
@@ -399,45 +395,31 @@ const JS2VideoControls = ({
             <RewindButton />
             <TogglePlayButton />
           </div>
-          <div className="flex gap-2">
-            <button
-              title="Zoom in timeline"
-              onClick={zoomIn}
-              className="opacity-60 hover:opacity-80"
-            >
+          <div className="flex">
+            <ControlButton title="Zoom in timeline" onClick={zoomIn}>
               <ZoomInIcon strokeWidth={1} />
-            </button>
-            <button
-              title="Zoom out timeline"
-              onClick={zoomOut}
-              className="opacity-60 hover:opacity-80"
-            >
+            </ControlButton>
+            <ControlButton title="Zoom out timeline" onClick={zoomOut}>
               <ZoomOutIcon strokeWidth={1} />
-            </button>
+            </ControlButton>
           </div>
-          <div className="flex gap-3">
-            <button
+          <div className="flex">
+            <ControlButton
               title="Set range start to playhead position"
               onClick={setRangeStartToCurrentTime}
-              className="opacity-60 hover:opacity-80"
             >
               <ScissorsLineDashedIcon strokeWidth={1} />
-            </button>
-            <button
+            </ControlButton>
+            <ControlButton
               title="Set range end to playhead position"
               onClick={setRangeEndToCurrentTime}
-              className="opacity-60 hover:opacity-80"
             >
               <ScissorsLineDashedIcon strokeWidth={1} className="rotate-180" />
-            </button>
+            </ControlButton>
           </div>
-          <button
-            title="Reset range"
-            onClick={resetRange}
-            className="opacity-60 hover:opacity-80"
-          >
+          <ControlButton title="Reset range" onClick={resetRange}>
             <UnfoldHorizontalIcon strokeWidth={1} />
-          </button>
+          </ControlButton>
         </div>
         <div className="flex justify-center flex-1">
           <CurrentTime />
