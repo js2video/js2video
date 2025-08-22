@@ -10,21 +10,16 @@ const App = () => {
   useEffect(() => {
     function handleMessage(message) {
       console.log("Received message in iframe:", message);
-      if (message.origin !== import.meta.env.VITE_PARENT_ORIGIN) {
-        console.log(
-          "Skipping message from not parent origin:",
-          import.meta.env.VITE_PARENT_ORIGIN
-        );
+      if (message.origin !== window.location.origin) {
+        console.log("Ignored message from other origin:", message.origin);
         return;
       }
-      console.log("set template url", message.data);
+      if (!message.data) return;
       setTemplateUrl(message.data);
     }
     window.addEventListener("message", handleMessage);
-    window.parent.postMessage(
-      { type: "iframe-ready" },
-      import.meta.env.VITE_PARENT_ORIGIN
-    );
+    // notify parent that iframe is ready
+    window.parent.postMessage({ type: "iframe-ready" }, "*");
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
@@ -41,10 +36,9 @@ const App = () => {
       templateUrl={templateUrl}
       params={{}}
       autoPlay={false}
-      loop={true}
+      loop
       enableUnsecureMode={false}
       videoFilePrefix="js2video"
-      hideExportButton={true}
       controlsClassName="border-t border-[#666] bg-black text-white"
     />
   );
