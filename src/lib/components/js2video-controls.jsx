@@ -252,7 +252,7 @@ const ExportButton = () => {
   return (
     <>
       {!!isExporting && (
-        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-70">
+        <div className="absolute inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
           <div className="flex flex-col items-center gap-4">
             <div>
               Exporting MP4 to disk...{" "}
