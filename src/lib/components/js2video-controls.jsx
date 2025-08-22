@@ -4,13 +4,13 @@ import { canBrowserEncodeVideo, formatTime, cn, invlerp } from "../utils";
 import {
   PlayIcon,
   PauseIcon,
-  RewindIcon,
   SquareArrowDownIcon,
   ZoomInIcon,
   ZoomOutIcon,
   UnfoldHorizontalIcon,
   ScissorsLineDashedIcon,
   DownloadIcon,
+  SkipBackIcon,
 } from "lucide-react";
 import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
@@ -28,7 +28,7 @@ const CurrentTime = () => {
   const currentTime = useCurrentTime();
   const duration = useDuration();
   return (
-    <div className="px-2 select-none font-mono text-sm opacity-70 whitespace-nowrap">
+    <div className="px-2 select-none tabular-nums text-sm opacity-70 whitespace-nowrap">
       {formatTime(currentTime)} / {formatTime(duration)}
     </div>
   );
@@ -95,6 +95,7 @@ const Scrubber = ({
           width: "100%",
           height: "80px",
           backgroundColor: "transparent",
+          fontFamily: "Inter",
         }}
         rowHeight={20}
         autoScroll={true}
@@ -131,7 +132,9 @@ const ControlButton = ({ children, ...rest }) => {
     <button
       {...rest}
       disabled={isLoading}
-      className={cn("p-2", { "opacity-60": isLoading })}
+      className={cn("p-2 opacity-80 hover:opacity-100", {
+        "opacity-60": isLoading,
+      })}
     >
       {children}
     </button>
@@ -300,7 +303,7 @@ const RewindButton = () => {
         await videoTemplate.rewind();
       }}
     >
-      <RewindIcon size={22} strokeWidth={1} />
+      <SkipBackIcon size={22} strokeWidth={1} />
     </ControlButton>
   );
 };
@@ -309,7 +312,10 @@ const RewindButton = () => {
  * Simple playback controls
  * @returns {JSX.Element}
  */
-const JS2VideoControls = ({ hideExportButton = false }) => {
+const JS2VideoControls = ({
+  hideExportButton = false,
+  className = "bg-black text-white",
+}) => {
   const { videoTemplate } = useJS2Video();
   const [scale, setScale] = useState(2);
   const [scaleWidth, setScaleWidth] = useState(160);
@@ -318,6 +324,8 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
   const [rangeEnd, setRangeEnd] = useState(0);
   const scaleFactor = 0.5;
   const timelineRef = useRef();
+
+  console.log({ className });
 
   // use a listener to update react-timeline-editor time
   useEffect(() => {
@@ -373,8 +381,18 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
     videoTemplate.setTimeRange(0, videoTemplate.duration);
   };
 
+  console.log("CL", className);
+
   return (
-    <div className="flex flex-col bg-black border-t pt-2 border-[#666]">
+    <div
+      className={cn(
+        "flex flex-col",
+        "[&_.timeline-editor-time-unit-scale]:text-current",
+        "[&_.timeline-editor-time-unit]:border-current",
+        "[&_.timeline-editor-time-unit]:opacity-60",
+        className
+      )}
+    >
       <div className="flex items-center px-2">
         <div className="flex flex-1 gap-8">
           <div className="flex">
@@ -410,7 +428,7 @@ const JS2VideoControls = ({ hideExportButton = false }) => {
               onClick={setRangeEndToCurrentTime}
               className="opacity-60 hover:opacity-80"
             >
-              <ScissorsLineDashedIcon strokeWidth={1} className="-rotate-180" />
+              <ScissorsLineDashedIcon strokeWidth={1} className="rotate-180" />
             </button>
           </div>
           <button

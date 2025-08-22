@@ -17,6 +17,7 @@ import { JS2VideoLayout } from "./js2video-layout";
  * @param {OnLoadingFunction | undefined} [props.onLoading] - OnLoading callback function.
  * @param {OnBeforeExportFunction | undefined} [props.onBeforeExport] - Called before export.
  * @param {boolean} [props.hideExportButton] - Hide the export buttons? Default: false.
+ * @param {string} [props.controlsClassName] - Tailwind classes for the controls component.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2Video = ({
@@ -29,6 +30,7 @@ const JS2Video = ({
   onLoading,
   onBeforeExport,
   hideExportButton = false,
+  controlsClassName = "bg-black text-white",
 }) => {
   return (
     <JS2VideoProvider
@@ -43,7 +45,10 @@ const JS2Video = ({
     >
       <JS2VideoLayout>
         <JS2VideoPreview />
-        <JS2VideoControls hideExportButton={hideExportButton} />
+        <JS2VideoControls
+          className={controlsClassName}
+          hideExportButton={hideExportButton}
+        />
       </JS2VideoLayout>
     </JS2VideoProvider>
   );

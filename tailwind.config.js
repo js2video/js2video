@@ -2,7 +2,12 @@ import { fontFamily } from "tailwindcss/defaultTheme";
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  content: ["./play/index.{jsx,html}", "./index.html", "./src/**/*.jsx"],
+  content: [
+    "./play/index.{jsx,html}",
+    "./iframe/index.{jsx,html}",
+    "./index.html",
+    "./src/**/*.jsx",
+  ],
   theme: {
     extend: {
       fontFamily: {

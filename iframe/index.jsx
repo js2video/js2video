@@ -45,6 +45,7 @@ const App = () => {
       enableUnsecureMode={false}
       videoFilePrefix="js2video"
       hideExportButton={true}
+      controlsClassName="border-t border-[#666] bg-black text-white"
     />
   );
 };
