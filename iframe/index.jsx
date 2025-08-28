@@ -39,7 +39,7 @@ const App = () => {
       loop
       enableUnsecureMode={false}
       videoFilePrefix="js2video"
-      controlsClassName="border-t border-[#666] bg-black text-white"
+      controlsClassName="border-t border-gray-700 bg-black text-gray-300"
     />
   );
 };

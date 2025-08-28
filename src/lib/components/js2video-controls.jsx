@@ -381,14 +381,25 @@ const JS2VideoControls = ({
 
   return (
     <div
-      className={cn(
-        "flex flex-col",
-        "[&_.timeline-editor-time-unit-scale]:text-current",
-        "[&_.timeline-editor-time-unit]:border-current",
-        "[&_.timeline-editor-time-unit]:opacity-60",
-        className
-      )}
+      className={cn("flex flex-col", className)}
+      style={{
+        // @ts-ignore
+        "--timeline-text": "currentColor",
+        "--timeline-ticks": "currentColor",
+        "--timeline-opacity": 0.6,
+      }}
     >
+      <style>
+        {`
+      .timeline-editor-time-unit-scale {
+        color: var(--timeline-text) !important;
+      }
+      .timeline-editor-time-unit {
+        border-color: var(--timeline-ticks) !important;
+        opacity: var(--timeline-opacity) !important;
+      }
+    `}
+      </style>
       <div className="flex items-center px-2">
         <div className="flex flex-1 gap-8">
           <div className="flex">
