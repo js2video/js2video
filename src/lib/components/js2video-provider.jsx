@@ -99,57 +99,78 @@ const JS2VideoProvider = ({
     vtRef.current = videoTemplate;
   }, [videoTemplate]);
 
+  const lastStateRef = useRef({ currentTime: 0, range: null });
+
   useEffect(() => {
-    async function load() {
-      await queueRef.current.enqueue(async () => {
-        setIsLoading(true);
-        setTemplateError(null);
-        let updatedParams = { ...params };
-        let currentTime = 0;
-        // dispose previous loaded template instance
+    // enqueue load job
+    queueRef.current.enqueue(async () => {
+      console.log("loading video template in provider...");
+
+      setIsLoading(true);
+      setTemplateError(null);
+
+      // grab carry-over values
+      const { currentTime, range } = lastStateRef.current;
+      let updatedParams = { ...params };
+      if (range) {
+        updatedParams.range = range;
+      }
+
+      const vt = new VideoTemplate({
+        templateUrl,
+        enableUnsecureMode,
+        parentElement: previewRef.current,
+        autoPlay,
+        loop,
+        params: updatedParams,
+        videoFilePrefix,
+      });
+
+      try {
+        await vt.load();
+
+        // seek to previous time if any
+        if (currentTime) {
+          await vt.seek({ time: currentTime });
+        }
+
+        vtRef.current = vt;
+        setVideoTemplate(vt);
+        console.log("loaded video template in provider");
+      } catch (err) {
+        console.error(err);
+        setTemplateError(err);
+        try {
+          await vt.dispose();
+        } catch (disposeErr) {
+          console.warn("dispose on error", disposeErr);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    });
+
+    return () => {
+      // enqueue dispose job
+      queueRef.current.enqueue(async () => {
         if (vtRef.current) {
-          // use same range in new vt
-          updatedParams = { ...updatedParams, range: vtRef.current.range };
-          currentTime = vtRef.current.currentTime;
+          // save state for next run
+          lastStateRef.current = {
+            currentTime: vtRef.current.currentTime,
+            range: vtRef.current.range,
+          };
+
           try {
+            console.log("disposing video template in provider...");
             await vtRef.current.dispose();
+            console.log("disposed video template in provider");
           } catch (err) {
-            console.log("error disposing template", err);
+            console.warn("dispose on cleanup", err);
           }
           vtRef.current = null;
         }
-        // load new template instance
-        const vt = new VideoTemplate({
-          templateUrl,
-          enableUnsecureMode,
-          parentElement: previewRef.current,
-          autoPlay,
-          loop,
-          params: updatedParams,
-          videoFilePrefix,
-        });
-        try {
-          await vt.load();
-          // seek to prev currentTime
-          if (vt.currentTime !== currentTime) {
-            await vt.seek({ time: currentTime });
-          }
-          vtRef.current = vt;
-          setVideoTemplate(vt);
-        } catch (err) {
-          console.error(err);
-          setTemplateError(err);
-          try {
-            await vt.dispose();
-          } catch (err) {
-            console.warn("dispose on error problem:", err);
-          }
-        } finally {
-          setIsLoading(false);
-        }
       });
-    }
-    load();
+    };
   }, [templateUrl, params]);
 
   useEffect(() => {
