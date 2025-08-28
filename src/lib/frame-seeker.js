@@ -206,7 +206,7 @@ export class FrameSeeker {
     try {
       await this.stop();
     } catch (err) {
-      console.error(err);
+      console.warn(err);
     }
     console.log("destroyed frame seeker");
   }
