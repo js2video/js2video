@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from "react";
 import ReactDOM from "react-dom/client";
-import { Loader2Icon, XIcon } from "lucide-react";
+import { Loader2Icon } from "lucide-react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Editor } from "../src/components/editor";
 import "../index.css";
@@ -60,7 +60,7 @@ const App = () => {
             {displayIframe && (
               <iframe
                 ref={iframeRef}
-                sandbox="allow-scripts allow-same-origin"
+                sandbox="allow-scripts"
                 src={"/iframe/"}
                 className="flex-1"
               />

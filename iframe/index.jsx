@@ -9,7 +9,11 @@ const App = () => {
 
   useEffect(() => {
     function handleMessage(message) {
-      console.log("Received message in iframe:", message);
+      console.log(
+        "Received message in iframe:",
+        message,
+        window.location.origin
+      );
       if (message.origin !== window.location.origin) {
         console.log("Ignored message from other origin:", message.origin);
         return;
@@ -19,7 +23,7 @@ const App = () => {
     }
     window.addEventListener("message", handleMessage);
     // notify parent that iframe is ready
-    window.parent.postMessage({ type: "iframe-ready" }, "*");
+    window.parent.postMessage({ type: "iframe-ready" }, window.location.origin);
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 
