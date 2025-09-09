@@ -224,6 +224,7 @@ const ExportButton = () => {
     setAbortController(controller);
 
     try {
+      // @ts-ignore
       const fileHandle = await window.showSaveFilePicker({
         suggestedName: `${videoTemplate.videoFilePrefix}-${Date.now()}.mp4`,
         types: [
