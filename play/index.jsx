@@ -60,7 +60,7 @@ const App = () => {
             {displayIframe && (
               <iframe
                 ref={iframeRef}
-                sandbox="allow-scripts"
+                sandbox="allow-scripts allow-same-origin"
                 src={"/iframe/"}
                 className="flex-1"
               />
