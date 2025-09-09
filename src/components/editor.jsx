@@ -32,7 +32,7 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
       console.log("Received message in parent:", message);
 
       // only accept messages from same origin
-      if (message.origin !== "null") {
+      if (message.origin !== location.origin) {
         console.log(
           "Skipping message in parent (wrong origin)",
           message.origin
