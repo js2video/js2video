@@ -198,6 +198,7 @@ function stringToBase64Url(string) {
 
 function canBrowserEncodeVideo() {
   return (
+    // @ts-ignore
     typeof window.showSaveFilePicker !== "undefined" &&
     typeof window.VideoEncoder !== "undefined" &&
     typeof window.AudioEncoder !== "undefined"
@@ -337,6 +338,36 @@ const base64ToBuffer = (base64String) => Buffer.from(base64String, "base64");
  */
 const bufferToBase64 = (buffer) => buffer.toString("base64");
 
+/**
+ * Save an ArrayBuffer to disk by triggering a browser download.
+ *
+ * @param {ArrayBuffer} buffer - The raw file data to save.
+ * @param {string} filename - Suggested name for the downloaded file.
+ * @param {string} [mimeType="application/octet-stream"] - MIME type of the file.
+ */
+function saveBufferToDisk(
+  buffer,
+  filename,
+  mimeType = "application/octet-stream"
+) {
+  // Wrap the buffer in a Blob
+  const blob = new Blob([buffer], { type: mimeType });
+
+  // Create a temporary object URL for the Blob
+  const url = URL.createObjectURL(blob);
+
+  // Create an anchor and simulate a click
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename || `file-${Date.now()}`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+
+  // Release the object URL
+  URL.revokeObjectURL(url);
+}
+
 export {
   lerp,
   clamp,
@@ -361,4 +392,5 @@ export {
   debounceAsync,
   base64ToBuffer,
   bufferToBase64,
+  saveBufferToDisk,
 };

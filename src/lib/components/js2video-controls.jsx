@@ -1,6 +1,6 @@
 import { useJS2VideoEventProperty } from "./hooks/use-js2video-event-property";
 import { useJS2Video } from "./js2video-provider";
-import { canBrowserEncodeVideo, formatTime, cn, invlerp } from "../utils";
+import { formatTime, cn, invlerp } from "../utils";
 import {
   PlayIcon,
   PauseIcon,
@@ -15,6 +15,8 @@ import {
 import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
 import { Timeline } from "@xzdarcy/react-timeline-editor";
+import { StreamTarget, BufferTarget } from "mediabunny";
+import { saveBufferToDisk } from "../utils";
 
 const useDuration = () => useJS2VideoEventProperty("duration", 0);
 const useCurrentTime = () => useJS2VideoEventProperty("currentTime", 0);
@@ -213,33 +215,13 @@ const ExportButton = () => {
       }
     }
 
-    if (!canBrowserEncodeVideo()) {
-      return alert(
-        "Exporting videos from the browser is only supported in newer versions of Chrome on the desktop."
-      );
-    }
-
     // Create a new abort controller
     const controller = new AbortController();
     setAbortController(controller);
 
     try {
-      // @ts-ignore
-      const fileHandle = await window.showSaveFilePicker({
-        suggestedName: `${videoTemplate.videoFilePrefix}-${Date.now()}.mp4`,
-        types: [
-          {
-            description: "Video File",
-            accept: { "video/mp4": [".mp4"] },
-          },
-        ],
-      });
-
-      const fileStream = await fileHandle.createWritable();
-
       await videoTemplate.export({
         signal: controller.signal,
-        fileStream,
       });
 
       setIsAborted(false);

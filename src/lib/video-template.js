@@ -423,10 +423,9 @@ class VideoTemplate {
    *
    * @param {Object} options - The options for the export.
    * @param {AbortSignal} [options.signal] - The signal that can be used to abort the export process.
-   * @param {FileSystemWritableFileStream} [options.fileStream]
    * @returns {Promise<ExportResult>}
    */
-  async export({ signal, fileStream } = {}) {
+  async export({ signal } = {}) {
     try {
       console.log("export started");
       this.isExporting = true;
@@ -452,21 +451,20 @@ class VideoTemplate {
         timeline: this.timeline,
         progressHandler: () => this.sendEvent("exportProgress"),
         signal,
-        fileStream,
       });
 
       await this.cleanupExport();
+
+      return {
+        videoBitrate: this.params.bitrate,
+        videoSize: this.params.size,
+        videoDuration: this.duration * 1000,
+      };
     } catch (err) {
       console.error(err?.message ?? err);
       await this.cleanupExport();
       throw err;
     }
-    const result = {
-      videoBitrate: this.params.bitrate,
-      videoSize: this.params.size,
-      videoDuration: this.duration * 1000,
-    };
-    return result;
   }
 
   /**

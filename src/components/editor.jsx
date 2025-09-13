@@ -30,24 +30,20 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
   useEffect(() => {
     function handleMessage(message) {
       console.log("Received message in parent:", message);
-
       // only accept messages from same origin
-      if (message.origin !== location.origin) {
+      if (message.origin !== "null") {
         console.log(
           "Skipping message in parent (wrong origin)",
           message.origin
         );
         return;
       }
-
       if (message.data?.type === "iframe-ready") {
         setIsIframeReady(true);
       }
     }
-
     window.addEventListener("message", handleMessage);
     onMessageListenerReady();
-
     return () => window.removeEventListener("message", handleMessage);
   }, []);
 

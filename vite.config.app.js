@@ -45,6 +45,10 @@ export default defineConfig({
     },
   },
   server: {
+    cors: {
+      origin: "*", // allow all origins, including null
+      credentials: false, // keep simple
+    },
     port: 3000,
     hmr: false,
     proxy: {
