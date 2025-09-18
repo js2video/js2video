@@ -30,6 +30,7 @@ const globalParams = {
  * @property {number} videoSize.width - The width of the video.
  * @property {number} videoSize.height - The height of the video.
  * @property {number} videoDuration - The duration of the video in milliseconds.
+ * @property {any} buffer - Video output buffer.
  */
 
 /**
@@ -436,7 +437,7 @@ class VideoTemplate {
 
       const audioBuffer = await this.mergeAudio();
 
-      await encodeVideo({
+      const buffer = await encodeVideo({
         audioBuffer,
         bitrate: this.bitrate,
         width: this.params.size.width,
@@ -459,6 +460,7 @@ class VideoTemplate {
         videoBitrate: this.params.bitrate,
         videoSize: this.params.size,
         videoDuration: this.duration * 1000,
+        buffer,
       };
     } catch (err) {
       console.error(err?.message ?? err);

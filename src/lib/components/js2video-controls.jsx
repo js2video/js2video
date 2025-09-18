@@ -1,6 +1,6 @@
 import { useJS2VideoEventProperty } from "./hooks/use-js2video-event-property";
 import { useJS2Video } from "./js2video-provider";
-import { formatTime, cn, invlerp } from "../utils";
+import { formatTime, cn, invlerp, saveBufferToDisk } from "../utils";
 import {
   PlayIcon,
   PauseIcon,
@@ -221,9 +221,13 @@ const ExportButton = ({ strokeWidth = 1 }) => {
     setAbortController(controller);
 
     try {
-      await videoTemplate.export({
+      const result = await videoTemplate.export({
         signal: controller.signal,
       });
+
+      if (result.buffer) {
+        saveBufferToDisk(result.buffer, `js2video-${Date.now()}.mp4`);
+      }
 
       setIsAborted(false);
       confetti();

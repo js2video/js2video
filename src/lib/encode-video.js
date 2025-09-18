@@ -151,13 +151,10 @@ async function encodeVideo({
 
     await output.finalize();
 
-    if (!isPuppeteer()) {
-      saveBufferToDisk(
-        // @ts-ignore
-        output.target.buffer,
-        `js2video-${Date.now()}.mp4`
-      );
-    }
+    // @ts-ignore
+    return output?.target?.buffer;
+
+    return;
   } catch (err) {
     console.error(err?.message ?? err);
     await close();
