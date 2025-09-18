@@ -64,6 +64,7 @@ const templates = [
       { label: "Typewriter effect", url: "/templates/typewriter.js" },
       { label: "Display a counter", url: "/templates/counter.js" },
       { label: "Animate separate characters", url: "/templates/chars.js" },
+      { label: "Animate separate words", url: "/templates/words.js" },
       { label: "Load custom font by URL", url: "/templates/custom-font.js" },
       { label: "Load Google font by name", url: "/templates/google-font.js" },
     ],
