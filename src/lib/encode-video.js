@@ -134,8 +134,7 @@ async function encodeVideo({
       if (time >= rangeStart) {
         // update timeline + canvas
         await seek(time);
-        const ts = time - rangeStart;
-        await videoSource.add(ts);
+        await videoSource.add(time - rangeStart, 1 / fps);
         progressHandler();
         currentFrame++;
       }
