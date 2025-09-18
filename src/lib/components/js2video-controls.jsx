@@ -15,8 +15,6 @@ import {
 import { useEffect, useState, useRef } from "react";
 import confetti from "canvas-confetti";
 import { Timeline } from "@xzdarcy/react-timeline-editor";
-import { StreamTarget, BufferTarget } from "mediabunny";
-import { saveBufferToDisk } from "../utils";
 
 const useDuration = () => useJS2VideoEventProperty("duration", 0);
 const useCurrentTime = () => useJS2VideoEventProperty("currentTime", 0);
@@ -143,7 +141,7 @@ const ControlButton = ({ children, ...rest }) => {
   );
 };
 
-const ExportServerButton = () => {
+const ExportServerButton = ({ strokeWidth = 1 }) => {
   const { videoTemplate, onBeforeExport } = useJS2Video();
   const rangeStart = useRangeStart();
   const rangeEnd = useRangeEnd();
@@ -164,6 +162,9 @@ const ExportServerButton = () => {
 
     await fetch(exportUrl, {
       method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
       body: JSON.stringify({
         templateUrl: videoTemplate.templateUrl,
         params: {
@@ -174,12 +175,12 @@ const ExportServerButton = () => {
   };
   return (
     <ControlButton onClick={handleClick}>
-      <SquareArrowDownIcon size={26} strokeWidth={1} />
+      <SquareArrowDownIcon size={26} strokeWidth={strokeWidth} />
     </ControlButton>
   );
 };
 
-const ExportButton = () => {
+const ExportButton = ({ strokeWidth = 1 }) => {
   const { videoTemplate, onBeforeExport } = useJS2Video();
   const progress = useProgress();
   const rangeStart = useRangeStart();
@@ -237,16 +238,16 @@ const ExportButton = () => {
       {!!isExporting && (
         <div
           id="exporting"
-          className="absolute inset-0 z-50 flex items-center justify-center bg-black/50"
+          className="absolute inset-0 z-50 flex items-center justify-center bg-black/60"
         >
           <div className="flex flex-col items-center gap-4">
-            <div>
+            <div className="text-white">
               Exporting MP4 to disk...{" "}
               {Math.round(invlerp(rangeStart, rangeEnd, progress) * 100)}%
             </div>
             <button
               onClick={handleAbort}
-              className="px-4 py-2 text-sm bg-black rounded"
+              className="px-4 py-2 text-sm bg-black rounded text-white"
             >
               Abort
             </button>
@@ -255,13 +256,13 @@ const ExportButton = () => {
       )}
 
       <ControlButton onClick={handleClick}>
-        <DownloadIcon size={26} strokeWidth={1} />
+        <DownloadIcon size={26} strokeWidth={strokeWidth} />
       </ControlButton>
     </>
   );
 };
 
-const TogglePlayButton = () => {
+const TogglePlayButton = ({ strokeWidth = 1 }) => {
   const { videoTemplate } = useJS2Video();
   const isPlaying = useIsPlaying();
   return (
@@ -272,15 +273,15 @@ const TogglePlayButton = () => {
       }}
     >
       {isPlaying ? (
-        <PauseIcon size={22} strokeWidth={1} />
+        <PauseIcon size={22} strokeWidth={strokeWidth} />
       ) : (
-        <PlayIcon size={22} strokeWidth={1} />
+        <PlayIcon size={22} strokeWidth={strokeWidth} />
       )}
     </ControlButton>
   );
 };
 
-const RewindButton = () => {
+const RewindButton = ({ strokeWidth = 1 }) => {
   const { videoTemplate } = useJS2Video();
   return (
     <ControlButton
@@ -289,7 +290,7 @@ const RewindButton = () => {
         await videoTemplate.rewind();
       }}
     >
-      <SkipBackIcon size={22} strokeWidth={1} />
+      <SkipBackIcon size={22} strokeWidth={strokeWidth} />
     </ControlButton>
   );
 };
@@ -301,6 +302,7 @@ const RewindButton = () => {
 const JS2VideoControls = ({
   hideExportButton = false,
   className = "bg-black text-white",
+  strokeWidth = 1,
 }) => {
   const { videoTemplate } = useJS2Video();
   const [scale, setScale] = useState(2);
@@ -389,15 +391,15 @@ const JS2VideoControls = ({
       <div className="flex items-center px-2">
         <div className="flex flex-1 gap-8">
           <div className="flex">
-            <RewindButton />
-            <TogglePlayButton />
+            <RewindButton strokeWidth={strokeWidth} />
+            <TogglePlayButton strokeWidth={strokeWidth} />
           </div>
           <div className="flex">
             <ControlButton title="Zoom in timeline" onClick={zoomIn}>
-              <ZoomInIcon strokeWidth={1} />
+              <ZoomInIcon strokeWidth={strokeWidth} />
             </ControlButton>
             <ControlButton title="Zoom out timeline" onClick={zoomOut}>
-              <ZoomOutIcon strokeWidth={1} />
+              <ZoomOutIcon strokeWidth={strokeWidth} />
             </ControlButton>
           </div>
           <div className="flex">
@@ -405,25 +407,30 @@ const JS2VideoControls = ({
               title="Set range start to playhead position"
               onClick={setRangeStartToCurrentTime}
             >
-              <ScissorsLineDashedIcon strokeWidth={1} />
+              <ScissorsLineDashedIcon strokeWidth={strokeWidth} />
             </ControlButton>
             <ControlButton
               title="Set range end to playhead position"
               onClick={setRangeEndToCurrentTime}
             >
-              <ScissorsLineDashedIcon strokeWidth={1} className="rotate-180" />
+              <ScissorsLineDashedIcon
+                strokeWidth={strokeWidth}
+                className="rotate-180"
+              />
             </ControlButton>
           </div>
           <ControlButton title="Reset range" onClick={resetRange}>
-            <UnfoldHorizontalIcon strokeWidth={1} />
+            <UnfoldHorizontalIcon strokeWidth={strokeWidth} />
           </ControlButton>
         </div>
         <div className="flex justify-center flex-1">
           <CurrentTime />
         </div>
         <div className="flex justify-end flex-1">
-          {!hideExportButton && <ExportButton />}
-          {!hideExportButton && <ExportServerButton />}
+          {!hideExportButton && <ExportButton strokeWidth={strokeWidth} />}
+          {!hideExportButton && (
+            <ExportServerButton strokeWidth={strokeWidth} />
+          )}
         </div>
       </div>
       <div>
