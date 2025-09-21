@@ -4,11 +4,6 @@ import { JS2VideoMixin } from "./js2video-mixin";
 class JS2VideoTextbox extends JS2VideoMixin(Textbox) {
   static type = "js2video_textbox";
 
-  /**
-   * Create an instance of the JS2VideoTextbox class
-   * @param {string} text
-   * @param {Object} options
-   */
   constructor(text, options) {
     super(text, options);
     super.set({ objectCaching: false });

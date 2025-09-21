@@ -1,8 +1,10 @@
-import { Textbox, Group, FabricText } from "fabric";
+import { Group } from "fabric";
+import { loadTextbox } from "./load-textbox";
+import { loadText } from "./load-text";
 
 async function loadWords({ canvas, text, options = {} }) {
   const obj = new Group();
-  const t = new Textbox(text, options);
+  const t = await loadTextbox({ text, options });
   const boxLeft = t._getLeftOffset();
 
   for (let i = 0; i < t._textLines.length; i++) {
@@ -24,12 +26,17 @@ async function loadWords({ canvas, text, options = {} }) {
 
       const isWordEnd = char === " " || j === textLine.length - 1;
       if (isWordEnd) {
-        const wordText = new FabricText(word, {
-          ...style,
-          left: boxLeft + lineLeft + wordLeft,
-          top: lineHeight * i,
+        const wordText = await loadText({
+          text: word,
+          options: {
+            ...options,
+            ...style,
+            left: boxLeft + lineLeft + wordLeft,
+            top: lineHeight * i,
+          },
         });
         canvas.add(wordText);
+        // @ts-ignore
         obj.add(wordText);
         word = "";
         wordLeft = null;

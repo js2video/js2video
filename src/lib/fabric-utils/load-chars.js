@@ -1,8 +1,10 @@
-import { Textbox, Group, FabricText } from "fabric";
+import { Group } from "fabric";
+import { loadTextbox } from "./load-textbox";
+import { loadText } from "./load-text";
 
 async function loadChars({ canvas, text, options = {} }) {
   const obj = new Group();
-  const t = new Textbox(text, options);
+  const t = await loadTextbox({ text, options });
   const boxLeft = t._getLeftOffset();
   for (let i = 0; i < t._textLines.length; i++) {
     const lineHeight = t.getHeightOfLine(i);
@@ -12,12 +14,17 @@ async function loadChars({ canvas, text, options = {} }) {
       const style = t.getCompleteStyleDeclaration(i, j);
       const { left: charLeft } = t.__charBounds[i][j];
       const char = textLine[j];
-      const charText = new FabricText(char, {
-        ...style,
-        left: boxLeft + lineLeft + charLeft,
-        top: lineHeight * i,
+      const charText = await loadText({
+        text: char,
+        options: {
+          ...options,
+          ...style,
+          left: boxLeft + lineLeft + charLeft,
+          top: lineHeight * i,
+        },
       });
       canvas.add(charText);
+      // @ts-ignore
       obj.add(charText);
     }
   }

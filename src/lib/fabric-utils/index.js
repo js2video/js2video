@@ -6,6 +6,7 @@ export * from "./load-text";
 export * from "./load-textbox";
 export * from "./load-chars";
 export * from "./load-words";
+export * from "./load-lines";
 export * from "./load-waveform-bars";
 export * from "./load-svg";
 export * from "./load-lottie";

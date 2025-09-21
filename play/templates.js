@@ -58,13 +58,22 @@ const templates = [
     group: "Text",
     items: [
       {
+        label: "Text",
+        url: "/templates/text.js",
+      },
+      {
+        label: "Textbox",
+        url: "/templates/textbox.js",
+      },
+      {
         label: "Text with glitch effect",
         url: "/templates/text-glitch-filter.js",
       },
       { label: "Typewriter effect", url: "/templates/typewriter.js" },
       { label: "Display a counter", url: "/templates/counter.js" },
-      { label: "Animate separate characters", url: "/templates/chars.js" },
-      { label: "Animate separate words", url: "/templates/words.js" },
+      { label: "Animate separate characters", url: "/templates/text-chars.js" },
+      { label: "Animate separate words", url: "/templates/text-words.js" },
+      { label: "Animate separate lines", url: "/templates/text-lines.js" },
       { label: "Load custom font by URL", url: "/templates/custom-font.js" },
       { label: "Load Google font by name", url: "/templates/google-font.js" },
     ],

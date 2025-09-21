@@ -1,5 +1,5 @@
 const defaultParams = {
-  name: "Unknown",
+  text: "I love deadlines. I like the whooshing sound they make as they fly by.",
   fps: 30,
   size: {
     width: 1920,
@@ -23,14 +23,17 @@ const template = async ({
   canvas.set({ backgroundColor: "#0000ee" });
 
   const text = await canvasUtils.loadTextbox({
-    text: `Hello ${params.name}! askjdh aksdjha kdhkajsdhk ajdhakdj hkj`,
+    text: params.text,
     options: {
-      fontSize: 200,
+      textAlign: "center",
+      fontSize: 130,
       fontFamily: "sans-serif",
       fill: "white",
       originX: "center",
       originY: "center",
-      textBackgroundColor: "#000",
+      textBackgroundColor: "#f0f",
+      textBackgroundPaddingX: 80,
+      width: params.size.width * 0.8,
     },
   });
 

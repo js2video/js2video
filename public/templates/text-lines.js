@@ -3,7 +3,7 @@ Animate text as separate words
 */
 
 const defaultParams = {
-  text: "“There is a theory which states that if ever anyone discovers exactly what the Universe is for and why it is here, it will instantly disappear and be replaced by something even more bizarre and inexplicable. There is another theory which states that this has already happened.”",
+  text: "I love deadlines. I like the whooshing sound they make as they fly by.",
   fontFamily: "Rubik",
   fps: 30,
   size: {
@@ -25,22 +25,24 @@ const template = async ({
   canvasUtils,
   d3,
 }) => {
-  canvas.set({ backgroundColor: "purple" });
+  canvas.set({ backgroundColor: "gray" });
 
   // load Google font by name
   await utils.loadGoogleFont(params.fontFamily);
 
   // load text object
-  const text = await canvasUtils.loadWords({
+  const text = await canvasUtils.loadLines({
     canvas,
     text: params.text,
     options: {
       width: canvas.width * 0.8,
-      fontSize: 80,
+      fontSize: 160,
       fontWeight: "bold",
       fontFamily: params.fontFamily,
-      fill: "yellow",
+      fill: "white",
       textAlign: "center",
+      textBackgroundColor: "#000",
+      textBackgroundPaddingX: 40,
     },
   });
 
