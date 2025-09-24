@@ -326,84 +326,6 @@ export { template, defaultParams };
 
 ```
 
-### chars.js
-
-```javascript
-/*
-Animate text as separate characters
-*/
-
-const defaultParams = {
-  text: "The ships hung in the sky in much the same way that bricks don't.",
-  fontFamily: "Liter",
-  fps: 30,
-  size: {
-    width: 1080,
-    height: 1080,
-  },
-};
-
-const template = async ({
-  gsap,
-  timeline,
-  canvas,
-  canvasElement,
-  params,
-  Fabric,
-  Pixi,
-  PixiFilters,
-  utils,
-  canvasUtils,
-  d3,
-}) => {
-  canvas.set({ backgroundColor: "#000000" });
-
-  // load Google font by name
-  await utils.loadGoogleFont(params.fontFamily);
-
-  // load text object
-  const text = await canvasUtils.loadChars({
-    canvas,
-    text: params.text,
-    options: {
-      width: canvas.width * 0.8,
-      fontSize: 120,
-      fontWeight: "bold",
-      fontFamily: params.fontFamily,
-      fill: "white",
-      textAlign: "center",
-    },
-  });
-
-  // center text on canvas
-  canvas.centerObject(text);
-
-  // animate chars
-  timeline
-    .from(text._objects, {
-      left: "-=100",
-      top: 0,
-      opacity: 0,
-      duration: 0.1,
-      stagger: 0.02,
-      ease: "back",
-      duration: 1,
-    })
-    .to(text._objects, {
-      delay: 1,
-      opacity: 0,
-      duration: 0.5,
-      stagger: {
-        each: 0.02,
-        from: "random",
-      },
-    });
-};
-
-export { template, defaultParams };
-
-```
-
 ### confetti.js
 
 ```javascript
@@ -929,7 +851,7 @@ const template = async ({
 }) => {
   canvas.set({ backgroundColor: "#0000ee" });
 
-  const text = await canvasUtils.loadText({
+  const text = await canvasUtils.loadTextbox({
     text: `Hello ${params.name}!`,
     options: {
       fontSize: 200,
@@ -937,6 +859,7 @@ const template = async ({
       fill: "white",
       originX: "center",
       originY: "center",
+      textBackgroundColor: "#000",
     },
   });
 
@@ -1221,6 +1144,84 @@ export { template, defaultParams };
 
 ```
 
+### text-chars.js
+
+```javascript
+/*
+Animate text as separate characters
+*/
+
+const defaultParams = {
+  text: "The ships hung in the sky in much the same way that bricks don't.",
+  fontFamily: "Liter",
+  fps: 30,
+  size: {
+    width: 1080,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  canvas.set({ backgroundColor: "#000000" });
+
+  // load Google font by name
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load text object
+  const text = await canvasUtils.loadChars({
+    canvas,
+    text: params.text,
+    options: {
+      width: canvas.width * 0.8,
+      fontSize: 120,
+      fontWeight: "bold",
+      fontFamily: params.fontFamily,
+      fill: "white",
+      textAlign: "center",
+    },
+  });
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // animate chars
+  timeline
+    .from(text._objects, {
+      left: "-=100",
+      top: 0,
+      opacity: 0,
+      duration: 0.1,
+      stagger: 0.02,
+      ease: "back",
+      duration: 1,
+    })
+    .to(text._objects, {
+      delay: 1,
+      opacity: 0,
+      duration: 0.5,
+      stagger: {
+        each: 0.02,
+        from: "random",
+      },
+    });
+};
+
+export { template, defaultParams };
+
+```
+
 ### text-glitch-filter.js
 
 ```javascript
@@ -1328,6 +1329,298 @@ const template = async ({
     },
     0
   );
+};
+
+export { template, defaultParams };
+
+```
+
+### text-lines.js
+
+```javascript
+/*
+Animate text as separate words
+*/
+
+const defaultParams = {
+  text: "I love deadlines. I like the whooshing sound they make as they fly by.",
+  fontFamily: "Rubik",
+  fps: 30,
+  size: {
+    width: 1080,
+    height: 1920,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  canvas.set({ backgroundColor: "gray" });
+
+  // load Google font by name
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load text object
+  const text = await canvasUtils.loadLines({
+    canvas,
+    text: params.text,
+    options: {
+      width: canvas.width * 0.8,
+      fontSize: 160,
+      fontWeight: "bold",
+      fontFamily: params.fontFamily,
+      fill: "white",
+      textAlign: "center",
+      textBackgroundColor: "#000",
+      textBackgroundPaddingX: 40,
+    },
+  });
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // animate chars
+  timeline
+    .from(text._objects, {
+      top: "-=200",
+      opacity: 0,
+      duration: 0.3,
+      ease: "elastic",
+      duration: 2,
+      stagger: {
+        each: 0.02,
+        from: "start",
+      },
+    })
+    .to(text._objects, {
+      delay: 10,
+      top: "+=200",
+      opacity: 0,
+      duration: 0.5,
+      stagger: {
+        each: 0.02,
+        from: "start",
+      },
+    });
+};
+
+export { template, defaultParams };
+
+```
+
+### text-words.js
+
+```javascript
+/*
+Animate text as separate words
+*/
+
+const defaultParams = {
+  text: "I love deadlines. I like the whooshing sound they make as they fly by.",
+  fontFamily: "Gloock",
+  fps: 30,
+  size: {
+    width: 1080,
+    height: 1920,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  canvas.set({ backgroundColor: "purple" });
+
+  // load Google font by name
+  await utils.loadGoogleFont(params.fontFamily);
+
+  // load text object
+  const text = await canvasUtils.loadWords({
+    canvas,
+    text: params.text,
+    options: {
+      width: canvas.width * 0.8,
+      fontSize: 130,
+      fontWeight: "bold",
+      fontFamily: params.fontFamily,
+      fill: "yellow",
+      textAlign: "center",
+    },
+  });
+
+  // center text on canvas
+  canvas.centerObject(text);
+
+  // animate chars
+  timeline
+    .from(text._objects, {
+      left: "-=200",
+      opacity: 0,
+      duration: 0.3,
+      ease: "elastic",
+      duration: 2,
+      stagger: {
+        each: 0.02,
+        from: "start",
+      },
+    })
+    .to(text._objects, {
+      delay: 2,
+      top: "+=200",
+      opacity: 0,
+      duration: 0.5,
+      stagger: {
+        each: 0.02,
+        from: "start",
+      },
+    });
+};
+
+export { template, defaultParams };
+
+```
+
+### text.js
+
+```javascript
+const defaultParams = {
+  text: "Hello Friend!",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  canvas.set({ backgroundColor: "#0000ee" });
+
+  const text = await canvasUtils.loadText({
+    text: params.text,
+    options: {
+      fontSize: 200,
+      fontFamily: "sans-serif",
+      fill: "white",
+      originX: "center",
+      originY: "center",
+      textBackgroundColor: "#f0f",
+      textBackgroundPaddingX: 80,
+    },
+  });
+
+  canvas.add(text);
+  canvas.centerObject(text);
+
+  timeline.from(text, {
+    scaleX: 0,
+    scaleY: 0,
+    duration: 0.5,
+    delay: 0.2,
+    ease: "elastic",
+  });
+
+  timeline.to(text, {
+    opacity: 0,
+    duration: 2,
+    delay: 1,
+    ease: "expo.out",
+  });
+};
+
+export { template, defaultParams };
+
+```
+
+### textbox.js
+
+```javascript
+const defaultParams = {
+  text: "I love deadlines. I like the whooshing sound they make as they fly by.",
+  fps: 30,
+  size: {
+    width: 1920,
+    height: 1080,
+  },
+};
+
+const template = async ({
+  gsap,
+  timeline,
+  canvas,
+  canvasElement,
+  params,
+  Fabric,
+  Pixi,
+  PixiFilters,
+  utils,
+  canvasUtils,
+  d3,
+}) => {
+  canvas.set({ backgroundColor: "#0000ee" });
+
+  const text = await canvasUtils.loadTextbox({
+    text: params.text,
+    options: {
+      textAlign: "center",
+      fontSize: 130,
+      fontFamily: "sans-serif",
+      fill: "white",
+      originX: "center",
+      originY: "center",
+      textBackgroundColor: "#f0f",
+      textBackgroundPaddingX: 80,
+      width: params.size.width * 0.8,
+    },
+  });
+
+  canvas.add(text);
+  canvas.centerObject(text);
+
+  timeline.from(text, {
+    scaleX: 0,
+    scaleY: 0,
+    duration: 0.5,
+    delay: 0.2,
+    ease: "elastic",
+  });
+
+  timeline.to(text, {
+    opacity: 0,
+    duration: 2,
+    delay: 1,
+    ease: "expo.out",
+  });
 };
 
 export { template, defaultParams };
@@ -2315,87 +2608,6 @@ const template = async ({
     },
     0
   );
-};
-
-export { template, defaultParams };
-
-```
-
-### words.js
-
-```javascript
-/*
-Animate text as separate words
-*/
-
-const defaultParams = {
-  text: "“There is a theory which states that if ever anyone discovers exactly what the Universe is for and why it is here, it will instantly disappear and be replaced by something even more bizarre and inexplicable. There is another theory which states that this has already happened.”",
-  fontFamily: "Rubik",
-  fps: 30,
-  size: {
-    width: 1080,
-    height: 1920,
-  },
-};
-
-const template = async ({
-  gsap,
-  timeline,
-  canvas,
-  canvasElement,
-  params,
-  Fabric,
-  Pixi,
-  PixiFilters,
-  utils,
-  canvasUtils,
-  d3,
-}) => {
-  canvas.set({ backgroundColor: "purple" });
-
-  // load Google font by name
-  await utils.loadGoogleFont(params.fontFamily);
-
-  // load text object
-  const text = await canvasUtils.loadWords({
-    canvas,
-    text: params.text,
-    options: {
-      width: canvas.width * 0.8,
-      fontSize: 80,
-      fontWeight: "bold",
-      fontFamily: params.fontFamily,
-      fill: "yellow",
-      textAlign: "center",
-    },
-  });
-
-  // center text on canvas
-  canvas.centerObject(text);
-
-  // animate chars
-  timeline
-    .from(text._objects, {
-      top: "-=200",
-      opacity: 0,
-      duration: 0.3,
-      ease: "elastic",
-      duration: 2,
-      stagger: {
-        each: 0.02,
-        from: "start",
-      },
-    })
-    .to(text._objects, {
-      delay: 10,
-      top: "+=200",
-      opacity: 0,
-      duration: 0.5,
-      stagger: {
-        each: 0.02,
-        from: "start",
-      },
-    });
 };
 
 export { template, defaultParams };

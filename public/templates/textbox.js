@@ -31,8 +31,6 @@ const template = async ({
       fill: "white",
       originX: "center",
       originY: "center",
-      textBackgroundColor: "#f0f",
-      textBackgroundPaddingX: 80,
       width: params.size.width * 0.8,
     },
   });

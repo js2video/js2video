@@ -23,14 +23,13 @@ const template = async ({
   canvas.set({ backgroundColor: "#0000ee" });
 
   const text = await canvasUtils.loadTextbox({
-    text: `Hello ${params.name}! askjdh aksdjha kdhkajsdhk ajdhakdj hkj`,
+    text: `Hello ${params.name}!`,
     options: {
       fontSize: 200,
       fontFamily: "sans-serif",
       fill: "white",
       originX: "center",
       originY: "center",
-      textBackgroundColor: "#000",
     },
   });
 
