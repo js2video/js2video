@@ -9,7 +9,9 @@ import {
   QUALITY_HIGH,
   StreamTarget,
 } from "mediabunny";
-import { isPuppeteer, saveBufferToDisk } from "./utils";
+import { isPuppeteer } from "./utils";
+
+const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
 /**
  * Exports a video template to MP4
@@ -70,12 +72,6 @@ async function encodeVideo({
 
     const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 
-    // safari is off by an order of magnitude
-    // TODO: this is probably wrong.....
-    if (isSafari) {
-      bitrate = bitrate * 10;
-    }
-
     const videoCodec = await getFirstEncodableVideoCodec(
       containableVideoCodecs,
       { width, height, bitrate }
@@ -94,17 +90,28 @@ async function encodeVideo({
 
     output.addVideoTrack(videoSource, { frameRate: fps });
 
+    // @ts-ignore
+    console.log(navigator?.userAgentData?.brands);
+
     if (audioBuffer) {
-      const audioCodec = await getFirstEncodableAudioCodec(
-        output.format.getSupportedAudioCodecs(),
-        {
-          numberOfChannels: 2,
-          sampleRate: 48000,
-        }
-      );
+      // Force Opus on Safari, otherwise pick the first encodable codec
+      let audioCodec;
+
+      if (isSafari) {
+        audioCodec = "opus";
+      } else {
+        audioCodec = await getFirstEncodableAudioCodec(
+          output.format.getSupportedAudioCodecs(),
+          {
+            numberOfChannels: 2,
+            sampleRate: 48000,
+          }
+        );
+      }
 
       if (audioCodec) {
         audioBufferSource = new AudioBufferSource({
+          // @ts-ignore
           codec: audioCodec,
           bitrate: QUALITY_HIGH,
         });
@@ -117,6 +124,11 @@ async function encodeVideo({
     }
 
     await output.start();
+
+    if (audioBufferSource) {
+      await audioBufferSource.add(audioBuffer);
+      audioBufferSource.close();
+    }
 
     let frame = 0;
     let currentFrame = 0;
@@ -143,11 +155,6 @@ async function encodeVideo({
 
     // not necessary, but recommended
     videoSource.close();
-
-    if (audioBufferSource) {
-      await audioBufferSource.add(audioBuffer);
-      audioBufferSource.close();
-    }
 
     await output.finalize();
 
