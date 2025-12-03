@@ -90,9 +90,6 @@ async function encodeVideo({
 
     output.addVideoTrack(videoSource, { frameRate: fps });
 
-    // @ts-ignore
-    console.log(navigator?.userAgentData?.brands);
-
     if (audioBuffer) {
       // Force Opus on Safari, otherwise pick the first encodable codec
       let audioCodec;
