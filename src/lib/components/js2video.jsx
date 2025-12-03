@@ -18,6 +18,7 @@ import { JS2VideoLayout } from "./js2video-layout";
  * @param {OnBeforeExportFunction | undefined} [props.onBeforeExport] - Called before export.
  * @param {boolean} [props.hideExportButton] - Hide the export buttons? Default: false.
  * @param {string} [props.controlsClassName] - Tailwind classes for the controls component.
+ * @param {number} [props.iconStrokeWidth] - Stroke width for control icons.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2Video = ({
@@ -31,6 +32,7 @@ const JS2Video = ({
   onBeforeExport,
   hideExportButton = false,
   controlsClassName = "bg-black text-white",
+  iconStrokeWidth = 1.2,
 }) => {
   return (
     <JS2VideoProvider
@@ -48,6 +50,7 @@ const JS2Video = ({
         <JS2VideoControls
           className={controlsClassName}
           hideExportButton={hideExportButton}
+          strokeWidth={iconStrokeWidth}
         />
       </JS2VideoLayout>
     </JS2VideoProvider>
