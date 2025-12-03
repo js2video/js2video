@@ -1,6 +1,10 @@
 import { exec } from "child_process";
 import { promisify } from "util";
-import packageJson from "../package.json" assert { type: "json" };
+
+import { readFile } from "node:fs/promises";
+const packageJson = JSON.parse(
+  await readFile(new URL("../package.json", import.meta.url), "utf8")
+);
 
 const execPromise = promisify(exec);
 
