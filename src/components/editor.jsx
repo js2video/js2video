@@ -7,10 +7,9 @@ import { useEffect, useState } from "react";
 import { cn, stringToBase64Url } from "../lib/utils";
 import { ExamplesButton } from "./examples-button";
 
-const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
+const Editor = ({ templateUrl, setTemplateUrl }) => {
   const [code, setCode] = useState("");
   const [isChanged, setIsChanged] = useState(false);
-  const [isIframeReady, setIsIframeReady] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
@@ -28,30 +27,7 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
   }, [isChanged]);
 
   useEffect(() => {
-    function handleMessage(message) {
-      console.log("Received message in parent:", message);
-      // only accept messages from same origin
-      if (message.origin !== "null") {
-        console.log(
-          "Skipping message in parent (wrong origin)",
-          message.origin
-        );
-        return;
-      }
-      if (message.data?.type === "iframe-ready") {
-        setIsIframeReady(true);
-      }
-    }
-    window.addEventListener("message", handleMessage);
-    onMessageListenerReady();
-    return () => window.removeEventListener("message", handleMessage);
-  }, []);
-
-  useEffect(() => {
     async function load() {
-      if (!isIframeReady) {
-        return;
-      }
       try {
         setIsLoading(true);
         const templateCode = await fetch(templateUrl).then((res) => res.text());
@@ -63,16 +39,13 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
       }
     }
     load();
-  }, [isIframeReady, templateUrl]);
+  }, [templateUrl]);
 
   // preview code and mark as unchanged
   function updateCode(newCode) {
     setCode(newCode);
     setIsChanged(false);
-    iframeRef?.current?.contentWindow?.postMessage(
-      stringToBase64Url(newCode),
-      "*"
-    );
+    setTemplateUrl(stringToBase64Url(newCode));
   }
 
   async function handleCodeChange(value) {
@@ -81,8 +54,8 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
   }
 
   return (
-    <div className="flex-1 flex flex-col relative">
-      <div className="flex px-2 py-2 justify-between items-center bg-black text-white">
+    <div className="relative flex flex-1 flex-col">
+      <div className="flex items-center justify-between bg-black px-2 py-2 text-white">
         <div className="flex items-center gap-6 pl-1 text-sm font-medium">
           <div>Code</div>
           <ExamplesButton />
@@ -104,7 +77,7 @@ const Editor = ({ templateUrl, iframeRef, onMessageListenerReady }) => {
           </button>
         </div>
       </div>
-      <div className="flex-1 relative">
+      <div className="relative flex-1">
         <div className="absolute inset-0">
           <CodeMirror
             readOnly={isLoading}

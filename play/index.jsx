@@ -3,12 +3,11 @@ import ReactDOM from "react-dom/client";
 import { Loader2Icon } from "lucide-react";
 import { Panel, PanelGroup, PanelResizeHandle } from "react-resizable-panels";
 import { Editor } from "../src/components/editor";
+import { JS2Video } from "../src";
 import "../index.css";
 
 const App = () => {
-  const [displayIframe, setDisplayIframe] = useState(false);
   const [templateUrl, setTemplateUrl] = useState("");
-  const iframeRef = useRef();
 
   useEffect(() => {
     const urlParams = new URLSearchParams(window.location.search);
@@ -18,22 +17,22 @@ const App = () => {
 
   if (!templateUrl) {
     return (
-      <div className="fixed inset-0 bg-black flex items-center justify-center text-white">
+      <div className="fixed inset-0 flex items-center justify-center bg-black text-white">
         <Loader2Icon className="animate-spin" />
       </div>
     );
   }
 
   return (
-    <div className="h-screen flex flex-col max-w-screen-2xl w-full mx-auto">
-      <header className="p-3 border-b border-[#666] text-white flex justify-between items-center">
+    <div className="mx-auto flex h-screen w-full flex-col">
+      <header className="flex items-center justify-between border-b border-[#666] p-3 text-white">
         <a href="/">
           <img
             style={{ height: "26px" }}
             src="/images/js2video-logo-dark.svg"
           />
         </a>
-        <div className="flex gap-6 items-center text-sm font-medium">
+        <div className="flex items-center gap-6 text-sm font-medium">
           <a href="/docs/" target="_blank">
             Docs
           </a>
@@ -46,25 +45,22 @@ const App = () => {
           </a>
         </div>
       </header>
-      <div className="text-white flex-1 flex">
+      <div className="flex flex-1 text-white">
         <PanelGroup direction="horizontal">
           <Panel defaultSize={30} className="flex border-r border-[#666]">
-            <Editor
-              iframeRef={iframeRef}
-              templateUrl={templateUrl}
-              onMessageListenerReady={() => setDisplayIframe(true)}
-            />
+            <Editor templateUrl={templateUrl} setTemplateUrl={setTemplateUrl} />
           </Panel>
           <PanelResizeHandle />
           <Panel className="flex flex-col">
-            {displayIframe && (
-              <iframe
-                ref={iframeRef}
-                sandbox="allow-scripts allow-downloads"
-                src={"/iframe/"}
-                className="flex-1"
-              />
-            )}
+            <JS2Video
+              templateUrl={templateUrl}
+              params={{}}
+              autoPlay={false}
+              loop
+              enableUnsecureMode={true}
+              videoFilePrefix="js2video"
+              controlsClassName="border-t border-gray-700 bg-black text-gray-300"
+            />
           </Panel>
         </PanelGroup>
       </div>

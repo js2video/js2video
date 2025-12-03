@@ -40,23 +40,13 @@ export default defineConfig({
       input: {
         index: resolve(__dirname, "index.html"),
         play: resolve(__dirname, "play/index.html"),
-        iframe: resolve(__dirname, "iframe/index.html"),
       },
     },
   },
   server: {
-    cors: {
-      origin: "*", // allow all origins, including null
-      credentials: false, // keep simple
-    },
     port: 3000,
     hmr: false,
     proxy: {
-      "/api": {
-        target: "http://localhost:3002",
-        changeOrigin: true,
-        rewrite: (path) => path.replace(/^\/api/, ""),
-      },
       "/docs": {
         target: "http://localhost:5173",
         changeOrigin: true,

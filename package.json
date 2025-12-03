@@ -40,7 +40,7 @@
   },
   "scripts": {
     "dev": "run-p dev:*",
-    "dev:vite": "vite --config vite.config.app.js --force",
+    "dev:vite": "vite --config vite.config.app.js --port 5174",
     "dev:server": "node --watch ./server.js",
     "dev:server-client": "npm run build-server-client -- --watch",
     "dev:docs": "vitepress dev docs",
@@ -73,6 +73,8 @@
     "handlebars": "4.7.8",
     "npm-run-all": "4.1.5",
     "postcss": "8.4.49",
+    "prettier": "3.6.2",
+    "prettier-plugin-tailwindcss": "0.7.1",
     "react-resizable-panels": "2.1.7",
     "rimraf": "6.0.1",
     "rollup": "4.24.4",

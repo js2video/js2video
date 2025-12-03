@@ -859,7 +859,6 @@ const template = async ({
       fill: "white",
       originX: "center",
       originY: "center",
-      textBackgroundColor: "#000",
     },
   });
 
@@ -1376,13 +1375,13 @@ const template = async ({
     text: params.text,
     options: {
       width: canvas.width * 0.8,
-      fontSize: 160,
+      fontSize: 140,
       fontWeight: "bold",
       fontFamily: params.fontFamily,
       fill: "white",
-      textAlign: "center",
-      textBackgroundColor: "#000",
-      textBackgroundPaddingX: 40,
+      textAlign: "right",
+      customTextBackgroundColor: "#000",
+      customTextBackgroundPaddingX: 40,
     },
   });
 
@@ -1393,6 +1392,7 @@ const template = async ({
   timeline
     .from(text._objects, {
       top: "-=200",
+      angle: 10,
       opacity: 0,
       duration: 0.3,
       ease: "elastic",
@@ -1403,13 +1403,14 @@ const template = async ({
       },
     })
     .to(text._objects, {
-      delay: 10,
+      angle: 0,
+      delay: 1,
       top: "+=200",
       opacity: 0,
       duration: 0.5,
       stagger: {
         each: 0.02,
-        from: "start",
+        from: "end",
       },
     });
 };
@@ -1534,8 +1535,6 @@ const template = async ({
       fill: "white",
       originX: "center",
       originY: "center",
-      textBackgroundColor: "#f0f",
-      textBackgroundPaddingX: 80,
     },
   });
 
@@ -1598,8 +1597,6 @@ const template = async ({
       fill: "white",
       originX: "center",
       originY: "center",
-      textBackgroundColor: "#f0f",
-      textBackgroundPaddingX: 80,
       width: params.size.width * 0.8,
     },
   });
