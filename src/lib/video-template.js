@@ -103,7 +103,7 @@ class VideoTemplate {
     this.timeline = gsap.timeline({ paused: true, repeat: -1 });
     this.canvasElement = document.createElement("canvas");
     this.canvas = new Fabric.StaticCanvas(this.canvasElement, {
-      enableRetinaScaling: true,
+      enableRetinaScaling: false,
     });
     this.bitrate = 6e6;
   }
