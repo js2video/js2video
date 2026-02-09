@@ -28,7 +28,7 @@ const CurrentTime = () => {
   const currentTime = useCurrentTime();
   const duration = useDuration();
   return (
-    <div className="px-2 select-none tabular-nums text-sm opacity-70 whitespace-nowrap">
+    <div className="select-none whitespace-nowrap px-2 text-sm tabular-nums opacity-70">
       {formatTime(currentTime)} / {formatTime(duration)}
     </div>
   );
@@ -72,7 +72,7 @@ const Scrubber = ({
   const actionRender = (action) => {
     return (
       <div
-        className={`h-full select-none text-xs overflow-hidden justify-center items-center bg-blue-700 flex text-blue-400`}
+        className={`flex h-full select-none items-center justify-center overflow-hidden bg-blue-700 text-xs text-blue-400`}
       >
         {formatTime(rangeEnd - rangeStart)}
       </div>
@@ -251,7 +251,7 @@ const ExportButton = ({ strokeWidth = 1 }) => {
             </div>
             <button
               onClick={handleAbort}
-              className="px-4 py-2 text-sm bg-black rounded text-white"
+              className="rounded bg-black px-4 py-2 text-sm text-white"
             >
               Abort
             </button>
@@ -259,7 +259,7 @@ const ExportButton = ({ strokeWidth = 1 }) => {
         </div>
       )}
 
-      <ControlButton onClick={handleClick}>
+      <ControlButton id="js2video-export-button" onClick={handleClick}>
         <DownloadIcon size={26} strokeWidth={strokeWidth} />
       </ControlButton>
     </>
@@ -427,10 +427,10 @@ const JS2VideoControls = ({
             <UnfoldHorizontalIcon strokeWidth={strokeWidth} />
           </ControlButton>
         </div>
-        <div className="flex justify-center flex-1">
+        <div className="flex flex-1 justify-center">
           <CurrentTime />
         </div>
-        <div className="flex justify-end flex-1">
+        <div className="flex flex-1 justify-end">
           {!hideExportButton && <ExportButton strokeWidth={strokeWidth} />}
           {!hideExportButton && (
             <ExportServerButton strokeWidth={strokeWidth} />
