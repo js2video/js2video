@@ -16,6 +16,7 @@ import { JS2VideoLayout } from "./js2video-layout";
  * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
  * @param {OnLoadingFunction | undefined} [props.onLoading] - OnLoading callback function.
  * @param {OnBeforeExportFunction | undefined} [props.onBeforeExport] - Called before export.
+ * @param {OnAfterExportFunction | undefined} [props.onAfterExport] - Called after export.
  * @param {boolean} [props.hideExportButton] - Hide the export buttons? Default: false.
  * @param {string} [props.controlsClassName] - Tailwind classes for the controls component.
  * @param {number} [props.iconStrokeWidth] - Stroke width for control icons.
@@ -30,6 +31,7 @@ const JS2Video = ({
   enableUnsecureMode = false,
   onLoading,
   onBeforeExport,
+  onAfterExport,
   hideExportButton = false,
   controlsClassName = "bg-black text-white",
   iconStrokeWidth = 1.2,
@@ -44,6 +46,7 @@ const JS2Video = ({
       enableUnsecureMode={enableUnsecureMode}
       onLoading={onLoading}
       onBeforeExport={onBeforeExport}
+      onAfterExport={onAfterExport}
     >
       <JS2VideoLayout>
         <JS2VideoPreview />

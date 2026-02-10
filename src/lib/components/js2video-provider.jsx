@@ -20,6 +20,8 @@ class AsyncQueue {
  * @property {React.Dispatch<React.SetStateAction<Object>> | null} setParams - The setter function for updating the template params state variable.
  * @property {boolean} isLoading - A flag to indicate whether the video template is loading.
  * @property {OnBeforeExportFunction | null} onBeforeExport - A function that's called before the video is exported. Must return true for export to continue.
+ * @property {OnAfterExportFunction | null} onAfterExport - A function that's called after the video is exported.
+ * @property {String} videoFilePrefix - Video file prefix.
  */
 
 /**
@@ -34,7 +36,9 @@ const Context = createContext({
   setTemplateUrl: null,
   setParams: null,
   onBeforeExport: null,
+  onAfterExport: null,
   isLoading: true,
+  videoFilePrefix: "js2video",
 });
 
 /**
@@ -65,6 +69,7 @@ const useJS2Video = () => {
  * @param {boolean} [props.enableUnsecureMode] - Enables the template to be loaded and executed from outside an iframe. Use with caution, and only set to 'true' if you trust the template code as it enables code execution on the current page. Default: false.
  * @param {OnLoadingFunction | undefined} [props.onLoading] - OnLoading callback function.
  * @param {OnBeforeExportFunction | undefined} [props.onBeforeExport] - A function that's called before the video is exported. Must return true for export to continue.
+ * @param {OnAfterExportFunction | undefined} [props.onAfterExport] - A function that's called after the video is exported.
  * @returns {JSX.Element} - The video template preview wrapped a context
  */
 const JS2VideoProvider = ({
@@ -76,6 +81,7 @@ const JS2VideoProvider = ({
   enableUnsecureMode = false,
   onLoading,
   onBeforeExport,
+  onAfterExport,
   children,
 }) => {
   const [templateUrl, setTemplateUrl] = useState(defaultTemplateUrl);
@@ -189,6 +195,8 @@ const JS2VideoProvider = ({
         setParams,
         isLoading,
         onBeforeExport,
+        onAfterExport,
+        videoFilePrefix,
       }}
     >
       {children}

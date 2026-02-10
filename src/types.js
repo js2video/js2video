@@ -10,3 +10,8 @@
  * @typedef {Function} OnBeforeExportFunction
  * @returns {Promise<boolean>}
  */
+
+/**
+ * @typedef {Function} OnAfterExportFunction
+ * @returns {Promise<void>}
+ */

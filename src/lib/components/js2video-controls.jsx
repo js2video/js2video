@@ -142,7 +142,7 @@ const ControlButton = ({ children, ...rest }) => {
 };
 
 const ExportServerButton = ({ strokeWidth = 1 }) => {
-  const { videoTemplate, onBeforeExport } = useJS2Video();
+  const { videoTemplate, onBeforeExport, onAfterExport } = useJS2Video();
   const rangeStart = useRangeStart();
   const rangeEnd = useRangeEnd();
 
@@ -172,7 +172,12 @@ const ExportServerButton = ({ strokeWidth = 1 }) => {
         },
       }),
     });
+
+    if (onAfterExport) {
+      await onAfterExport();
+    }
   };
+
   return (
     <ControlButton onClick={handleClick}>
       <SquareArrowDownIcon size={26} strokeWidth={strokeWidth} />
@@ -181,7 +186,8 @@ const ExportServerButton = ({ strokeWidth = 1 }) => {
 };
 
 const ExportButton = ({ strokeWidth = 1 }) => {
-  const { videoTemplate, onBeforeExport } = useJS2Video();
+  const { videoTemplate, onBeforeExport, onAfterExport, videoFilePrefix } =
+    useJS2Video();
   const progress = useProgress();
   const rangeStart = useRangeStart();
   const rangeEnd = useRangeEnd();
@@ -226,11 +232,15 @@ const ExportButton = ({ strokeWidth = 1 }) => {
       });
 
       if (result.buffer) {
-        saveBufferToDisk(result.buffer, `js2video-${Date.now()}.mp4`);
+        saveBufferToDisk(result.buffer, `${videoFilePrefix}-${Date.now()}.mp4`);
       }
 
       setIsAborted(false);
       confetti();
+
+      if (onAfterExport) {
+        await onAfterExport();
+      }
     } catch (err) {
       console.error(err);
       setIsAborted(false);
