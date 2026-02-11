@@ -12,4 +12,4 @@ JS2Video is an open source JavaScript SDK library that lets you generate videos 
 
 ## License
 
-You are free to copy, modify, and distribute JS2Video with attribution under the terms of the MIT license. See the LICENSE file inside the repo for details.
+You are free to copy, modify, and distribute JS2Video with attribution under the terms of the OSAASY license. See the LICENSE file inside the repo for details.
